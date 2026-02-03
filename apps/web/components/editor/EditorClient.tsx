@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { FilmstripEditor, type NewStepType } from './FilmstripEditor';
+import { DocEditor, type NewStepType } from './DocEditor';
 import { PreviewOverlay } from './PreviewOverlay';
 import type { Tutorial, StepWithSignedUrl, Annotation } from '@/lib/types/editor';
 
@@ -331,7 +331,7 @@ export function EditorClient({ initialTutorial, initialSteps }: EditorClientProp
 
   return (
     <>
-      <FilmstripEditor
+      <DocEditor
         tutorial={initialTutorial}
         steps={steps}
         saveStatus={isSaving || isReordering ? 'saving' : saveStatus}

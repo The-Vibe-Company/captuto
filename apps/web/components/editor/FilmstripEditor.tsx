@@ -626,7 +626,6 @@ export function FilmstripEditor({
                       content={selectedStep.text_content || ''}
                       onChange={(caption) => onStepCaptionChange(selectedStep.id, caption)}
                       placeholder="Décrivez cette étape... ex: Cliquez sur le bouton Paramètres"
-                      darkMode
                     />
                   </div>
                   {selectedStep.url && (

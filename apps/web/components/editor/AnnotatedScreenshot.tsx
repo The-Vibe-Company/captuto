@@ -76,9 +76,8 @@ export function AnnotatedScreenshot({
         <AnnotationToolbar
           activeTool={activeTool}
           onToolChange={setActiveTool}
-          onUndo={handleUndo}
-          onClear={handleClear}
-          canUndo={history.length > 0}
+          onClearAll={handleClear}
+          onDone={() => setActiveTool(null)}
           hasAnnotations={annotations.length > 0}
         />
       </div>
