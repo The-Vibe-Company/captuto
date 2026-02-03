@@ -68,11 +68,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   switch (message.type) {
     case 'START_RECORDING':
-      handleStartRecording().then(sendResponse);
+      (async () => {
+        const result = await handleStartRecording();
+        console.log('[Service Worker] Sending START_RECORDING response:', result);
+        sendResponse(result);
+      })();
       return true;
 
     case 'STOP_RECORDING':
-      handleStopRecording().then(sendResponse);
+      (async () => {
+        const result = await handleStopRecording();
+        console.log('[Service Worker] Sending STOP_RECORDING response:', { success: result.success, stepsCount: result.steps.length });
+        sendResponse(result);
+      })();
       return true;
 
     case 'CLICK_CAPTURED':
