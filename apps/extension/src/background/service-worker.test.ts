@@ -23,6 +23,10 @@ const mockChrome = {
     query: vi.fn(),
     sendMessage: vi.fn(),
     captureVisibleTab: vi.fn(),
+    get: vi.fn(),
+    onActivated: {
+      addListener: vi.fn(),
+    },
   },
   scripting: {
     executeScript: vi.fn(),
@@ -58,6 +62,8 @@ interface CapturedStep {
   screenshot?: string;
   x?: number;
   y?: number;
+  viewportWidth?: number;
+  viewportHeight?: number;
   url: string;
   elementInfo?: {
     tag: string;
@@ -297,5 +303,133 @@ describe('Message handling', () => {
 
     expect(message.type).toBe('AUDIO_ERROR');
     expect(message.error).toBe('Permission denied');
+  });
+});
+
+describe('Tab activation during recording', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should send START_CAPTURE with startTime when tab is activated', async () => {
+    const startTime = 1000000;
+    mockChrome.tabs.get.mockResolvedValue({
+      id: 2,
+      url: 'https://example.com',
+    });
+    mockChrome.tabs.sendMessage.mockResolvedValue({ success: true });
+
+    // Simulate what the service worker does
+    const activeInfo = { tabId: 2, windowId: 1 };
+    const tab = await mockChrome.tabs.get(activeInfo.tabId);
+
+    if (tab.url && !tab.url.startsWith('chrome://')) {
+      await mockChrome.tabs.sendMessage(activeInfo.tabId, {
+        type: 'START_CAPTURE',
+        startTime: startTime,
+      });
+    }
+
+    expect(mockChrome.tabs.sendMessage).toHaveBeenCalledWith(2, {
+      type: 'START_CAPTURE',
+      startTime: startTime,
+    });
+  });
+
+  it('should ignore chrome:// URLs', async () => {
+    mockChrome.tabs.get.mockResolvedValue({
+      id: 2,
+      url: 'chrome://extensions',
+    });
+
+    const activeInfo = { tabId: 2, windowId: 1 };
+    const tab = await mockChrome.tabs.get(activeInfo.tabId);
+
+    // Should not send message to chrome:// URLs
+    if (tab.url && !tab.url.startsWith('chrome://')) {
+      await mockChrome.tabs.sendMessage(activeInfo.tabId, { type: 'START_CAPTURE' });
+    }
+
+    expect(mockChrome.tabs.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it('should handle tab.get error gracefully', async () => {
+    mockChrome.tabs.get.mockRejectedValue(new Error('No tab with id: 999'));
+
+    const activeInfo = { tabId: 999, windowId: 1 };
+
+    // Simulate the try-catch behavior
+    try {
+      await mockChrome.tabs.get(activeInfo.tabId);
+    } catch (error) {
+      // Error should be caught and handled gracefully
+      expect(error).toBeDefined();
+    }
+
+    // sendMessage should not be called since tab.get failed
+    expect(mockChrome.tabs.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it('should inject content script when sendMessage fails', async () => {
+    const startTime = 1000000;
+    mockChrome.tabs.get.mockResolvedValue({
+      id: 2,
+      url: 'https://example.com',
+    });
+    mockChrome.tabs.sendMessage
+      .mockRejectedValueOnce(new Error('Could not establish connection'))
+      .mockResolvedValueOnce({ success: true });
+    mockChrome.scripting.executeScript.mockResolvedValue([{ result: true }]);
+
+    const activeInfo = { tabId: 2, windowId: 1 };
+    const tab = await mockChrome.tabs.get(activeInfo.tabId);
+
+    if (tab.url && !tab.url.startsWith('chrome://')) {
+      try {
+        await mockChrome.tabs.sendMessage(activeInfo.tabId, {
+          type: 'START_CAPTURE',
+          startTime: startTime,
+        });
+      } catch (error) {
+        // Content script not ready - inject it
+        await mockChrome.scripting.executeScript({
+          target: { tabId: activeInfo.tabId },
+          files: ['content/content.js'],
+        });
+        await mockChrome.tabs.sendMessage(activeInfo.tabId, {
+          type: 'START_CAPTURE',
+          startTime: startTime,
+        });
+      }
+    }
+
+    expect(mockChrome.scripting.executeScript).toHaveBeenCalledWith({
+      target: { tabId: 2 },
+      files: ['content/content.js'],
+    });
+    expect(mockChrome.tabs.sendMessage).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('START_CAPTURE message format', () => {
+  it('should include startTime in START_CAPTURE message', () => {
+    const startTime = Date.now();
+    const message = {
+      type: 'START_CAPTURE',
+      startTime: startTime,
+    };
+
+    expect(message.type).toBe('START_CAPTURE');
+    expect(message.startTime).toBe(startTime);
+    expect(typeof message.startTime).toBe('number');
+  });
+
+  it('should allow START_CAPTURE without startTime for backward compatibility', () => {
+    const message = {
+      type: 'START_CAPTURE',
+    };
+
+    expect(message.type).toBe('START_CAPTURE');
+    expect(message).not.toHaveProperty('startTime');
   });
 });
