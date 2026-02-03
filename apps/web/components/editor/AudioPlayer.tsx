@@ -15,7 +15,7 @@ export function AudioPlayer({ audioUrl }: AudioPlayerProps) {
 
   return (
     <div className="rounded-lg bg-gray-100 p-3">
-      <audio controls className="w-full" src={audioUrl}>
+      <audio controls preload="metadata" className="w-full" src={audioUrl}>
         Votre navigateur ne supporte pas l'audio.
       </audio>
     </div>
