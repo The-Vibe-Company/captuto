@@ -272,9 +272,9 @@ export function EditorClient({ initialTutorial, initialSteps }: EditorClientProp
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in a textarea or input
+      // Don't trigger if user is typing in a textarea, input, or contenteditable element
       const target = e.target as HTMLElement;
-      const isInputField = target.tagName === 'TEXTAREA' || target.tagName === 'INPUT';
+      const isInputField = target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' || target.isContentEditable;
 
       // Cmd/Ctrl + S to save
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {

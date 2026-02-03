@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { AnnotationToolbar } from './AnnotationToolbar';
 import { AnnotationCanvas } from './AnnotationCanvas';
 import type { Annotation, AnnotationType } from '@/lib/types/editor';
@@ -30,6 +30,11 @@ export function AnnotatedScreenshot({
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeTool, setActiveTool] = useState<AnnotationType | null>(null);
   const [history, setHistory] = useState<Annotation[][]>([]);
+
+  // Clear undo history when switching steps
+  useEffect(() => {
+    setHistory([]);
+  }, [stepNumber, screenshotUrl]);
 
   const handleAddAnnotation = useCallback(
     (annotation: Annotation) => {
