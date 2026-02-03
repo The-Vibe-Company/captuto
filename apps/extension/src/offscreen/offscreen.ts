@@ -53,12 +53,14 @@ async function stopAudioRecording(): Promise<void> {
       if (audioBlob.size > 0) {
         // Convert to base64 and send to service worker
         const reader = new FileReader();
-        reader.onloadend = () => {
+        reader.onloadend = async () => {
           console.log('[Offscreen] Sending audio data to service worker');
-          chrome.runtime.sendMessage({
+          // Await sendMessage to ensure it's delivered before resolving
+          await chrome.runtime.sendMessage({
             type: 'AUDIO_RECORDED',
             data: reader.result,
           });
+          console.log('[Offscreen] Audio data sent successfully');
           // Stop all tracks after sending data
           if (currentStream) {
             currentStream.getTracks().forEach((track) => track.stop());
