@@ -1,85 +1,137 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import type { User } from '@supabase/supabase-js';
+import { Plus } from 'lucide-react';
+import { TutorialCard, TutorialCardProps } from '@/components/dashboard/TutorialCard';
+import { TutorialCardSkeleton } from '@/components/dashboard/TutorialCardSkeleton';
+
+type Tutorial = Omit<TutorialCardProps, 'onEdit' | 'onDelete' | 'onShare'>;
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [tutorials, setTutorials] = useState<Tutorial[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+  const fetchTutorials = useCallback(async () => {
+    try {
+      const response = await fetch('/api/tutorials');
 
-      if (!user) {
-        router.push('/login');
-        return;
+      if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/login');
+          return;
+        }
+        throw new Error('Failed to fetch tutorials');
       }
 
-      setUser(user);
+      const data = await response.json();
+      setTutorials(data.tutorials);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
       setLoading(false);
-    };
-
-    checkUser();
+    }
   }, [router]);
 
-  const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+  useEffect(() => {
+    fetchTutorials();
+  }, [fetchTutorials]);
 
-    // Clear extension auth
-    window.postMessage(
-      { type: 'VIBE_TUTO_AUTH', authToken: null, userEmail: null },
-      window.location.origin
-    );
-
-    router.push('/login');
+  const handleEdit = (tutorialId: string) => {
+    router.push(`/editor/${tutorialId}`);
   };
 
-  if (loading) {
+  const handleDelete = async (tutorialId: string) => {
+    try {
+      const response = await fetch(`/api/tutorials/${tutorialId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete tutorial');
+      }
+
+      // Remove from local state
+      setTutorials((prev) => prev.filter((t) => t.id !== tutorialId));
+    } catch (err) {
+      console.error('Delete error:', err);
+      // Could show a toast notification here
+    }
+  };
+
+  const handleShare = (tutorialId: string) => {
+    // TODO: Implement share functionality
+    console.log('Share tutorial:', tutorialId);
+  };
+
+  if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+      <div className="rounded-xl bg-white p-8 text-center shadow-sm">
+        <p className="text-red-600">{error}</p>
+        <button
+          onClick={() => {
+            setError(null);
+            setLoading(true);
+            fetchTutorials();
+          }}
+          className="mt-4 text-sm text-blue-600 hover:underline"
+        >
+          Réessayer
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Vibe Tuto</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">{user?.email}</span>
-            <button
-              onClick={handleLogout}
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              Déconnexion
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-xl shadow-sm p-8 text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Mes tutoriels</h2>
-          <p className="text-gray-500 mb-6">
-            Vous n'avez pas encore de tutoriels.
-            Utilisez l'extension Chrome pour en créer un.
+    <div>
+      {/* Page Header */}
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Mes tutoriels</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Gérez et partagez vos tutoriels
           </p>
-          <div className="inline-flex items-center gap-2 text-sm text-indigo-600">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Cliquez sur l'icône Vibe Tuto dans Chrome pour commencer
-          </div>
         </div>
-      </main>
+      </div>
+
+      {/* Content */}
+      {loading ? (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <TutorialCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : tutorials.length === 0 ? (
+        <div className="rounded-xl bg-white p-8 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+            <Plus className="h-6 w-6 text-blue-600" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900">
+            Aucun tutoriel
+          </h2>
+          <p className="mt-2 text-gray-500">
+            Utilisez l'extension Chrome pour créer votre premier tutoriel.
+          </p>
+          <p className="mt-4 text-sm text-gray-400">
+            Cliquez sur l'icône Vibe Tuto dans Chrome pour commencer
+            l'enregistrement.
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {tutorials.map((tutorial) => (
+            <TutorialCard
+              key={tutorial.id}
+              {...tutorial}
+              onEdit={() => handleEdit(tutorial.id)}
+              onDelete={() => handleDelete(tutorial.id)}
+              onShare={() => handleShare(tutorial.id)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

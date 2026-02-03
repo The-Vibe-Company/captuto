@@ -1,16 +1,31 @@
 'use client';
 
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import type { StepWithSignedUrl } from '@/lib/types/editor';
-import { MousePointerClick, ArrowRight, ExternalLink } from 'lucide-react';
+import { MousePointerClick, ArrowRight, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface StepViewerProps {
   step: StepWithSignedUrl | null;
   stepNumber: number;
+  totalSteps: number;
   onTextChange: (text: string) => void;
+  onPrevious: () => void;
+  onNext: () => void;
+  hasPrevious: boolean;
+  hasNext: boolean;
 }
 
-export function StepViewer({ step, stepNumber, onTextChange }: StepViewerProps) {
+export function StepViewer({
+  step,
+  stepNumber,
+  totalSteps,
+  onTextChange,
+  onPrevious,
+  onNext,
+  hasPrevious,
+  hasNext
+}: StepViewerProps) {
   if (!step) {
     return (
       <div className="flex flex-1 items-center justify-center">
@@ -21,23 +36,52 @@ export function StepViewer({ step, stepNumber, onTextChange }: StepViewerProps) 
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto p-6">
-      {/* Step header */}
-      <div className="mb-4 flex items-center gap-3">
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-medium text-blue-600">
-          {stepNumber}
-        </span>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          {step.click_type === 'navigation' ? (
-            <>
-              <ArrowRight className="h-4 w-4" />
-              <span>Navigation</span>
-            </>
-          ) : (
-            <>
-              <MousePointerClick className="h-4 w-4" />
-              <span>Clic</span>
-            </>
-          )}
+      {/* Step header with navigation */}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-medium text-blue-600">
+            {stepNumber}
+          </span>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            {step.click_type === 'navigation' ? (
+              <>
+                <ArrowRight className="h-4 w-4" />
+                <span>Navigation</span>
+              </>
+            ) : (
+              <>
+                <MousePointerClick className="h-4 w-4" />
+                <span>Clic</span>
+              </>
+            )}
+          </div>
+          <span className="text-sm text-gray-400">
+            Étape {stepNumber} sur {totalSteps}
+          </span>
+        </div>
+
+        {/* Navigation buttons */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onPrevious}
+            disabled={!hasPrevious}
+            title="Étape précédente (↑ ou K)"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Précédent
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onNext}
+            disabled={!hasNext}
+            title="Étape suivante (↓ ou J)"
+          >
+            Suivant
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
