@@ -37,4 +37,4 @@ Use conventional commits for the commits and PR
 
 ## PR Comment
 
-When asked to fix a PR, use the skill address-github-comments to address the comments. 
+When asked to fix a PR, use the skill address-github-comments to address the comments. Mark all the comments as resolved when you are done with a short text explaining what you did.
