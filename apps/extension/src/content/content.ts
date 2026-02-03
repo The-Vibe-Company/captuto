@@ -72,4 +72,20 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 // Notify service worker that content script is ready
 chrome.runtime.sendMessage({ type: 'CONTENT_SCRIPT_READY' });
 
+// Listen for auth messages from the web app (localhost:3000)
+window.addEventListener('message', async (event) => {
+  // Only accept messages from localhost:3000
+  if (!event.origin.includes('localhost:3000')) return;
+
+  if (event.data?.type === 'VIBE_TUTO_AUTH') {
+    const { authToken, userEmail } = event.data;
+    if (authToken && userEmail) {
+      await chrome.storage.local.set({ authToken, userEmail });
+      console.log('[Vibe Tuto] Auth synced from web app');
+      // Notify the page that sync is complete
+      window.postMessage({ type: 'VIBE_TUTO_AUTH_SYNCED' }, '*');
+    }
+  }
+});
+
 console.log('[Vibe Tuto] Content script loaded');
