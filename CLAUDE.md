@@ -18,6 +18,11 @@ Never use claude chrome mcp to test the localhost website.
 
 ALWAYS USE THE BROWSER AUTOMATION TO TEST THE LOCALHOST WEBSITE. 
 
+To login to the app, you can use the following credentials:
+
+Email: admin@thevibecompany.co
+Password: adminadmin
+
 ## Testing
 
 - **Unit tests** : Vitest in `apps/web` and `apps/extension`. Run from root: `pnpm test` or `pnpm test:run`.

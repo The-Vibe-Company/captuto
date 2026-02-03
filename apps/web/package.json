@@ -13,7 +13,10 @@
   },
   "dependencies": {
     "@deepgram/sdk": "^4.11.3",
-    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-avatar": "^1.1.11",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-slot": "^1.2.4",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.93.3",
     "class-variance-authority": "^0.7.0",
