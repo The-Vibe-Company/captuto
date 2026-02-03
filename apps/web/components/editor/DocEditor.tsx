@@ -17,16 +17,17 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { Plus, FileText, Heading, Minus } from 'lucide-react';
-import type { Tutorial, StepWithSignedUrl, Annotation } from '@/lib/types/editor';
+import type { Tutorial, StepWithSignedUrl, SourceWithSignedUrl, Annotation } from '@/lib/types/editor';
 import type { SaveStatus } from './EditorClient';
 import { DocHeader } from './DocHeader';
 import { DocStepCard } from './DocStepCard';
-import { CapturedElementsSidebar } from './CapturedElementsSidebar';
+import { SourcesSidebar } from './SourcesSidebar';
 
 export type NewStepType = 'text' | 'heading' | 'divider';
 
 interface DocEditorProps {
   tutorial: Tutorial;
+  sources: SourceWithSignedUrl[];
   steps: StepWithSignedUrl[];
   saveStatus: SaveStatus;
   selectedStepId: string | null;
@@ -36,12 +37,13 @@ interface DocEditorProps {
   onDeleteStep: (stepId: string) => void;
   onReorderSteps: (newSteps: StepWithSignedUrl[]) => void;
   onAddStep: (type: NewStepType, afterStepId?: string) => void;
-  onCreateStepWithImage?: (sourceStep: StepWithSignedUrl) => void;
+  onCreateStepFromSource: (source: SourceWithSignedUrl) => void;
   onPreview: () => void;
 }
 
 export function DocEditor({
   tutorial,
+  sources,
   steps,
   saveStatus,
   selectedStepId,
@@ -51,7 +53,7 @@ export function DocEditor({
   onDeleteStep,
   onReorderSteps,
   onAddStep,
-  onCreateStepWithImage,
+  onCreateStepFromSource,
   onPreview,
 }: DocEditorProps) {
   const sensors = useSensors(
@@ -112,10 +114,10 @@ export function DocEditor({
                   strategy={verticalListSortingStrategy}
                 >
                   {steps.map((step) => {
-                    // Only count screenshot steps for the numbered badge
-                    const isScreenshotStep = !!step.signedScreenshotUrl;
-                    const isTextStep = step.click_type === 'text' && !step.signedScreenshotUrl;
-                    if (isScreenshotStep || isTextStep) {
+                    // Only count image and text steps for the numbered badge
+                    const isImageStep = step.step_type === 'image';
+                    const isTextStep = step.step_type === 'text';
+                    if (isImageStep || isTextStep) {
                       screenshotStepNumber++;
                     }
 
@@ -124,7 +126,7 @@ export function DocEditor({
                         key={step.id}
                         step={step}
                         stepNumber={
-                          step.click_type === 'heading' || step.click_type === 'divider'
+                          step.step_type === 'heading' || step.step_type === 'divider'
                             ? 0
                             : screenshotStepNumber
                         }
@@ -170,12 +172,10 @@ export function DocEditor({
             </div>
           </main>
 
-          {/* Right sidebar */}
-          <CapturedElementsSidebar
-            steps={steps}
-            selectedStepId={selectedStepId}
-            onSelectStep={onSelectStep}
-            onCreateStepWithImage={onCreateStepWithImage}
+          {/* Right sidebar - Sources */}
+          <SourcesSidebar
+            sources={sources}
+            onCreateStepFromSource={onCreateStepFromSource}
           />
         </div>
       </div>

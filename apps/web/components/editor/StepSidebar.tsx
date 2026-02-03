@@ -54,7 +54,7 @@ export function StepSidebar({ steps, selectedStepId, onSelectStep }: StepSidebar
                       <Check className="h-3.5 w-3.5 text-green-500" />
                     )}
                   </div>
-                  <span className="text-xs text-gray-500 capitalize">{step.click_type || 'action'}</span>
+                  <span className="text-xs text-gray-500 capitalize">{step.step_type || 'action'}</span>
                 </div>
               </button>
             );

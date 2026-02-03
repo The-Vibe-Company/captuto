@@ -137,11 +137,11 @@ function FilmstripThumbnail({
                 />
               )}
             </>
-          ) : step.click_type === 'heading' ? (
+          ) : step.step_type === 'heading' ? (
             <div className="flex h-full items-center justify-center bg-gradient-to-br from-amber-500/20 to-orange-500/20">
               <Heading className="h-6 w-6 text-amber-400" />
             </div>
-          ) : step.click_type === 'divider' ? (
+          ) : step.step_type === 'divider' ? (
             <div className="flex h-full items-center justify-center bg-gradient-to-br from-stone-700 to-stone-800">
               <SeparatorHorizontal className="h-6 w-6 text-stone-500" />
             </div>
@@ -579,7 +579,7 @@ export function FilmstripEditor({
                       />
                     </div>
                   </div>
-                ) : selectedStep.click_type === 'heading' ? (
+                ) : selectedStep.step_type === 'heading' ? (
                   // Heading step - large editable title
                   <div className="w-full max-w-2xl rounded-xl border border-stone-800 bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-12 text-center">
                     <Heading className="mx-auto mb-4 h-12 w-12 text-amber-400" />
@@ -590,7 +590,7 @@ export function FilmstripEditor({
                       Utilisez la description ci-dessous pour définir le titre
                     </p>
                   </div>
-                ) : selectedStep.click_type === 'divider' ? (
+                ) : selectedStep.step_type === 'divider' ? (
                   // Divider step
                   <div className="w-full max-w-2xl rounded-xl border border-stone-800 bg-stone-900 p-12 text-center">
                     <div className="mx-auto my-8 h-px w-32 bg-gradient-to-r from-transparent via-stone-600 to-transparent" />

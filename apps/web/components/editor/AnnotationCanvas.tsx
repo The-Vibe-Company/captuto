@@ -162,6 +162,31 @@ export function AnnotationCanvas({
           ctx.filter = 'none';
           break;
         }
+        case 'click-indicator': {
+          // Draw the cursor icon (MousePointer2)
+          const size = 28;
+          ctx.save();
+          ctx.translate(x - 4, y - 4);
+          ctx.scale(size / 24, size / 24);
+
+          // MousePointer2 SVG path
+          ctx.fillStyle = ann.color || '#8b5cf6';
+          ctx.strokeStyle = 'white';
+          ctx.lineWidth = 1.5 / (size / 24);
+
+          ctx.beginPath();
+          // Path: M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z
+          ctx.moveTo(3, 3);
+          ctx.lineTo(10.07, 19.97);
+          ctx.lineTo(12.58, 12.58);
+          ctx.lineTo(19.97, 10.07);
+          ctx.closePath();
+
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+          break;
+        }
       }
 
       // Draw hover indicator (if hovered and not selected)

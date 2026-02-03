@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
-import { MousePointer2, ZoomIn, ZoomOut } from 'lucide-react';
+import { ZoomIn, ZoomOut } from 'lucide-react';
 import { AnnotationCanvas } from './AnnotationCanvas';
 import { AnnotationToolbar } from './AnnotationToolbar';
 import { QuickAnnotationBar } from './QuickAnnotationBar';
@@ -12,10 +12,6 @@ import { cn } from '@/lib/utils';
 interface StepScreenshotProps {
   src: string;
   alt: string;
-  clickX?: number | null;
-  clickY?: number | null;
-  viewportWidth?: number | null;
-  viewportHeight?: number | null;
   annotations: Annotation[];
   onAnnotationsChange: (annotations: Annotation[]) => void;
   onUpdateAnnotation?: (id: string, updates: Partial<Annotation>) => void;
@@ -27,10 +23,6 @@ const ZOOM_LEVELS = [1, 1.5, 2];
 export function StepScreenshot({
   src,
   alt,
-  clickX,
-  clickY,
-  viewportWidth,
-  viewportHeight,
   annotations,
   onAnnotationsChange,
   onUpdateAnnotation,
@@ -74,16 +66,6 @@ export function StepScreenshot({
     setIsAnnotating(true);
     setActiveTool(tool);
   }, []);
-
-  // Calculate cursor position as percentage
-  const cursorLeft =
-    clickX != null && viewportWidth
-      ? (clickX / viewportWidth) * 100
-      : null;
-  const cursorTop =
-    clickY != null && viewportHeight
-      ? (clickY / viewportHeight) * 100
-      : null;
 
   return (
     <div
@@ -135,25 +117,6 @@ export function StepScreenshot({
                 sizes="(max-width: 768px) 100vw, 800px"
                 priority
               />
-
-              {/* Cursor indicator */}
-              {cursorLeft !== null && cursorTop !== null && (
-                <div
-                  className="pointer-events-none absolute z-10"
-                  style={{
-                    left: `${cursorLeft}%`,
-                    top: `${cursorTop}%`,
-                    transform: 'translate(-4px, -4px)',
-                  }}
-                >
-                  <MousePointer2
-                    className="h-7 w-7 drop-shadow-lg"
-                    fill="#8b5cf6"
-                    stroke="white"
-                    strokeWidth={1.5}
-                  />
-                </div>
-              )}
 
               {/* Annotation canvas (always visible, editable when annotating) */}
               <AnnotationCanvas

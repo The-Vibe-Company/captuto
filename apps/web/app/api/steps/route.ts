@@ -20,15 +20,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       tutorial_id,
+      source_id,
       order_index,
-      click_type,
+      step_type,
       text_content,
-      screenshot_url,
-      click_x,
-      click_y,
-      viewport_width,
-      viewport_height,
-      element_info,
+      annotations,
     } = body;
 
     if (!tutorial_id) {
@@ -53,6 +49,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    // If source_id is provided, verify it exists and belongs to the same tutorial
+    // Note: Using type assertion due to regenerated types not including all columns
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let source: any = null;
+    if (source_id) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: sourceData, error: sourceError } = await (supabase as any)
+        .from('sources')
+        .select('*')
+        .eq('id', source_id)
+        .eq('tutorial_id', tutorial_id)
+        .single();
+
+      if (sourceError || !sourceData) {
+        return NextResponse.json({ error: 'Source not found' }, { status: 404 });
+      }
+      source = sourceData;
+    }
+
     // Get the current max order_index for this tutorial
     const { data: existingSteps } = await supabase
       .from('steps')
@@ -66,7 +81,6 @@ export async function POST(request: Request) {
 
     // If inserting in the middle, shift subsequent steps
     if (order_index !== undefined && order_index <= maxOrderIndex) {
-      // Get all steps that need to be shifted
       const { data: stepsToShift } = await supabase
         .from('steps')
         .select('id, order_index')
@@ -74,7 +88,6 @@ export async function POST(request: Request) {
         .gte('order_index', order_index)
         .order('order_index', { ascending: false });
 
-      // Update each step's order_index (starting from highest to avoid conflicts)
       if (stepsToShift) {
         for (const step of stepsToShift) {
           await supabase
@@ -85,34 +98,63 @@ export async function POST(request: Request) {
       }
     }
 
-    // Build insert object with only defined fields
-    // This avoids issues with columns not in schema cache
+    // Determine step_type based on source_id or provided type
+    const finalStepType = step_type || (source_id ? 'image' : 'text');
+
+    // Build insert object
     const insertData: Record<string, unknown> = {
       tutorial_id,
       order_index: newOrderIndex,
-      click_type: click_type || 'text',
+      step_type: finalStepType,
     };
 
-    // Only add optional fields if they have values
+    // Add optional fields
+    if (source_id) insertData.source_id = source_id;
     if (text_content) insertData.text_content = text_content;
-    if (screenshot_url) insertData.screenshot_url = screenshot_url;
-    if (click_x != null) insertData.click_x = click_x;
-    if (click_y != null) insertData.click_y = click_y;
-    if (viewport_width != null) insertData.viewport_width = viewport_width;
-    if (viewport_height != null) insertData.viewport_height = viewport_height;
-    if (element_info) insertData.element_info = element_info;
+
+    // Handle annotations
+    // If source has click coordinates and no annotations provided, create click-indicator
+    if (source && !annotations) {
+      if (source.click_x != null && source.click_y != null &&
+          source.viewport_width && source.viewport_height) {
+        insertData.annotations = [
+          {
+            id: crypto.randomUUID(),
+            type: 'click-indicator',
+            x: source.click_x / source.viewport_width,
+            y: source.click_y / source.viewport_height,
+            color: '#8b5cf6',
+          },
+        ];
+      }
+    } else if (annotations) {
+      insertData.annotations = annotations;
+    }
+
+    // Generate auto-caption from source element_info if no text_content provided
+    if (!text_content && source?.element_info) {
+      const elementInfo = typeof source.element_info === 'string'
+        ? JSON.parse(source.element_info)
+        : source.element_info;
+
+      if (elementInfo?.text) {
+        const cleanText = elementInfo.text.replace(/\s+/g, ' ').trim().slice(0, 50);
+        insertData.text_content = `Click on <strong>${cleanText}</strong>`;
+      }
+    }
 
     // Create the new step
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: step, error: insertError } = await supabase
       .from('steps')
-      .insert(insertData)
+      .insert(insertData as any)
       .select()
       .single();
 
     if (insertError) {
       console.error('Failed to create step:', insertError);
       return NextResponse.json(
-        { error: 'Failed to create step' },
+        { error: 'Failed to create step', details: insertError.message },
         { status: 500 }
       );
     }

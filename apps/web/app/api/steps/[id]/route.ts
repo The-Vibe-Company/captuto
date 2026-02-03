@@ -142,19 +142,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    // 4. Delete screenshot from storage if exists
-    if (step.screenshot_url) {
-      const { error: storageError } = await supabase.storage
-        .from('screenshots')
-        .remove([step.screenshot_url]);
+    // Note: We don't delete the source or its screenshot when deleting a step
+    // Sources can be reused by multiple steps
 
-      if (storageError) {
-        console.error('Error deleting screenshot:', storageError);
-        // Continue with step deletion even if storage deletion fails
-      }
-    }
-
-    // 5. Delete the step
+    // 4. Delete the step
     const { error: deleteError } = await supabase
       .from('steps')
       .delete()
@@ -165,7 +156,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Failed to delete step' }, { status: 500 });
     }
 
-    // 6. Reindex remaining steps for this tutorial
+    // 5. Reindex remaining steps for this tutorial
     if (!step.tutorial_id) {
       return NextResponse.json({ success: true });
     }

@@ -18,6 +18,8 @@ export function hitTestAnnotation(
     case 'highlight':
     case 'blur':
       return hitTestRect(annotation, point);
+    case 'click-indicator':
+      return hitTestClickIndicator(annotation, point);
     default:
       return false;
   }
@@ -64,6 +66,16 @@ export function getAnnotationBounds(annotation: Annotation): {
         minY: annotation.y - height,
         maxX: annotation.x + width,
         maxY: annotation.y,
+      };
+    }
+    case 'click-indicator': {
+      // Small bounding box around cursor
+      const size = 0.04;
+      return {
+        minX: annotation.x - size / 2,
+        minY: annotation.y - size / 2,
+        maxX: annotation.x + size / 2,
+        maxY: annotation.y + size / 2,
       };
     }
     default:
@@ -156,6 +168,14 @@ function hitTestRect(annotation: Annotation, point: { x: number; y: number }): b
     point.y >= annotation.y &&
     point.y <= annotation.y + height
   );
+}
+
+// Hit test for click indicator (circular area around cursor)
+function hitTestClickIndicator(annotation: Annotation, point: { x: number; y: number }): boolean {
+  const hitRadius = 0.03; // 3% of canvas
+  const dx = point.x - annotation.x;
+  const dy = point.y - annotation.y;
+  return Math.sqrt(dx * dx + dy * dy) < hitRadius;
 }
 
 // Calculate distance from point to line segment

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { RichTextEditor } from './RichTextEditor';
 import { AnnotatedScreenshot } from './AnnotatedScreenshot';
 import type { Annotation, StepWithSignedUrl } from '@/lib/types/editor';
-import { MousePointerClick, ArrowRight, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MousePointerClick, FileText, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface StepViewerProps {
   step: StepWithSignedUrl | null;
@@ -48,10 +48,10 @@ export function StepViewer({
             {stepNumber}
           </span>
           <div className="flex items-center gap-2 text-sm text-gray-500">
-            {step.click_type === 'navigation' ? (
+            {step.step_type === 'text' && !step.signedScreenshotUrl ? (
               <>
-                <ArrowRight className="h-4 w-4" />
-                <span>Navigation</span>
+                <FileText className="h-4 w-4" />
+                <span>Texte</span>
               </>
             ) : (
               <>

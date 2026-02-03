@@ -62,8 +62,8 @@ export function DocStepCard({
   };
 
   const hasScreenshot = !!step.signedScreenshotUrl;
-  const isHeading = step.click_type === 'heading';
-  const isDivider = step.click_type === 'divider';
+  const isHeading = step.step_type === 'heading';
+  const isDivider = step.step_type === 'divider';
 
   // Divider step
   if (isDivider) {
@@ -235,10 +235,6 @@ export function DocStepCard({
           <StepScreenshot
             src={step.signedScreenshotUrl!}
             alt={`Step ${stepNumber} screenshot`}
-            clickX={step.click_x}
-            clickY={step.click_y}
-            viewportWidth={step.viewport_width}
-            viewportHeight={step.viewport_height}
             annotations={annotations}
             onAnnotationsChange={onAnnotationsChange}
             onUpdateAnnotation={handleUpdateAnnotation}
