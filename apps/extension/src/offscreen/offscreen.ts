@@ -3,10 +3,12 @@
 
 let mediaRecorder: MediaRecorder | null = null;
 let audioChunks: Blob[] = [];
+let currentStream: MediaStream | null = null;
 
 async function startAudioRecording(): Promise<boolean> {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    currentStream = stream;
 
     mediaRecorder = new MediaRecorder(stream, {
       mimeType: 'audio/webm;codecs=opus',
@@ -17,24 +19,8 @@ async function startAudioRecording(): Promise<boolean> {
     mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
         audioChunks.push(event.data);
+        console.log('[Offscreen] Audio chunk received, size:', event.data.size);
       }
-    };
-
-    mediaRecorder.onstop = () => {
-      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-
-      // Convert to base64 and send to service worker
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        chrome.runtime.sendMessage({
-          type: 'AUDIO_RECORDED',
-          data: reader.result,
-        });
-      };
-      reader.readAsDataURL(audioBlob);
-
-      // Stop all tracks
-      stream.getTracks().forEach((track) => track.stop());
     };
 
     mediaRecorder.start(1000); // Collect data every second
@@ -50,11 +36,61 @@ async function startAudioRecording(): Promise<boolean> {
   }
 }
 
-function stopAudioRecording(): void {
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+async function stopAudioRecording(): Promise<void> {
+  return new Promise((resolve) => {
+    if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+      console.log('[Offscreen] No active recording to stop');
+      resolve();
+      return;
+    }
+
+    mediaRecorder.onstop = async () => {
+      console.log('[Offscreen] MediaRecorder stopped, chunks:', audioChunks.length);
+
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      console.log('[Offscreen] Audio blob size:', audioBlob.size);
+
+      if (audioBlob.size > 0) {
+        // Convert to base64 and send to service worker
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          console.log('[Offscreen] Sending audio data to service worker');
+          // Await sendMessage to ensure it's delivered before resolving
+          try {
+            await chrome.runtime.sendMessage({
+              type: 'AUDIO_RECORDED',
+              data: reader.result,
+            });
+            console.log('[Offscreen] Audio data sent successfully');
+          } catch (error) {
+            console.error('[Offscreen] Failed to send audio data:', error);
+          }
+          // Stop all tracks after sending data
+          if (currentStream) {
+            currentStream.getTracks().forEach((track) => track.stop());
+          }
+          resolve();
+        };
+        reader.onerror = () => {
+          console.error('[Offscreen] FileReader error');
+          if (currentStream) {
+            currentStream.getTracks().forEach((track) => track.stop());
+          }
+          resolve();
+        };
+        reader.readAsDataURL(audioBlob);
+      } else {
+        console.warn('[Offscreen] Audio blob is empty, no data to send');
+        if (currentStream) {
+          currentStream.getTracks().forEach((track) => track.stop());
+        }
+        resolve();
+      }
+    };
+
     mediaRecorder.stop();
-    console.log('[Offscreen] Audio recording stopped');
-  }
+    console.log('[Offscreen] Audio recording stop requested');
+  });
 }
 
 // Listen for messages from service worker
@@ -65,8 +101,10 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       return true;
 
     case 'STOP_AUDIO':
-      stopAudioRecording();
-      sendResponse({ success: true });
+      stopAudioRecording().then(() => {
+        console.log('[Offscreen] Stop audio complete, sending response');
+        sendResponse({ success: true });
+      });
       return true;
 
     default:
