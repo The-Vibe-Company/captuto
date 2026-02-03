@@ -11,6 +11,7 @@ interface EditorHeaderProps {
   hasChanges: boolean;
   saveStatus: SaveStatus;
   onSave: () => void;
+  onPreview: () => void;
 }
 
 function SaveStatusIndicator({ status }: { status: SaveStatus }) {
@@ -46,7 +47,7 @@ function SaveStatusIndicator({ status }: { status: SaveStatus }) {
   }
 }
 
-export function EditorHeader({ title, isSaving, hasChanges, saveStatus, onSave }: EditorHeaderProps) {
+export function EditorHeader({ title, isSaving, hasChanges, saveStatus, onSave, onPreview }: EditorHeaderProps) {
   return (
     <header className="flex h-14 items-center justify-between border-b bg-white px-4">
       <div className="flex items-center gap-4">
@@ -61,7 +62,7 @@ export function EditorHeader({ title, isSaving, hasChanges, saveStatus, onSave }
       </div>
 
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" disabled>
+        <Button variant="outline" size="sm" onClick={onPreview}>
           <Eye className="mr-2 h-4 w-4" />
           Aperçu
         </Button>

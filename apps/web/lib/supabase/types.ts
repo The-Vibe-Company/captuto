@@ -65,6 +65,7 @@ export type Database = {
           url: string | null;
           viewport_width: number | null;
           viewport_height: number | null;
+          annotations: Json | null;
           created_at: string;
         };
         Insert: {
@@ -81,6 +82,7 @@ export type Database = {
           url?: string | null;
           viewport_width?: number | null;
           viewport_height?: number | null;
+          annotations?: Json | null;
           created_at?: string;
         };
         Update: {
@@ -97,6 +99,7 @@ export type Database = {
           url?: string | null;
           viewport_width?: number | null;
           viewport_height?: number | null;
+          annotations?: Json | null;
           created_at?: string;
         };
         Relationships: [

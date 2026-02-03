@@ -1,15 +1,18 @@
 'use client';
 
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import type { StepWithSignedUrl } from '@/lib/types/editor';
+import { RichTextEditor } from './RichTextEditor';
+import { AnnotatedScreenshot } from './AnnotatedScreenshot';
+import type { Annotation, StepWithSignedUrl } from '@/lib/types/editor';
 import { MousePointerClick, ArrowRight, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface StepViewerProps {
   step: StepWithSignedUrl | null;
   stepNumber: number;
   totalSteps: number;
+  annotations: Annotation[];
   onTextChange: (text: string) => void;
+  onAnnotationsChange: (annotations: Annotation[]) => void;
   onPrevious: () => void;
   onNext: () => void;
   hasPrevious: boolean;
@@ -20,7 +23,9 @@ export function StepViewer({
   step,
   stepNumber,
   totalSteps,
+  annotations,
   onTextChange,
+  onAnnotationsChange,
   onPrevious,
   onNext,
   hasPrevious,
@@ -85,31 +90,18 @@ export function StepViewer({
         </div>
       </div>
 
-      {/* Screenshot with click overlay */}
-      <div className="relative mb-6 overflow-hidden rounded-lg border bg-gray-100">
-        {step.signedScreenshotUrl ? (
-          <div className="relative">
-            <img
-              src={step.signedScreenshotUrl}
-              alt={`Screenshot de l'étape ${stepNumber}`}
-              className="w-full"
-            />
-            {/* Click position overlay */}
-            {step.click_x != null && step.click_y != null && step.viewport_width && step.viewport_height && (
-              <div
-                className="absolute h-8 w-8 -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full border-4 border-red-500 bg-red-500/20"
-                style={{
-                  left: `${(step.click_x / step.viewport_width) * 100}%`,
-                  top: `${(step.click_y / step.viewport_height) * 100}%`,
-                }}
-              />
-            )}
-          </div>
-        ) : (
-          <div className="flex aspect-video items-center justify-center">
-            <p className="text-gray-400">Aucune capture d'écran</p>
-          </div>
-        )}
+      {/* Screenshot with annotations */}
+      <div className="mb-6">
+        <AnnotatedScreenshot
+          screenshotUrl={step.signedScreenshotUrl}
+          stepNumber={stepNumber}
+          annotations={annotations}
+          onAnnotationsChange={onAnnotationsChange}
+          clickX={step.click_x}
+          clickY={step.click_y}
+          viewportWidth={step.viewport_width}
+          viewportHeight={step.viewport_height}
+        />
       </div>
 
       {/* URL */}
@@ -120,18 +112,15 @@ export function StepViewer({
         </div>
       )}
 
-      {/* Text editor */}
+      {/* Rich text editor */}
       <div>
-        <label htmlFor="step-text" className="mb-2 block text-sm font-medium text-gray-700">
+        <label className="mb-2 block text-sm font-medium text-gray-700">
           Description de l'étape
         </label>
-        <Textarea
-          id="step-text"
+        <RichTextEditor
+          content={step.text_content || ''}
+          onChange={onTextChange}
           placeholder="Décrivez cette étape... (ex: Cliquez sur le bouton 'Connexion' en haut à droite)"
-          value={step.text_content || ''}
-          onChange={(e) => onTextChange(e.target.value)}
-          rows={4}
-          className="resize-none"
         />
       </div>
     </div>
