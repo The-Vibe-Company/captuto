@@ -5,10 +5,13 @@
   "scripts": {
     "dev": "node scripts/build.js --watch",
     "build": "node scripts/build.js",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "devDependencies": {
     "esbuild": "^0.20.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.18"
   }
 }

@@ -68,11 +68,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   switch (message.type) {
     case 'START_RECORDING':
-      handleStartRecording().then(sendResponse);
+      (async () => {
+        const result = await handleStartRecording();
+        console.log('[Service Worker] Sending START_RECORDING response:', result);
+        sendResponse(result);
+      })();
       return true;
 
     case 'STOP_RECORDING':
-      handleStopRecording().then(sendResponse);
+      (async () => {
+        const result = await handleStopRecording();
+        console.log('[Service Worker] Sending STOP_RECORDING response:', { success: result.success, stepsCount: result.steps.length });
+        sendResponse(result);
+      })();
       return true;
 
     case 'CLICK_CAPTURED':
@@ -82,6 +90,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     case 'CONTENT_SCRIPT_READY':
       console.log('[Service Worker] Content script ready in tab:', sender.tab?.id);
+      // If we're recording and a content script just loaded, tell it to start capturing
+      if (state.isRecording && sender.tab?.id) {
+        chrome.tabs.sendMessage(sender.tab.id, { type: 'START_CAPTURE' }).catch(() => {
+          // Ignore errors
+        });
+        console.log('[Service Worker] Sent START_CAPTURE to newly ready tab:', sender.tab.id);
+      }
       sendResponse({ success: true });
       return true;
 
@@ -108,24 +123,41 @@ async function handleStartRecording(): Promise<{ success: boolean }> {
   state.steps = [];
   state.audioData = null;
 
-  // Setup offscreen document for audio recording
+  // Setup offscreen document for audio recording (optional - continue if fails)
   try {
     await setupOffscreenDocument();
     // Start audio recording
     await chrome.runtime.sendMessage({ type: 'START_AUDIO' });
     console.log('[Service Worker] Audio recording started');
   } catch (error) {
-    console.error('[Service Worker] Failed to start audio:', error);
+    console.log('[Service Worker] Audio recording not available (permission denied or error):', error);
+    // Continue without audio - it's optional
   }
 
-  // Notify all tabs to start capturing clicks
+  // Notify active tab to start capturing clicks
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
   for (const tab of tabs) {
-    if (tab.id) {
+    if (tab.id && tab.url && !tab.url.startsWith('chrome://')) {
       try {
+        // Try to send message to existing content script
         await chrome.tabs.sendMessage(tab.id, { type: 'START_CAPTURE' });
+        console.log('[Service Worker] START_CAPTURE sent to tab:', tab.id);
       } catch (error) {
-        console.error('Failed to send message to tab:', tab.id, error);
+        // Content script not ready - inject it programmatically
+        console.log('[Service Worker] Content script not ready, injecting...', tab.id);
+        try {
+          await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: ['content/content.js'],
+          });
+          // Wait a bit for script to initialize
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          // Retry sending the message
+          await chrome.tabs.sendMessage(tab.id, { type: 'START_CAPTURE' });
+          console.log('[Service Worker] Content script injected and START_CAPTURE sent');
+        } catch (injectError) {
+          console.error('[Service Worker] Failed to inject content script:', injectError);
+        }
       }
     }
   }
@@ -175,7 +207,14 @@ async function handleStopRecording(): Promise<{
   state.audioData = null;
 
   console.log('[Service Worker] Recording stopped, steps:', steps.length, 'audio:', !!audioData);
-  return { success: true, steps, audioData };
+
+  // Store result in chrome.storage for popup to retrieve
+  // This avoids message size limits with sendResponse
+  const result = { success: true, steps, audioData };
+  await chrome.storage.local.set({ recordingResult: result });
+  console.log('[Service Worker] Recording result stored in storage');
+
+  return result;
 }
 
 async function handleClickCaptured(
