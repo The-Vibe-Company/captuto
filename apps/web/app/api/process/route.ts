@@ -9,6 +9,9 @@ interface ProcessRequest {
 export async function POST(request: Request) {
   const supabase = await createClient();
 
+  // Store tutorialId at function scope for error handling
+  let tutorialIdForErrorHandling: string | undefined;
+
   try {
     // 1. Verify authentication
     const {
@@ -31,6 +34,9 @@ export async function POST(request: Request) {
     if (!body.tutorialId || typeof body.tutorialId !== 'string') {
       return NextResponse.json({ error: 'Missing tutorialId' }, { status: 400 });
     }
+
+    // Store for error handling in catch block
+    tutorialIdForErrorHandling = body.tutorialId;
 
     // 3. Fetch tutorial to verify existence and status
     const { data: tutorial, error: tutorialError } = await supabase
@@ -158,17 +164,16 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Processing error:', error);
 
-    // Try to set error status
-    try {
-      const body = await request.clone().json();
-      if (body.tutorialId) {
+    // Try to set error status using stored tutorialId
+    if (tutorialIdForErrorHandling) {
+      try {
         await supabase
           .from('tutorials')
           .update({ status: 'error' })
-          .eq('id', body.tutorialId);
+          .eq('id', tutorialIdForErrorHandling);
+      } catch {
+        // Ignore cleanup errors
       }
-    } catch {
-      // Ignore cleanup errors
     }
 
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
