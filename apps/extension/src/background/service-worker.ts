@@ -177,13 +177,17 @@ async function handleStopRecording(): Promise<{
 }> {
   state.isRecording = false;
 
-  // Stop audio recording
+  // Stop audio recording and wait for data
   try {
+    console.log('[Service Worker] Stopping audio recording...');
     await chrome.runtime.sendMessage({ type: 'STOP_AUDIO' });
-    console.log('[Service Worker] Audio recording stopped');
+    console.log('[Service Worker] Audio recording stopped, audioData received:', !!state.audioData);
 
-    // Wait a bit for audio data to be processed
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Wait a bit longer to ensure AUDIO_RECORDED message is fully processed
+    // The offscreen document sends AUDIO_RECORDED before resolving STOP_AUDIO,
+    // but we need to give the message time to be received and processed
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    console.log('[Service Worker] After wait, audioData:', !!state.audioData);
 
     // Close offscreen document
     await closeOffscreenDocument();
