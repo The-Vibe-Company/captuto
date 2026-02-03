@@ -202,14 +202,20 @@ async function stopRecording(): Promise<void> {
     stopTimer();
     showState('uploading');
 
+    console.log('[Popup] Sending STOP_RECORDING...');
     const response = await chrome.runtime.sendMessage({ type: 'STOP_RECORDING' });
+    console.log('[Popup] Received response:', response);
+    console.log('[Popup] Response type:', typeof response);
+    console.log('[Popup] Steps:', response?.steps);
+    console.log('[Popup] Steps length:', response?.steps?.length);
 
     await chrome.storage.local.set({
       isRecording: false,
       recordingStartTime: null,
     });
 
-    if (!response.success || !response.steps || response.steps.length === 0) {
+    if (!response || !response.success || !response.steps || response.steps.length === 0) {
+      console.log('[Popup] No steps - showing error');
       showError('Aucune étape capturée');
       showState('error');
       return;
