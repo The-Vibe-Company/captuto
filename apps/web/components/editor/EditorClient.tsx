@@ -220,32 +220,41 @@ export function EditorClient({ initialTutorial, initialSteps }: EditorClientProp
   const handleAddStep = useCallback(async (type: NewStepType, afterStepId?: string) => {
     // Create optimistic step
     const tempId = `temp-${Date.now()}`;
-    const afterIndex = afterStepId ? steps.findIndex((s) => s.id === afterStepId) : steps.length - 1;
 
-    const newStep: StepWithSignedUrl = {
-      id: tempId,
-      tutorial_id: initialTutorial.id,
-      order_index: afterIndex + 1,
-      screenshot_url: null,
-      signedScreenshotUrl: null,
-      text_content: type === 'heading' ? '<strong>Nouvelle section</strong>' : type === 'divider' ? '' : 'Nouvelle étape texte',
-      click_x: null,
-      click_y: null,
-      viewport_width: null,
-      viewport_height: null,
-      click_type: type,
-      url: null,
-      timestamp_start: null,
-      timestamp_end: null,
-      annotations: null,
-      element_info: null,
-      created_at: new Date().toISOString(),
-    };
+    // Use functional update to get current steps and avoid stale closure
+    let afterIndex = -1;
+    let previousSteps: StepWithSignedUrl[] = [];
 
-    // Insert after the specified step
-    const newSteps = [...steps];
-    newSteps.splice(afterIndex + 1, 0, newStep);
-    setSteps(newSteps);
+    setSteps((currentSteps) => {
+      previousSteps = currentSteps;
+      afterIndex = afterStepId ? currentSteps.findIndex((s) => s.id === afterStepId) : currentSteps.length - 1;
+
+      const newStep: StepWithSignedUrl = {
+        id: tempId,
+        tutorial_id: initialTutorial.id,
+        order_index: afterIndex + 1,
+        screenshot_url: null,
+        signedScreenshotUrl: null,
+        text_content: type === 'heading' ? '<strong>Nouvelle section</strong>' : type === 'divider' ? '' : 'Nouvelle étape texte',
+        click_x: null,
+        click_y: null,
+        viewport_width: null,
+        viewport_height: null,
+        click_type: type,
+        url: null,
+        timestamp_start: null,
+        timestamp_end: null,
+        annotations: null,
+        element_info: null,
+        created_at: new Date().toISOString(),
+      };
+
+      // Insert after the specified step
+      const newSteps = [...currentSteps];
+      newSteps.splice(afterIndex + 1, 0, newStep);
+      return newSteps;
+    });
+
     setSelectedStepId(tempId);
 
     try {
@@ -257,7 +266,7 @@ export function EditorClient({ initialTutorial, initialSteps }: EditorClientProp
           tutorial_id: initialTutorial.id,
           order_index: afterIndex + 1,
           click_type: type,
-          text_content: newStep.text_content,
+          text_content: type === 'heading' ? '<strong>Nouvelle section</strong>' : type === 'divider' ? '' : 'Nouvelle étape texte',
         }),
       });
 
@@ -276,10 +285,88 @@ export function EditorClient({ initialTutorial, initialSteps }: EditorClientProp
       setSelectedStepId(data.step.id);
     } catch (error) {
       console.error('Failed to add step:', error);
-      // Rollback
-      setSteps(steps);
+      // Rollback using the captured previous state
+      setSteps(previousSteps);
+      setSelectedStepId(previousSteps[0]?.id ?? null);
     }
-  }, [steps, initialTutorial.id]);
+  }, [initialTutorial.id]);
+
+  // Handle creating a new step with an image from the sidebar
+  const handleCreateStepWithImage = useCallback(async (sourceStep: StepWithSignedUrl) => {
+    // Create optimistic step with the same screenshot
+    const tempId = `temp-${Date.now()}`;
+
+    let previousSteps: StepWithSignedUrl[] = [];
+
+    setSteps((currentSteps) => {
+      previousSteps = currentSteps;
+
+      const newStep: StepWithSignedUrl = {
+        id: tempId,
+        tutorial_id: initialTutorial.id,
+        order_index: currentSteps.length,
+        screenshot_url: sourceStep.screenshot_url,
+        signedScreenshotUrl: sourceStep.signedScreenshotUrl,
+        text_content: 'Nouvelle étape avec image',
+        click_x: sourceStep.click_x,
+        click_y: sourceStep.click_y,
+        viewport_width: sourceStep.viewport_width,
+        viewport_height: sourceStep.viewport_height,
+        click_type: 'click',
+        url: sourceStep.url,
+        timestamp_start: null,
+        timestamp_end: null,
+        annotations: null,
+        element_info: sourceStep.element_info,
+        created_at: new Date().toISOString(),
+      };
+
+      return [...currentSteps, newStep];
+    });
+
+    setSelectedStepId(tempId);
+
+    try {
+      // Create the step in the database with the screenshot reference
+      const response = await fetch(`/api/steps`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tutorial_id: initialTutorial.id,
+          order_index: previousSteps.length,
+          click_type: 'click',
+          text_content: 'Nouvelle étape avec image',
+          screenshot_url: sourceStep.screenshot_url,
+          click_x: sourceStep.click_x,
+          click_y: sourceStep.click_y,
+          viewport_width: sourceStep.viewport_width,
+          viewport_height: sourceStep.viewport_height,
+          element_info: sourceStep.element_info,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create step');
+      }
+
+      const data = await response.json();
+
+      // Update the step with the real ID
+      setSteps((prev) =>
+        prev.map((s) =>
+          s.id === tempId
+            ? { ...s, id: data.step.id }
+            : s
+        )
+      );
+      setSelectedStepId(data.step.id);
+    } catch (error) {
+      console.error('Failed to create step with image:', error);
+      // Rollback
+      setSteps(previousSteps);
+      setSelectedStepId(previousSteps[previousSteps.length - 1]?.id ?? null);
+    }
+  }, [initialTutorial.id]);
 
   // Auto-save with debounce (1 second delay)
   useEffect(() => {
@@ -342,6 +429,7 @@ export function EditorClient({ initialTutorial, initialSteps }: EditorClientProp
         onDeleteStep={handleDeleteStep}
         onReorderSteps={handleReorderSteps}
         onAddStep={handleAddStep}
+        onCreateStepWithImage={handleCreateStepWithImage}
         onPreview={handleOpenPreview}
       />
 

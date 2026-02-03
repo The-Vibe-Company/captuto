@@ -18,7 +18,18 @@ export async function POST(request: Request) {
 
     // Parse request body
     const body = await request.json();
-    const { tutorial_id, order_index, click_type, text_content } = body;
+    const {
+      tutorial_id,
+      order_index,
+      click_type,
+      text_content,
+      screenshot_url,
+      click_x,
+      click_y,
+      viewport_width,
+      viewport_height,
+      element_info,
+    } = body;
 
     if (!tutorial_id) {
       return NextResponse.json(
@@ -74,15 +85,27 @@ export async function POST(request: Request) {
       }
     }
 
+    // Build insert object with only defined fields
+    // This avoids issues with columns not in schema cache
+    const insertData: Record<string, unknown> = {
+      tutorial_id,
+      order_index: newOrderIndex,
+      click_type: click_type || 'text',
+    };
+
+    // Only add optional fields if they have values
+    if (text_content) insertData.text_content = text_content;
+    if (screenshot_url) insertData.screenshot_url = screenshot_url;
+    if (click_x != null) insertData.click_x = click_x;
+    if (click_y != null) insertData.click_y = click_y;
+    if (viewport_width != null) insertData.viewport_width = viewport_width;
+    if (viewport_height != null) insertData.viewport_height = viewport_height;
+    if (element_info) insertData.element_info = element_info;
+
     // Create the new step
     const { data: step, error: insertError } = await supabase
       .from('steps')
-      .insert({
-        tutorial_id,
-        order_index: newOrderIndex,
-        click_type: click_type || 'text',
-        text_content: text_content || null,
-      })
+      .insert(insertData)
       .select()
       .single();
 

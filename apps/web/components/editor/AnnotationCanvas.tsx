@@ -2,15 +2,19 @@
 
 import { useRef, useEffect, useState, useCallback } from 'react';
 import type { Annotation, AnnotationType } from '@/lib/types/editor';
+import { findAnnotationAtPoint, moveAnnotation, getAnnotationBounds } from '@/lib/utils/annotation-hit-test';
 
 interface AnnotationCanvasProps {
   annotations: Annotation[];
   activeTool: AnnotationType | null;
   onAddAnnotation: (annotation: Annotation) => void;
+  onUpdateAnnotation?: (id: string, updates: Partial<Annotation>) => void;
+  onDeleteAnnotation?: (id: string) => void;
   containerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const ANNOTATION_COLOR = '#e63946';
+const SELECTION_COLOR = '#8b5cf6';
 const HIGHLIGHT_COLOR = 'rgba(244, 211, 94, 0.4)';
 const BLUR_RADIUS = 10;
 
@@ -18,12 +22,20 @@ export function AnnotationCanvas({
   annotations,
   activeTool,
   onAddAnnotation,
+  onUpdateAnnotation,
+  onDeleteAnnotation,
   containerRef,
 }: AnnotationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPos, setStartPos] = useState<{ x: number; y: number } | null>(null);
   const [currentPos, setCurrentPos] = useState<{ x: number; y: number } | null>(null);
+
+  // Selection state
+  const [selectedAnnotationId, setSelectedAnnotationId] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartPos, setDragStartPos] = useState<{ x: number; y: number } | null>(null);
+  const [hoveredAnnotationId, setHoveredAnnotationId] = useState<string | null>(null);
 
   // Get relative position (0-1) from mouse event
   const getRelativePosition = useCallback(
@@ -36,6 +48,60 @@ export function AnnotationCanvas({
         x: (e.clientX - rect.left) / rect.width,
         y: (e.clientY - rect.top) / rect.height,
       };
+    },
+    []
+  );
+
+  // Draw selection indicator around an annotation
+  const drawSelectionIndicator = useCallback(
+    (ctx: CanvasRenderingContext2D, annotation: Annotation, width: number, height: number) => {
+      const bounds = getAnnotationBounds(annotation);
+      const padding = 5;
+
+      const x = bounds.minX * width - padding;
+      const y = bounds.minY * height - padding;
+      const w = (bounds.maxX - bounds.minX) * width + padding * 2;
+      const h = (bounds.maxY - bounds.minY) * height + padding * 2;
+
+      // Draw dashed border
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = SELECTION_COLOR;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, w, h);
+      ctx.setLineDash([]);
+
+      // Draw handles at corners
+      const handleSize = 8;
+      ctx.fillStyle = SELECTION_COLOR;
+      const corners = [
+        [x, y],
+        [x + w, y],
+        [x, y + h],
+        [x + w, y + h],
+      ];
+      corners.forEach(([cx, cy]) => {
+        ctx.fillRect(cx - handleSize / 2, cy - handleSize / 2, handleSize, handleSize);
+      });
+    },
+    []
+  );
+
+  // Draw hover indicator
+  const drawHoverIndicator = useCallback(
+    (ctx: CanvasRenderingContext2D, annotation: Annotation, width: number, height: number) => {
+      const bounds = getAnnotationBounds(annotation);
+      const padding = 3;
+
+      const x = bounds.minX * width - padding;
+      const y = bounds.minY * height - padding;
+      const w = (bounds.maxX - bounds.minX) * width + padding * 2;
+      const h = (bounds.maxY - bounds.minY) * height + padding * 2;
+
+      ctx.setLineDash([2, 2]);
+      ctx.strokeStyle = 'rgba(139, 92, 246, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x, y, w, h);
+      ctx.setLineDash([]);
     },
     []
   );
@@ -97,6 +163,16 @@ export function AnnotationCanvas({
           break;
         }
       }
+
+      // Draw hover indicator (if hovered and not selected)
+      if (hoveredAnnotationId === ann.id && selectedAnnotationId !== ann.id) {
+        drawHoverIndicator(ctx, ann, width, height);
+      }
+
+      // Draw selection indicator
+      if (selectedAnnotationId === ann.id) {
+        drawSelectionIndicator(ctx, ann, width, height);
+      }
     });
 
     // Draw current drawing preview
@@ -139,7 +215,7 @@ export function AnnotationCanvas({
 
       ctx.setLineDash([]);
     }
-  }, [annotations, isDrawing, startPos, currentPos, activeTool]);
+  }, [annotations, isDrawing, startPos, currentPos, activeTool, selectedAnnotationId, hoveredAnnotationId, drawSelectionIndicator, drawHoverIndicator]);
 
   // Resize canvas to match container
   useEffect(() => {
@@ -163,94 +239,173 @@ export function AnnotationCanvas({
     drawAnnotations();
   }, [drawAnnotations]);
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!activeTool) return;
+  // Handle keyboard events for deletion
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedAnnotationId && onDeleteAnnotation) {
+        e.preventDefault();
+        onDeleteAnnotation(selectedAnnotationId);
+        setSelectedAnnotationId(null);
+      }
+      if (e.key === 'Escape') {
+        setSelectedAnnotationId(null);
+      }
+    };
 
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedAnnotationId, onDeleteAnnotation]);
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const pos = getRelativePosition(e);
     if (!pos) return;
 
-    if (activeTool === 'text') {
-      const content = window.prompt('Texte de l\'annotation:');
-      if (content) {
-        onAddAnnotation({
-          id: crypto.randomUUID(),
-          type: 'text',
-          x: pos.x,
-          y: pos.y,
-          content,
-          color: ANNOTATION_COLOR,
+    // If there's an active tool, enter drawing mode
+    if (activeTool) {
+      if (activeTool === 'text') {
+        const content = window.prompt('Texte de l\'annotation:');
+        if (content) {
+          onAddAnnotation({
+            id: crypto.randomUUID(),
+            type: 'text',
+            x: pos.x,
+            y: pos.y,
+            content,
+            color: ANNOTATION_COLOR,
+          });
+        }
+        return;
+      }
+
+      setIsDrawing(true);
+      setStartPos(pos);
+      setCurrentPos(pos);
+      return;
+    }
+
+    // No active tool - handle selection/dragging
+    const hitAnnotationId = findAnnotationAtPoint(annotations, pos);
+
+    if (hitAnnotationId) {
+      // Clicked on an annotation
+      if (selectedAnnotationId === hitAnnotationId) {
+        // Already selected - start dragging
+        setIsDragging(true);
+        setDragStartPos(pos);
+      } else {
+        // Select this annotation
+        setSelectedAnnotationId(hitAnnotationId);
+      }
+    } else {
+      // Clicked on empty space - deselect
+      setSelectedAnnotationId(null);
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const pos = getRelativePosition(e);
+    if (!pos) return;
+
+    // Handle drawing preview
+    if (isDrawing && activeTool) {
+      setCurrentPos(pos);
+      return;
+    }
+
+    // Handle dragging
+    if (isDragging && dragStartPos && selectedAnnotationId && onUpdateAnnotation) {
+      const deltaX = pos.x - dragStartPos.x;
+      const deltaY = pos.y - dragStartPos.y;
+
+      const annotation = annotations.find((a) => a.id === selectedAnnotationId);
+      if (annotation) {
+        const moved = moveAnnotation(annotation, deltaX, deltaY);
+        onUpdateAnnotation(selectedAnnotationId, {
+          x: moved.x,
+          y: moved.y,
+          endX: moved.endX,
+          endY: moved.endY,
         });
+        setDragStartPos(pos);
       }
       return;
     }
 
-    setIsDrawing(true);
-    setStartPos(pos);
-    setCurrentPos(pos);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !activeTool) return;
-
-    const pos = getRelativePosition(e);
-    if (pos) {
-      setCurrentPos(pos);
+    // Handle hover detection (only when no tool is active)
+    if (!activeTool) {
+      const hitAnnotationId = findAnnotationAtPoint(annotations, pos);
+      setHoveredAnnotationId(hitAnnotationId);
     }
   };
 
   const handleMouseUp = () => {
-    if (!isDrawing || !startPos || !currentPos || !activeTool) {
-      setIsDrawing(false);
-      return;
-    }
+    // Handle drawing completion
+    if (isDrawing && startPos && currentPos && activeTool) {
+      const annotation: Annotation = {
+        id: crypto.randomUUID(),
+        type: activeTool,
+        x: Math.min(startPos.x, currentPos.x),
+        y: Math.min(startPos.y, currentPos.y),
+        color: ANNOTATION_COLOR,
+      };
 
-    const annotation: Annotation = {
-      id: crypto.randomUUID(),
-      type: activeTool,
-      x: Math.min(startPos.x, currentPos.x),
-      y: Math.min(startPos.y, currentPos.y),
-      color: ANNOTATION_COLOR,
-    };
+      switch (activeTool) {
+        case 'circle':
+        case 'highlight':
+        case 'blur':
+          annotation.width = Math.abs(currentPos.x - startPos.x);
+          annotation.height = Math.abs(currentPos.y - startPos.y);
+          break;
+        case 'arrow':
+          annotation.x = startPos.x;
+          annotation.y = startPos.y;
+          annotation.endX = currentPos.x;
+          annotation.endY = currentPos.y;
+          break;
+      }
 
-    switch (activeTool) {
-      case 'circle':
-      case 'highlight':
-      case 'blur':
-        annotation.width = Math.abs(currentPos.x - startPos.x);
-        annotation.height = Math.abs(currentPos.y - startPos.y);
-        break;
-      case 'arrow':
-        annotation.x = startPos.x;
-        annotation.y = startPos.y;
-        annotation.endX = currentPos.x;
-        annotation.endY = currentPos.y;
-        break;
-    }
-
-    // Only add if it has some size
-    const minSize = 0.01;
-    if (
-      activeTool === 'arrow' ||
-      (annotation.width && annotation.width > minSize) ||
-      (annotation.height && annotation.height > minSize)
-    ) {
-      onAddAnnotation(annotation);
+      // Only add if it has some size
+      const minSize = 0.01;
+      if (
+        activeTool === 'arrow' ||
+        (annotation.width && annotation.width > minSize) ||
+        (annotation.height && annotation.height > minSize)
+      ) {
+        onAddAnnotation(annotation);
+      }
     }
 
     setIsDrawing(false);
     setStartPos(null);
     setCurrentPos(null);
+    setIsDragging(false);
+    setDragStartPos(null);
+  };
+
+  const handleMouseLeave = () => {
+    handleMouseUp();
+    setHoveredAnnotationId(null);
+  };
+
+  // Determine cursor style
+  const getCursorStyle = () => {
+    if (activeTool) return 'crosshair';
+    if (isDragging) return 'grabbing';
+    if (hoveredAnnotationId) return 'pointer';
+    if (selectedAnnotationId && hoveredAnnotationId === selectedAnnotationId) return 'grab';
+    return 'default';
   };
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 cursor-crosshair"
-      style={{ cursor: activeTool ? 'crosshair' : 'default' }}
+      className="absolute inset-0"
+      style={{ cursor: getCursorStyle() }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      onMouseLeave={handleMouseLeave}
+      tabIndex={0}
     />
   );
 }
