@@ -1,7 +1,7 @@
 import { redirect, notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { EditorClient } from '@/components/editor/EditorClient';
-import type { StepWithSignedUrl } from '@/lib/types/editor';
+import type { StepWithSignedUrl, Annotation } from '@/lib/types/editor';
 
 interface EditorPageProps {
   params: Promise<{ id: string }>;
@@ -62,9 +62,15 @@ export default async function EditorPage({ params }: EditorPageProps) {
         signedScreenshotUrl = signedUrl?.signedUrl || null;
       }
 
+      // Parse annotations from JSON if present
+      const annotations = step.annotations
+        ? (step.annotations as unknown as Annotation[])
+        : undefined;
+
       return {
         ...step,
         signedScreenshotUrl,
+        annotations,
       };
     })
   );

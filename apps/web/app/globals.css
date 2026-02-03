@@ -54,3 +54,41 @@
 body {
   @apply bg-background text-foreground;
 }
+
+/* Tiptap editor styles */
+.tiptap p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.tiptap {
+  @apply text-sm;
+}
+
+.tiptap p {
+  @apply my-1;
+}
+
+.tiptap ul,
+.tiptap ol {
+  @apply my-2 ml-4;
+}
+
+.tiptap ul {
+  @apply list-disc;
+}
+
+.tiptap ol {
+  @apply list-decimal;
+}
+
+.tiptap li {
+  @apply my-0.5;
+}
+
+.tiptap code {
+  @apply rounded bg-stone-100 px-1 py-0.5 font-mono text-xs;
+}
