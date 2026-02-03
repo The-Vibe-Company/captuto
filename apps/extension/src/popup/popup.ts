@@ -128,12 +128,7 @@ async function requestMicrophonePermissionViaIframe(): Promise<boolean> {
   }
 
   return new Promise((resolve) => {
-    // Send message to content script to inject iframe
-    chrome.tabs.sendMessage(tab.id!, { type: 'REQUEST_MICROPHONE_PERMISSION' }).catch((error) => {
-      console.log('[Popup] Failed to send message to content script:', error);
-      resolve(false);
-    });
-
+    // Add listener BEFORE sending message to avoid race condition
     const listener = (msg: { type: string; error?: string }): void => {
       if (msg.type === 'MICROPHONE_PERMISSION_GRANTED') {
         chrome.runtime.onMessage.removeListener(listener);
@@ -144,6 +139,13 @@ async function requestMicrophonePermissionViaIframe(): Promise<boolean> {
       }
     };
     chrome.runtime.onMessage.addListener(listener);
+
+    // Send message to content script to inject iframe
+    chrome.tabs.sendMessage(tab.id!, { type: 'REQUEST_MICROPHONE_PERMISSION' }).catch((error) => {
+      console.log('[Popup] Failed to send message to content script:', error);
+      chrome.runtime.onMessage.removeListener(listener);
+      resolve(false);
+    });
 
     // Timeout after 60s (user might take time to click allow)
     setTimeout(() => {
