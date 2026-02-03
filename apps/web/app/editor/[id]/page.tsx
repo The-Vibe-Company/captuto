@@ -1,7 +1,7 @@
 import { redirect, notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { EditorClient } from '@/components/editor/EditorClient';
-import type { StepWithSignedUrl, Annotation } from '@/lib/types/editor';
+import type { StepWithSignedUrl, Annotation, ElementInfo } from '@/lib/types/editor';
 
 interface EditorPageProps {
   params: Promise<{ id: string }>;
@@ -67,10 +67,16 @@ export default async function EditorPage({ params }: EditorPageProps) {
         ? (step.annotations as unknown as Annotation[])
         : undefined;
 
+      // Parse element_info from JSON if present
+      const element_info = step.element_info
+        ? (step.element_info as unknown as ElementInfo)
+        : null;
+
       return {
         ...step,
         signedScreenshotUrl,
         annotations,
+        element_info,
       };
     })
   );

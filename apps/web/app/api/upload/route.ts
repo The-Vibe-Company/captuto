@@ -1,5 +1,13 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import type { Json } from '@/lib/supabase/types';
+
+interface ElementInfo {
+  tag: string;
+  text: string;
+  id?: string;
+  className?: string;
+}
 
 interface UploadStep {
   timestamp: number;
@@ -10,6 +18,28 @@ interface UploadStep {
   viewportWidth?: number;
   viewportHeight?: number;
   url: string;
+  elementInfo?: ElementInfo | null;
+}
+
+/**
+ * Generate an auto-caption based on the clicked element info
+ * e.g., "Click on <strong>Settings</strong>"
+ */
+function generateCaption(step: UploadStep): string | null {
+  const elementText = step.elementInfo?.text?.trim();
+
+  if (elementText) {
+    // Clean up the text (remove extra whitespace, limit length)
+    const cleanText = elementText.replace(/\s+/g, ' ').slice(0, 50);
+    return `Click on <strong>${cleanText}</strong>`;
+  }
+
+  // Fallback: use click type
+  if (step.type === 'navigation') {
+    return 'Navigate to page';
+  }
+
+  return null;
 }
 
 interface UploadMetadata {
@@ -154,6 +184,8 @@ export async function POST(request: Request) {
         click_type: step.type,
         url: step.url,
         timestamp_start: step.timestamp,
+        element_info: (step.elementInfo ?? null) as Json,
+        text_content: generateCaption(step),
       });
     }
 

@@ -235,6 +235,7 @@ async function uploadRecording(
       viewportWidth: step.viewportWidth,
       viewportHeight: step.viewportHeight,
       url: step.url,
+      elementInfo: step.elementInfo || null,
     })),
   };
 

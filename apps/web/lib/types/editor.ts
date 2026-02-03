@@ -3,10 +3,20 @@ import type { Tables } from '@/lib/supabase/types';
 export type Tutorial = Tables<'tutorials'>;
 export type Step = Tables<'steps'>;
 
-export interface StepWithSignedUrl extends Omit<Step, 'annotations'> {
+// Element info captured during click events
+export interface ElementInfo {
+  tag: string;       // HTML tag name (e.g., "BUTTON", "A", "DIV")
+  text: string;      // Text content of element (e.g., "Settings", "Submit")
+  id?: string;       // Element ID attribute
+  className?: string; // Element class names
+}
+
+export interface StepWithSignedUrl extends Omit<Step, 'annotations' | 'element_info'> {
   signedScreenshotUrl: string | null;
   // Annotations are parsed from JSON to typed array
   annotations?: Annotation[] | null;
+  // Element info parsed from JSON
+  element_info?: ElementInfo | null;
 }
 
 export interface TutorialWithSteps {
