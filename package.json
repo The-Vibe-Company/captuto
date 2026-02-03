@@ -7,9 +7,11 @@
     "lint": "turbo lint",
     "type-check": "turbo type-check",
     "test": "turbo test",
-    "test:run": "turbo test:run"
+    "test:run": "turbo test:run",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
     "turbo": "^2.3.0"
   },
   "packageManager": "pnpm@9.15.0"
