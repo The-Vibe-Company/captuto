@@ -66,6 +66,7 @@ export type Database = {
           viewport_width: number | null;
           viewport_height: number | null;
           annotations: Json | null;
+          element_info: Json | null;
           created_at: string;
         };
         Insert: {
@@ -83,6 +84,7 @@ export type Database = {
           viewport_width?: number | null;
           viewport_height?: number | null;
           annotations?: Json | null;
+          element_info?: Json | null;
           created_at?: string;
         };
         Update: {
@@ -100,6 +102,7 @@ export type Database = {
           viewport_width?: number | null;
           viewport_height?: number | null;
           annotations?: Json | null;
+          element_info?: Json | null;
           created_at?: string;
         };
         Relationships: [

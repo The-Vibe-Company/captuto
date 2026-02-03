@@ -121,7 +121,12 @@ export async function POST(request: Request) {
     }
 
     // 9. Align transcription with steps
-    const alignedSteps = alignStepsWithTranscription(steps, segments);
+    // Filter out steps without valid timestamp_start (alignment requires timestamps)
+    const stepsWithTimestamp = steps.filter(
+      (step): step is { id: string; timestamp_start: number } =>
+        step.timestamp_start !== null
+    );
+    const alignedSteps = alignStepsWithTranscription(stepsWithTimestamp, segments);
 
     // 10. Batch update steps with aligned text
     const updatePromises = alignedSteps.map((aligned) =>

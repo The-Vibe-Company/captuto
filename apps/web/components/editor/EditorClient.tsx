@@ -1,9 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { EditorHeader } from './EditorHeader';
-import { StepViewer } from './StepViewer';
-import { StoryboardPanel } from './StoryboardPanel';
+import { WYSIWYGEditor } from './WYSIWYGEditor';
 import { PreviewOverlay } from './PreviewOverlay';
 import type { Tutorial, StepWithSignedUrl, Annotation } from '@/lib/types/editor';
 
@@ -29,68 +27,50 @@ export function EditorClient({ initialTutorial, initialSteps }: EditorClientProp
   const [previewStepIndex, setPreviewStepIndex] = useState(0);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const selectedStep = steps.find((s) => s.id === selectedStepId) ?? null;
   const selectedStepIndex = steps.findIndex((s) => s.id === selectedStepId);
   const hasChanges = Object.keys(pendingChanges).length > 0 || Object.keys(pendingAnnotations).length > 0;
-  const totalSteps = steps.length;
-
-  // Get current annotations for the selected step
-  // Priority: pending changes > saved step data > empty array
-  const currentAnnotations = selectedStepId
-    ? (pendingAnnotations[selectedStepId] ??
-       (selectedStep?.annotations as Annotation[] | undefined) ??
-       [])
-    : [];
 
   const handleSelectStep = useCallback((stepId: string) => {
     setSelectedStepId(stepId);
   }, []);
 
-  // Navigation functions
-  const goToPreviousStep = useCallback(() => {
-    if (selectedStepIndex > 0) {
-      setSelectedStepId(steps[selectedStepIndex - 1].id);
-    }
-  }, [selectedStepIndex, steps]);
-
-  const goToNextStep = useCallback(() => {
-    if (selectedStepIndex < steps.length - 1) {
-      setSelectedStepId(steps[selectedStepIndex + 1].id);
-    }
-  }, [selectedStepIndex, steps]);
-
-  const handleTextChange = useCallback((text: string) => {
-    if (!selectedStepId) return;
-
+  // Handle caption change for any step
+  const handleStepCaptionChange = useCallback((stepId: string, caption: string) => {
     // Update local steps state for immediate UI feedback
     setSteps((prev) =>
       prev.map((step) =>
-        step.id === selectedStepId ? { ...step, text_content: text } : step
+        step.id === stepId ? { ...step, text_content: caption } : step
       )
     );
 
     // Track pending changes
     setPendingChanges((prev) => ({
       ...prev,
-      [selectedStepId]: text,
+      [stepId]: caption,
     }));
 
     // Mark as unsaved
     setSaveStatus('unsaved');
-  }, [selectedStepId]);
+  }, []);
 
-  const handleAnnotationsChange = useCallback((annotations: Annotation[]) => {
-    if (!selectedStepId) return;
+  // Handle annotations change for any step
+  const handleStepAnnotationsChange = useCallback((stepId: string, annotations: Annotation[]) => {
+    // Update local steps state for immediate UI feedback
+    setSteps((prev) =>
+      prev.map((step) =>
+        step.id === stepId ? { ...step, annotations } : step
+      )
+    );
 
     // Track pending annotation changes
     setPendingAnnotations((prev) => ({
       ...prev,
-      [selectedStepId]: annotations,
+      [stepId]: annotations,
     }));
 
     // Mark as unsaved
     setSaveStatus('unsaved');
-  }, [selectedStepId]);
+  }, []);
 
   const handleSave = useCallback(async () => {
     if (!hasChanges) return;
@@ -134,17 +114,6 @@ export function EditorClient({ initialTutorial, initialSteps }: EditorClientProp
       });
 
       await Promise.all(savePromises);
-
-      // Update local steps state with saved annotations before clearing pending
-      setSteps((prev) =>
-        prev.map((step) => {
-          const savedAnnotations = pendingAnnotations[step.id];
-          if (savedAnnotations !== undefined) {
-            return { ...step, annotations: savedAnnotations };
-          }
-          return step;
-        })
-      );
 
       // Clear pending changes on success
       setPendingChanges({});
@@ -289,62 +258,26 @@ export function EditorClient({ initialTutorial, initialSteps }: EditorClientProp
         handleOpenPreview();
         return;
       }
-
-      // Navigation shortcuts (only when not in input field)
-      if (!isInputField) {
-        if (e.key === 'ArrowUp' || e.key === 'k') {
-          e.preventDefault();
-          goToPreviousStep();
-        } else if (e.key === 'ArrowDown' || e.key === 'j') {
-          e.preventDefault();
-          goToNextStep();
-        }
-      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSave, goToPreviousStep, goToNextStep, isPreviewOpen, handleOpenPreview]);
+  }, [handleSave, isPreviewOpen, handleOpenPreview]);
 
   return (
-    <div className="flex h-screen flex-col bg-stone-100">
-      <EditorHeader
-        title={initialTutorial.title}
-        isSaving={isSaving || isReordering}
-        hasChanges={hasChanges}
-        saveStatus={saveStatus}
-        onSave={handleSave}
+    <>
+      <WYSIWYGEditor
+        tutorial={initialTutorial}
+        steps={steps}
+        saveStatus={isSaving || isReordering ? 'saving' : saveStatus}
+        selectedStepId={selectedStepId}
+        onSelectStep={handleSelectStep}
+        onStepCaptionChange={handleStepCaptionChange}
+        onStepAnnotationsChange={handleStepAnnotationsChange}
+        onDeleteStep={handleDeleteStep}
+        onReorderSteps={handleReorderSteps}
         onPreview={handleOpenPreview}
       />
-
-      <div className="flex flex-1 overflow-hidden">
-        {/* Main editor area - 70% */}
-        <div className="flex-[7] overflow-hidden bg-white">
-          <StepViewer
-            step={selectedStep}
-            stepNumber={selectedStepIndex + 1}
-            totalSteps={totalSteps}
-            annotations={currentAnnotations}
-            onTextChange={handleTextChange}
-            onAnnotationsChange={handleAnnotationsChange}
-            onPrevious={goToPreviousStep}
-            onNext={goToNextStep}
-            hasPrevious={selectedStepIndex > 0}
-            hasNext={selectedStepIndex < steps.length - 1}
-          />
-        </div>
-
-        {/* Storyboard panel - 30% */}
-        <div className="w-80 flex-shrink-0">
-          <StoryboardPanel
-            steps={steps}
-            selectedStepId={selectedStepId}
-            onSelectStep={handleSelectStep}
-            onReorderSteps={handleReorderSteps}
-            onDeleteStep={handleDeleteStep}
-          />
-        </div>
-      </div>
 
       {/* Preview overlay */}
       {isPreviewOpen && (
@@ -355,6 +288,6 @@ export function EditorClient({ initialTutorial, initialSteps }: EditorClientProp
           onClose={handleClosePreview}
         />
       )}
-    </div>
+    </>
   );
 }
