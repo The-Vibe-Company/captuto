@@ -19,7 +19,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-white">
       <Header userEmail={userEmail} />
-      <main className="mx-auto max-w-6xl px-6 py-8">
+      <main>
         {children}
       </main>
     </div>
