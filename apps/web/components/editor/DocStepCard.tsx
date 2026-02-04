@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Trash2, FileText, Heading, Minus } from 'lucide-react';
@@ -25,6 +25,27 @@ export function DocStepCard({
   onDelete,
 }: DocStepCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const annotations = step.annotations || [];
+
+  // Handler to update a single annotation
+  const handleUpdateAnnotation = useCallback(
+    (id: string, updates: Partial<Annotation>) => {
+      const updatedAnnotations = annotations.map((ann) =>
+        ann.id === id ? { ...ann, ...updates } : ann
+      );
+      onAnnotationsChange(updatedAnnotations);
+    },
+    [annotations, onAnnotationsChange]
+  );
+
+  // Handler to delete a single annotation
+  const handleDeleteAnnotation = useCallback(
+    (id: string) => {
+      const updatedAnnotations = annotations.filter((ann) => ann.id !== id);
+      onAnnotationsChange(updatedAnnotations);
+    },
+    [annotations, onAnnotationsChange]
+  );
 
   const {
     attributes,
@@ -41,9 +62,8 @@ export function DocStepCard({
   };
 
   const hasScreenshot = !!step.signedScreenshotUrl;
-  const isHeading = step.click_type === 'heading';
-  const isDivider = step.click_type === 'divider';
-  const annotations = step.annotations || [];
+  const isHeading = step.step_type === 'heading';
+  const isDivider = step.step_type === 'divider';
 
   // Divider step
   if (isDivider) {
@@ -215,12 +235,10 @@ export function DocStepCard({
           <StepScreenshot
             src={step.signedScreenshotUrl!}
             alt={`Step ${stepNumber} screenshot`}
-            clickX={step.click_x}
-            clickY={step.click_y}
-            viewportWidth={step.viewport_width}
-            viewportHeight={step.viewport_height}
             annotations={annotations}
             onAnnotationsChange={onAnnotationsChange}
+            onUpdateAnnotation={handleUpdateAnnotation}
+            onDeleteAnnotation={handleDeleteAnnotation}
           />
         </div>
       ) : (

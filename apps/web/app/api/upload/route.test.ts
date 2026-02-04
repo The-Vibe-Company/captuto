@@ -147,7 +147,7 @@ describe('POST /api/upload', () => {
       }),
     });
 
-    const mockStepsInsert = vi.fn().mockResolvedValue({
+    const mockSourcesInsert = vi.fn().mockResolvedValue({
       error: null,
     });
 
@@ -166,8 +166,8 @@ describe('POST /api/upload', () => {
         if (table === 'tutorials') {
           return { insert: mockInsert };
         }
-        if (table === 'steps') {
-          return { insert: mockStepsInsert };
+        if (table === 'sources') {
+          return { insert: mockSourcesInsert };
         }
         return {};
       }),
@@ -197,8 +197,8 @@ describe('POST /api/upload', () => {
       status: 'processing',
     });
 
-    // Verify steps were created
-    expect(mockStepsInsert).toHaveBeenCalled();
+    // Verify sources were created
+    expect(mockSourcesInsert).toHaveBeenCalled();
 
     // Verify screenshot was uploaded
     expect(mockStorageUpload).toHaveBeenCalled();

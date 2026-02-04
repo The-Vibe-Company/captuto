@@ -9,7 +9,7 @@ interface ElementInfo {
   className?: string;
 }
 
-interface UploadStep {
+interface UploadSource {
   timestamp: number;
   type: 'click' | 'navigation';
   screenshot: string;
@@ -21,32 +21,11 @@ interface UploadStep {
   elementInfo?: ElementInfo | null;
 }
 
-/**
- * Generate an auto-caption based on the clicked element info
- * e.g., "Click on <strong>Settings</strong>"
- */
-function generateCaption(step: UploadStep): string | null {
-  const elementText = step.elementInfo?.text?.trim();
-
-  if (elementText) {
-    // Clean up the text (remove extra whitespace, limit length)
-    const cleanText = elementText.replace(/\s+/g, ' ').slice(0, 50);
-    return `Click on <strong>${cleanText}</strong>`;
-  }
-
-  // Fallback: use click type
-  if (step.type === 'navigation') {
-    return 'Navigate to page';
-  }
-
-  return null;
-}
-
 interface UploadMetadata {
   title?: string;
   duration: number;
   startedAt: string;
-  steps: UploadStep[];
+  steps: UploadSource[]; // Called "steps" in extension for backwards compatibility
 }
 
 function dataURLtoBuffer(dataURL: string): { buffer: Buffer; mimeType: string } {
@@ -143,16 +122,16 @@ export async function POST(request: Request) {
       }
     }
 
-    // 5. Upload screenshots and create steps
-    const stepInserts = [];
+    // 5. Upload screenshots and create sources (raw captured data)
+    const sourceInserts = [];
     for (let i = 0; i < metadata.steps.length; i++) {
-      const step = metadata.steps[i];
+      const source = metadata.steps[i];
       let screenshotPath: string | null = null;
 
       // Upload screenshot if provided
-      if (step.screenshot) {
+      if (source.screenshot) {
         try {
-          const { buffer, mimeType } = dataURLtoBuffer(step.screenshot);
+          const { buffer, mimeType } = dataURLtoBuffer(source.screenshot);
           const extension = mimeType === 'image/png' ? 'png' : 'jpg';
           const path = `${user.id}/${tutorial.id}/${i}.${extension}`;
 
@@ -173,29 +152,41 @@ export async function POST(request: Request) {
         }
       }
 
-      stepInserts.push({
+      // Sources contain raw captured data, no annotations or text_content
+      sourceInserts.push({
         tutorial_id: tutorial.id,
         order_index: i,
         screenshot_url: screenshotPath,
-        click_x: step.x ?? null,
-        click_y: step.y ?? null,
-        viewport_width: step.viewportWidth ?? null,
-        viewport_height: step.viewportHeight ?? null,
-        click_type: step.type,
-        url: step.url,
-        timestamp_start: step.timestamp,
-        element_info: (step.elementInfo ?? null) as Json,
-        text_content: generateCaption(step),
+        click_x: source.x ?? null,
+        click_y: source.y ?? null,
+        viewport_width: source.viewportWidth ?? null,
+        viewport_height: source.viewportHeight ?? null,
+        click_type: source.type,
+        url: source.url,
+        timestamp_start: source.timestamp,
+        element_info: (source.elementInfo ?? null) as Json,
       });
     }
 
-    // Batch insert all steps
-    const { error: stepsError } = await supabase
-      .from('steps')
-      .insert(stepInserts);
+    // Batch insert all sources
+    // Note: Using type assertion due to regenerated types not including all columns
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let { error: sourcesError } = await (supabase as any)
+      .from('sources')
+      .insert(sourceInserts);
 
-    if (stepsError) {
-      console.error('Failed to create steps:', stepsError);
+    // If insert failed due to element_info column not existing, retry without it
+    if (sourcesError && sourcesError.message?.includes('element_info')) {
+      console.warn('element_info column not found, retrying without it');
+      const sourceInsertsWithoutElementInfo = sourceInserts.map(({ element_info, ...rest }) => rest);
+      const retryResult = await (supabase as any)
+        .from('sources')
+        .insert(sourceInsertsWithoutElementInfo);
+      sourcesError = retryResult.error;
+    }
+
+    if (sourcesError) {
+      console.error('Failed to create sources:', sourcesError);
       // Don't fail the whole request - tutorial is created
     }
 
