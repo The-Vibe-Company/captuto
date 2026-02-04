@@ -13,6 +13,7 @@ build
 
 # Production
 dist
+*.zip
 
 # Misc
 .DS_Store

@@ -1,10 +1,11 @@
 {
   "name": "@vibe-tuto/extension",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "node scripts/build.js --watch",
     "build": "node scripts/build.js",
+    "package": "node scripts/package.js",
     "clean": "rm -rf dist",
     "test": "vitest",
     "test:run": "vitest run"
