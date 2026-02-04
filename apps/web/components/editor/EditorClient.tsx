@@ -18,6 +18,7 @@ export function EditorClient({
   initialSources,
   initialSteps,
 }: EditorClientProps) {
+  const [tutorial, setTutorial] = useState(initialTutorial);
   const [sources] = useState(initialSources);
   const [steps, setSteps] = useState(initialSteps);
   const [selectedStepId, setSelectedStepId] = useState<string | null>(
@@ -35,6 +36,30 @@ export function EditorClient({
   const handleSelectStep = useCallback((stepId: string) => {
     setSelectedStepId(stepId);
   }, []);
+
+  // Handle tutorial title change
+  const handleTitleChange = useCallback(async (newTitle: string) => {
+    const previousTitle = tutorial.title;
+
+    // Optimistic update
+    setTutorial((prev) => ({ ...prev, title: newTitle }));
+
+    try {
+      const response = await fetch(`/api/tutorials/${tutorial.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newTitle }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update title');
+      }
+    } catch (error) {
+      console.error('Failed to update title:', error);
+      // Rollback on error
+      setTutorial((prev) => ({ ...prev, title: previousTitle }));
+    }
+  }, [tutorial.id, tutorial.title]);
 
   // Handle caption change for any step
   const handleStepCaptionChange = useCallback((stepId: string, caption: string) => {
@@ -450,10 +475,11 @@ export function EditorClient({
 
   return (
     <DocEditor
-      tutorial={initialTutorial}
+      tutorial={tutorial}
       sources={sources}
       steps={steps}
       saveStatus={isSaving || isReordering ? 'saving' : saveStatus}
+      onTitleChange={handleTitleChange}
       onStepCaptionChange={handleStepCaptionChange}
       onStepAnnotationsChange={handleStepAnnotationsChange}
       onDeleteStep={handleDeleteStep}

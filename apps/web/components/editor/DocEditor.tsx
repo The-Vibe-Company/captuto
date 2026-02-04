@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
+import { Pencil } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -40,6 +41,7 @@ interface DocEditorProps {
   sources: SourceWithSignedUrl[];
   steps: StepWithSignedUrl[];
   saveStatus: SaveStatus;
+  onTitleChange: (title: string) => void;
   onStepCaptionChange: (stepId: string, caption: string) => void;
   onStepAnnotationsChange: (stepId: string, annotations: Annotation[]) => void;
   onDeleteStep: (stepId: string) => void;
@@ -55,6 +57,7 @@ export function DocEditor({
   sources,
   steps,
   saveStatus,
+  onTitleChange,
   onStepCaptionChange,
   onStepAnnotationsChange,
   onDeleteStep,
@@ -95,7 +98,12 @@ export function DocEditor({
   return (
     <TooltipProvider delayDuration={100}>
       <div className="min-h-screen bg-background">
-        <DocHeader saveStatus={saveStatus} tutorialTitle={tutorial.title} />
+        <DocHeader
+          saveStatus={saveStatus}
+          tutorialId={tutorial.id}
+          tutorialTitle={tutorial.title}
+          tutorialSlug={tutorial.slug}
+        />
 
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="flex gap-8">
@@ -105,9 +113,11 @@ export function DocEditor({
               <div className="mb-8">
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-1">
-                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                      {tutorial.title || 'Sans titre'}
-                    </h1>
+                    <EditableTitle
+                      value={tutorial.title || ''}
+                      onChange={onTitleChange}
+                      placeholder="Sans titre"
+                    />
                     {tutorial.description && (
                       <p className="text-sm text-muted-foreground max-w-2xl">
                         {tutorial.description}
@@ -267,5 +277,78 @@ function AddStepButton({
         Ajouter une étape {label.toLowerCase()}
       </TooltipContent>
     </Tooltip>
+  );
+}
+
+// Editable title component
+function EditableTitle({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  useEffect(() => {
+    setEditValue(value);
+  }, [value]);
+
+  const handleSubmit = () => {
+    const trimmed = editValue.trim();
+    if (trimmed && trimmed !== value) {
+      onChange(trimmed);
+    } else {
+      setEditValue(value);
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSubmit();
+    } else if (e.key === 'Escape') {
+      setEditValue(value);
+      setIsEditing(false);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <input
+        ref={inputRef}
+        type="text"
+        value={editValue}
+        onChange={(e) => setEditValue(e.target.value)}
+        onBlur={handleSubmit}
+        onKeyDown={handleKeyDown}
+        className="text-2xl font-semibold tracking-tight text-foreground bg-transparent border-b-2 border-primary outline-none w-full max-w-md"
+        placeholder={placeholder}
+      />
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setIsEditing(true)}
+      className="group flex items-center gap-2 text-left"
+    >
+      <h1 className="text-2xl font-semibold tracking-tight text-foreground group-hover:text-primary transition-colors">
+        {value || placeholder}
+      </h1>
+      <Pencil className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+    </button>
   );
 }

@@ -11,6 +11,7 @@ interface AnnotationCanvasProps {
   onUpdateAnnotation?: (id: string, updates: Partial<Annotation>) => void;
   onDeleteAnnotation?: (id: string) => void;
   containerRef: React.RefObject<HTMLDivElement | null>;
+  readOnly?: boolean;
 }
 
 const ANNOTATION_COLOR = '#e63946';
@@ -25,6 +26,7 @@ export function AnnotationCanvas({
   onUpdateAnnotation,
   onDeleteAnnotation,
   containerRef,
+  readOnly = false,
 }: AnnotationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -189,13 +191,13 @@ export function AnnotationCanvas({
         }
       }
 
-      // Draw hover indicator (if hovered and not selected)
-      if (hoveredAnnotationId === ann.id && selectedAnnotationId !== ann.id) {
+      // Draw hover indicator (if hovered and not selected, not in readOnly)
+      if (!readOnly && hoveredAnnotationId === ann.id && selectedAnnotationId !== ann.id) {
         drawHoverIndicator(ctx, ann, width, height);
       }
 
-      // Draw selection indicator
-      if (selectedAnnotationId === ann.id) {
+      // Draw selection indicator (not in readOnly)
+      if (!readOnly && selectedAnnotationId === ann.id) {
         drawSelectionIndicator(ctx, ann, width, height);
       }
     });
@@ -240,7 +242,7 @@ export function AnnotationCanvas({
 
       ctx.setLineDash([]);
     }
-  }, [annotations, isDrawing, startPos, currentPos, activeTool, selectedAnnotationId, hoveredAnnotationId, drawSelectionIndicator, drawHoverIndicator]);
+  }, [annotations, isDrawing, startPos, currentPos, activeTool, selectedAnnotationId, hoveredAnnotationId, drawSelectionIndicator, drawHoverIndicator, readOnly]);
 
   // Resize canvas to match container
   useEffect(() => {
@@ -264,8 +266,10 @@ export function AnnotationCanvas({
     drawAnnotations();
   }, [drawAnnotations]);
 
-  // Handle keyboard events for deletion
+  // Handle keyboard events for deletion (disabled in readOnly mode)
   useEffect(() => {
+    if (readOnly) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedAnnotationId && onDeleteAnnotation) {
         e.preventDefault();
@@ -279,9 +283,10 @@ export function AnnotationCanvas({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedAnnotationId, onDeleteAnnotation]);
+  }, [selectedAnnotationId, onDeleteAnnotation, readOnly]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (readOnly) return;
     const pos = getRelativePosition(e);
     if (!pos) return;
 
@@ -328,6 +333,7 @@ export function AnnotationCanvas({
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (readOnly) return;
     const pos = getRelativePosition(e);
     if (!pos) return;
 
@@ -414,6 +420,7 @@ export function AnnotationCanvas({
 
   // Determine cursor style
   const getCursorStyle = () => {
+    if (readOnly) return 'default';
     if (activeTool) return 'crosshair';
     if (isDragging) return 'grabbing';
     if (hoveredAnnotationId) return 'pointer';
@@ -425,12 +432,12 @@ export function AnnotationCanvas({
     <canvas
       ref={canvasRef}
       className="absolute inset-0"
-      style={{ cursor: getCursorStyle() }}
+      style={{ cursor: getCursorStyle(), pointerEvents: readOnly ? 'none' : 'auto' }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
-      tabIndex={0}
+      tabIndex={readOnly ? -1 : 0}
     />
   );
 }

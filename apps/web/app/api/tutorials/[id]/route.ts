@@ -71,6 +71,71 @@ export async function GET(
   return NextResponse.json({ tutorial, steps: stepsWithUrls });
 }
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: tutorialId } = await params;
+
+  const supabase = await createClient();
+
+  // Check authentication
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Verify ownership
+  const { data: tutorial, error: tutorialError } = await supabase
+    .from('tutorials')
+    .select('id, user_id')
+    .eq('id', tutorialId)
+    .single();
+
+  if (tutorialError || !tutorial) {
+    return NextResponse.json({ error: 'Tutorial not found' }, { status: 404 });
+  }
+
+  if (tutorial.user_id !== user.id) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  // Parse request body
+  const body = await request.json();
+  const { title, description } = body;
+
+  // Build update object with only provided fields
+  const updates: { title?: string; description?: string } = {};
+  if (title !== undefined) updates.title = title;
+  if (description !== undefined) updates.description = description;
+
+  if (Object.keys(updates).length === 0) {
+    return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
+  }
+
+  // Update tutorial
+  const { data: updatedTutorial, error: updateError } = await supabase
+    .from('tutorials')
+    .update(updates)
+    .eq('id', tutorialId)
+    .select()
+    .single();
+
+  if (updateError) {
+    console.error('Error updating tutorial:', updateError);
+    return NextResponse.json(
+      { error: 'Failed to update tutorial' },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({ tutorial: updatedTutorial });
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
