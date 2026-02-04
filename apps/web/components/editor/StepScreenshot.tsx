@@ -7,6 +7,13 @@ import { AnnotationCanvas } from './AnnotationCanvas';
 import { AnnotationToolbar } from './AnnotationToolbar';
 import { QuickAnnotationBar } from './QuickAnnotationBar';
 import type { Annotation, AnnotationType } from '@/lib/types/editor';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 interface StepScreenshotProps {
@@ -80,7 +87,7 @@ export function StepScreenshot({
     >
       {/* Annotation toolbar (shown when annotating, hidden in readOnly) */}
       {!readOnly && isAnnotating && (
-        <div className="absolute -top-14 left-1/2 z-20 -translate-x-1/2">
+        <div className="absolute -top-14 left-1/2 z-20 -translate-x-1/2 animate-in fade-in slide-in-from-bottom-2 duration-200">
           <AnnotationToolbar
             activeTool={activeTool}
             onToolChange={setActiveTool}
@@ -94,8 +101,10 @@ export function StepScreenshot({
       {/* Screenshot container */}
       <div
         className={cn(
-          'relative overflow-hidden rounded-lg border bg-stone-100 transition-all',
-          isAnnotating ? 'border-violet-400 ring-2 ring-violet-200' : 'border-stone-200'
+          'relative overflow-hidden rounded-lg border bg-muted transition-all duration-200',
+          isAnnotating
+            ? 'border-primary ring-2 ring-primary/20'
+            : 'border-border'
         )}
       >
         {/* Scrollable zoom container */}
@@ -138,49 +147,63 @@ export function StepScreenshot({
 
         {/* Quick annotation bar (bottom-left, shown on hover, hidden in readOnly) */}
         {!readOnly && isHovering && !isAnnotating && (
-          <div className="absolute bottom-3 left-3 z-10 animate-in fade-in duration-150">
+          <div className="absolute bottom-3 left-3 z-10 animate-in fade-in slide-in-from-left-2 duration-150">
             <QuickAnnotationBar onToolSelect={handleQuickToolSelect} />
           </div>
         )}
 
         {/* Controls overlay (bottom-right) */}
         <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2">
+          {/* Annotation count badge */}
+          {annotations.length > 0 && !isAnnotating && (
+            <Badge
+              variant="secondary"
+              className="h-7 gap-1 bg-background/90 backdrop-blur-sm"
+            >
+              <span className="text-xs tabular-nums">{annotations.length}</span>
+              <span className="text-xs text-muted-foreground">annotations</span>
+            </Badge>
+          )}
 
           {/* Zoom controls */}
-          <div className="flex items-center gap-1 rounded-lg border border-stone-200 bg-white/90 p-1 shadow-sm backdrop-blur-sm">
-            <button
-              type="button"
-              onClick={handleZoomOut}
-              disabled={zoomIndex === 0}
-              className={cn(
-                'flex h-6 w-6 items-center justify-center rounded transition-colors',
-                zoomIndex === 0
-                  ? 'cursor-not-allowed text-stone-300'
-                  : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
-              )}
-              title="Zoom out"
-            >
-              <ZoomOut className="h-4 w-4" />
-            </button>
+          <div className="flex items-center gap-1 rounded-lg border border-border bg-background/90 p-1 shadow-sm backdrop-blur-sm">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleZoomOut}
+                  disabled={zoomIndex === 0}
+                  className="h-7 w-7"
+                >
+                  <ZoomOut className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">
+                Zoom arrière
+              </TooltipContent>
+            </Tooltip>
 
-            <span className="min-w-[3rem] text-center text-xs font-medium text-stone-600">
+            <span className="min-w-[3rem] text-center text-xs font-medium tabular-nums text-muted-foreground">
               {zoom}x
             </span>
 
-            <button
-              type="button"
-              onClick={handleZoomIn}
-              disabled={zoomIndex === ZOOM_LEVELS.length - 1}
-              className={cn(
-                'flex h-6 w-6 items-center justify-center rounded transition-colors',
-                zoomIndex === ZOOM_LEVELS.length - 1
-                  ? 'cursor-not-allowed text-stone-300'
-                  : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
-              )}
-              title="Zoom in"
-            >
-              <ZoomIn className="h-4 w-4" />
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleZoomIn}
+                  disabled={zoomIndex === ZOOM_LEVELS.length - 1}
+                  className="h-7 w-7"
+                >
+                  <ZoomIn className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">
+                Zoom avant
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </div>

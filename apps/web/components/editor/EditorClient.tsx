@@ -454,8 +454,6 @@ export function EditorClient({
       sources={sources}
       steps={steps}
       saveStatus={isSaving || isReordering ? 'saving' : saveStatus}
-      selectedStepId={selectedStepId}
-      onSelectStep={handleSelectStep}
       onStepCaptionChange={handleStepCaptionChange}
       onStepAnnotationsChange={handleStepAnnotationsChange}
       onDeleteStep={handleDeleteStep}

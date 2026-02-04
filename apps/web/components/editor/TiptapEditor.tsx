@@ -37,7 +37,7 @@ export function TiptapEditor({
       attributes: {
         class: cn(
           'focus:outline-none min-h-[1.5em] max-w-none',
-          isHeading ? 'text-lg font-semibold' : 'prose prose-sm prose-stone'
+          isHeading ? 'text-lg font-semibold' : 'prose prose-sm dark:prose-invert'
         ),
       },
     },
@@ -64,15 +64,15 @@ export function TiptapEditor({
     <>
       <EditorContent editor={editor} />
       {!isHeading && (
-        <div className="mt-1 flex gap-1 border-t border-stone-100 pt-1">
+        <div className="mt-1 flex gap-1 border-t border-border pt-1">
           <button
             type="button"
             onClick={() => editor?.chain().focus().toggleBold().run()}
             className={cn(
               'rounded px-2 py-0.5 text-xs font-medium transition-colors',
               editor?.isActive('bold')
-                ? 'bg-violet-100 text-violet-700'
-                : 'text-stone-500 hover:bg-stone-100'
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:bg-muted'
             )}
           >
             B
@@ -83,8 +83,8 @@ export function TiptapEditor({
             className={cn(
               'rounded px-2 py-0.5 text-xs italic transition-colors',
               editor?.isActive('italic')
-                ? 'bg-violet-100 text-violet-700'
-                : 'text-stone-500 hover:bg-stone-100'
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:bg-muted'
             )}
           >
             I
@@ -95,8 +95,8 @@ export function TiptapEditor({
             className={cn(
               'rounded px-2 py-0.5 text-xs font-mono transition-colors',
               editor?.isActive('code')
-                ? 'bg-violet-100 text-violet-700'
-                : 'text-stone-500 hover:bg-stone-100'
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:bg-muted'
             )}
           >
             {'</>'}

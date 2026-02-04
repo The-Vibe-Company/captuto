@@ -4,10 +4,26 @@ import { useState, useCallback } from 'react';
 import Image from 'next/image';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Trash2, FileText, Heading, Minus, ImageOff, ImagePlus, X } from 'lucide-react';
+import { GripVertical, Trash2, Heading, Minus, ImageOff, ImagePlus } from 'lucide-react';
 import type { StepWithSignedUrl, SourceWithSignedUrl, Annotation } from '@/lib/types/editor';
 import { InlineCaption } from './InlineCaption';
 import { StepScreenshot } from './StepScreenshot';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
 interface DocStepCardProps {
@@ -100,7 +116,7 @@ export function DocStepCard({
               {...attributes}
               {...listeners}
               className={cn(
-                'cursor-grab touch-none text-stone-300 transition-opacity hover:text-stone-400',
+                'cursor-grab touch-none text-muted-foreground/50 transition-all hover:text-muted-foreground',
                 isHovered ? 'opacity-100' : 'opacity-0'
               )}
             >
@@ -110,23 +126,31 @@ export function DocStepCard({
 
           {/* Divider line */}
           <div className="flex flex-1 items-center gap-3">
-            <div className="h-px flex-1 bg-stone-200" />
-            <Minus className="h-4 w-4 text-stone-300" />
-            <div className="h-px flex-1 bg-stone-200" />
+            <Separator className="flex-1" />
+            <Minus className="h-4 w-4 text-muted-foreground/30" />
+            <Separator className="flex-1" />
           </div>
 
           {/* Delete (hidden in readOnly) */}
           {!readOnly && (
-            <button
-              type="button"
-              onClick={onDelete}
-              className={cn(
-                'text-stone-300 transition-all hover:text-red-500',
-                isHovered ? 'opacity-100' : 'opacity-0'
-              )}
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onDelete}
+                  className={cn(
+                    'h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all',
+                    isHovered ? 'opacity-100' : 'opacity-0'
+                  )}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">
+                Supprimer le séparateur
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
       </div>
@@ -140,20 +164,20 @@ export function DocStepCard({
         ref={readOnly ? undefined : setNodeRef}
         style={readOnly ? undefined : style}
         className={cn(
-          'group relative py-2',
+          'group relative py-3',
           !readOnly && isDragging && 'z-50 opacity-50'
         )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="flex items-start gap-4">
+        <div className="flex items-start gap-3">
           {/* Drag handle (hidden in readOnly) */}
           {!readOnly && (
             <button
               {...attributes}
               {...listeners}
               className={cn(
-                'mt-2 cursor-grab touch-none text-stone-300 transition-opacity hover:text-stone-400',
+                'mt-1.5 cursor-grab touch-none text-muted-foreground/50 transition-all hover:text-muted-foreground',
                 isHovered ? 'opacity-100' : 'opacity-0'
               )}
             >
@@ -162,8 +186,8 @@ export function DocStepCard({
           )}
 
           {/* Icon */}
-          <div className="mt-1.5 flex h-6 w-6 items-center justify-center rounded bg-violet-100">
-            <Heading className="h-3.5 w-3.5 text-violet-600" />
+          <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
+            <Heading className="h-4 w-4 text-primary" />
           </div>
 
           {/* Editable heading */}
@@ -179,16 +203,24 @@ export function DocStepCard({
 
           {/* Delete (hidden in readOnly) */}
           {!readOnly && (
-            <button
-              type="button"
-              onClick={onDelete}
-              className={cn(
-                'mt-2 text-stone-300 transition-all hover:text-red-500',
-                isHovered ? 'opacity-100' : 'opacity-0'
-              )}
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onDelete}
+                  className={cn(
+                    'h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all',
+                    isHovered ? 'opacity-100' : 'opacity-0'
+                  )}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">
+                Supprimer le titre
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
       </div>
@@ -197,150 +229,172 @@ export function DocStepCard({
 
   // Regular step (with or without screenshot)
   return (
-    <div
-      ref={readOnly ? undefined : setNodeRef}
-      style={readOnly ? undefined : style}
-      className={cn(
-        'group relative rounded-xl border border-stone-200 bg-white shadow-sm transition-shadow hover:shadow-md',
-        !readOnly && isDragging && 'z-50 opacity-50 shadow-lg'
-      )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Header: badge + caption + actions */}
-      <div className="flex items-start gap-3 p-4 pb-0">
-        {/* Drag handle + badge */}
-        <div className="flex items-center gap-2">
-          {!readOnly && (
-            <button
-              {...attributes}
-              {...listeners}
-              className={cn(
-                'cursor-grab touch-none text-stone-300 transition-opacity hover:text-stone-400',
-                isHovered ? 'opacity-100' : 'opacity-0'
-              )}
-            >
-              <GripVertical className="h-5 w-5" />
-            </button>
-          )}
-
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-500 text-sm font-semibold text-white shadow-sm">
-            {stepNumber}
-          </div>
-        </div>
-
-        {/* Caption */}
-        <div className="min-w-0 flex-1 pt-1">
-          <InlineCaption
-            content={step.text_content || ''}
-            onChange={onCaptionChange}
-            placeholder={
-              hasScreenshot
-                ? 'Cliquez sur "..."'
-                : 'Décrivez cette étape...'
-            }
-            readOnly={readOnly}
-          />
-        </div>
-
-        {/* Delete button (hidden in readOnly) */}
-        {!readOnly && (
-          <button
-            type="button"
-            onClick={onDelete}
-            className={cn(
-              'mt-1 text-stone-300 transition-all hover:text-red-500',
-              isHovered ? 'opacity-100' : 'opacity-0'
-            )}
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
+    <>
+      <Card
+        ref={readOnly ? undefined : setNodeRef}
+        style={readOnly ? undefined : style}
+        className={cn(
+          'group relative transition-all duration-200',
+          !readOnly && isDragging && 'z-50 opacity-50 shadow-lg ring-2 ring-primary/20',
+          !isDragging && 'hover:shadow-md hover:border-border/80'
         )}
-      </div>
-
-      {/* Screenshot (if exists) */}
-      {hasScreenshot ? (
-        <div className="relative p-4 pt-3">
-          {/* Remove image button (hidden in readOnly) */}
-          {!readOnly && (
-            <button
-              type="button"
-              onClick={onRemoveImage}
-              className={cn(
-                'absolute right-6 top-5 z-10 flex h-7 w-7 items-center justify-center rounded-md bg-red-500/90 text-white shadow-sm transition-all hover:bg-red-600',
-                isHovered ? 'opacity-100' : 'opacity-0'
-              )}
-              title="Supprimer l'image"
-            >
-              <ImageOff className="h-4 w-4" />
-            </button>
-          )}
-          <StepScreenshot
-            src={step.signedScreenshotUrl!}
-            alt={`Step ${stepNumber} screenshot`}
-            annotations={annotations}
-            onAnnotationsChange={onAnnotationsChange}
-            onUpdateAnnotation={handleUpdateAnnotation}
-            onDeleteAnnotation={handleDeleteAnnotation}
-            readOnly={readOnly}
-          />
-        </div>
-      ) : !readOnly ? (
-        /* Text-only step - show option to add image (only in edit mode) */
-        <div className="px-4 pb-4 pt-2">
-          {showImagePicker ? (
-            <div className="rounded-lg border border-stone-200 bg-stone-50 p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-medium text-stone-600">Choisir une image</span>
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <CardContent className="p-0">
+          {/* Header: badge + caption + actions */}
+          <div className="flex items-start gap-3 p-4 pb-0">
+            {/* Drag handle + badge */}
+            <div className="flex items-center gap-2">
+              {!readOnly && (
                 <button
-                  type="button"
-                  onClick={() => setShowImagePicker(false)}
-                  className="text-stone-400 hover:text-stone-600"
+                  {...attributes}
+                  {...listeners}
+                  className={cn(
+                    'cursor-grab touch-none text-muted-foreground/50 transition-all hover:text-muted-foreground',
+                    isHovered ? 'opacity-100' : 'opacity-0'
+                  )}
                 >
-                  <X className="h-4 w-4" />
+                  <GripVertical className="h-5 w-5" />
                 </button>
-              </div>
-              {availableSources.length > 0 ? (
-                <div className="grid grid-cols-4 gap-2">
-                  {availableSources.map((source) => (
-                    <button
-                      key={source.id}
-                      type="button"
-                      onClick={() => {
-                        onSetImage?.(source);
-                        setShowImagePicker(false);
-                      }}
-                      className="group relative aspect-video overflow-hidden rounded-md border border-stone-200 bg-white transition-all hover:border-violet-400 hover:ring-2 hover:ring-violet-200"
-                    >
-                      <Image
-                        src={source.signedScreenshotUrl!}
-                        alt="Source thumbnail"
-                        fill
-                        className="object-cover"
-                        sizes="100px"
-                      />
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-stone-400">Aucune image disponible dans la timeline</p>
               )}
+
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground shadow-sm">
+                {stepNumber}
+              </div>
+            </div>
+
+            {/* Caption */}
+            <div className="min-w-0 flex-1 pt-0.5">
+              <InlineCaption
+                content={step.text_content || ''}
+                onChange={onCaptionChange}
+                placeholder={
+                  hasScreenshot
+                    ? 'Cliquez sur "..."'
+                    : 'Décrivez cette étape...'
+                }
+                readOnly={readOnly}
+              />
+            </div>
+
+            {/* Action buttons (hidden in readOnly) */}
+            {!readOnly && (
+              <div className={cn(
+                'flex items-center gap-1 transition-all',
+                isHovered ? 'opacity-100' : 'opacity-0'
+              )}>
+                {hasScreenshot && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={onRemoveImage}
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <ImageOff className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="text-xs">
+                      Retirer l&apos;image
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={onDelete}
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-xs">
+                    Supprimer l&apos;étape
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            )}
+          </div>
+
+          {/* Screenshot (if exists) */}
+          {hasScreenshot ? (
+            <div className="p-4 pt-3">
+              <StepScreenshot
+                src={step.signedScreenshotUrl!}
+                alt={`Step ${stepNumber} screenshot`}
+                annotations={annotations}
+                onAnnotationsChange={onAnnotationsChange}
+                onUpdateAnnotation={handleUpdateAnnotation}
+                onDeleteAnnotation={handleDeleteAnnotation}
+                readOnly={readOnly}
+              />
+            </div>
+          ) : !readOnly ? (
+            /* Text-only step - show option to add image (only in edit mode) */
+            <div className="px-4 pb-4 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowImagePicker(true)}
+                className="w-full border-dashed hover:border-primary hover:bg-primary/5 hover:text-primary transition-colors"
+              >
+                <ImagePlus className="h-4 w-4 mr-2" />
+                <span>Ajouter une image</span>
+              </Button>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={() => setShowImagePicker(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-stone-300 bg-stone-50 py-3 text-sm text-stone-500 transition-colors hover:border-violet-400 hover:bg-violet-50 hover:text-violet-600"
-            >
-              <ImagePlus className="h-4 w-4" />
-              <span>Ajouter une image</span>
-            </button>
+            /* Text-only step in readOnly - just add padding */
+            <div className="pb-4" />
           )}
-        </div>
-      ) : (
-        /* Text-only step in readOnly - just add padding */
-        <div className="pb-4" />
-      )}
-    </div>
+        </CardContent>
+      </Card>
+
+      {/* Image picker dialog */}
+      <Dialog open={showImagePicker} onOpenChange={setShowImagePicker}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Choisir une image</DialogTitle>
+            <DialogDescription>
+              Sélectionnez une capture d&apos;écran depuis la timeline
+            </DialogDescription>
+          </DialogHeader>
+          {availableSources.length > 0 ? (
+            <ScrollArea className="max-h-[400px]">
+              <div className="grid grid-cols-3 gap-3 p-1">
+                {availableSources.map((source) => (
+                  <button
+                    key={source.id}
+                    type="button"
+                    onClick={() => {
+                      onSetImage?.(source);
+                      setShowImagePicker(false);
+                    }}
+                    className="group relative aspect-video overflow-hidden rounded-lg border border-border bg-muted transition-all hover:border-primary hover:ring-2 hover:ring-primary/20"
+                  >
+                    <Image
+                      src={source.signedScreenshotUrl!}
+                      alt="Source thumbnail"
+                      fill
+                      className="object-cover transition-transform group-hover:scale-105"
+                      sizes="150px"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </button>
+                ))}
+              </div>
+            </ScrollArea>
+          ) : (
+            <div className="py-8 text-center">
+              <p className="text-sm text-muted-foreground">
+                Aucune image disponible dans la timeline
+              </p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

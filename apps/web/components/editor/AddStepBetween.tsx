@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Plus, FileText, Heading, Minus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,13 +16,12 @@ interface AddStepBetweenProps {
   onAddStep: (type: NewStepType) => void;
 }
 
-// Type for the parent component callback
 export type AddStepCallback = (type: NewStepType, afterStepId?: string | null) => void;
 
-const stepOptions: { type: NewStepType; icon: typeof FileText; label: string }[] = [
-  { type: 'text', icon: FileText, label: 'Texte' },
-  { type: 'heading', icon: Heading, label: 'Titre' },
-  { type: 'divider', icon: Minus, label: 'Séparateur' },
+const stepOptions: { type: NewStepType; icon: typeof FileText; label: string; description: string }[] = [
+  { type: 'text', icon: FileText, label: 'Texte', description: 'Ajouter une description' },
+  { type: 'heading', icon: Heading, label: 'Titre', description: 'Créer une section' },
+  { type: 'divider', icon: Minus, label: 'Séparateur', description: 'Séparer les étapes' },
 ];
 
 export function AddStepBetween({ onAddStep }: AddStepBetweenProps) {
@@ -30,7 +30,7 @@ export function AddStepBetween({ onAddStep }: AddStepBetweenProps) {
 
   return (
     <div
-      className="group relative flex h-6 items-center justify-center"
+      className="group relative flex h-8 items-center justify-center"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -38,34 +38,40 @@ export function AddStepBetween({ onAddStep }: AddStepBetweenProps) {
       <div
         className={cn(
           'absolute inset-x-0 h-px border-t border-dashed transition-all duration-200',
-          isHovered || isOpen ? 'border-violet-300' : 'border-transparent'
+          isHovered || isOpen ? 'border-primary/40' : 'border-transparent'
         )}
       />
 
       {/* Center button with dropdown */}
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="icon"
             className={cn(
-              'relative z-10 flex h-6 w-6 items-center justify-center rounded-full border bg-white shadow-sm transition-all duration-200',
+              'relative z-10 h-7 w-7 rounded-full border-dashed transition-all duration-200',
               isHovered || isOpen
-                ? 'scale-100 border-violet-400 text-violet-600 opacity-100'
-                : 'scale-75 border-stone-200 text-stone-400 opacity-0'
+                ? 'scale-100 border-primary bg-primary/5 text-primary opacity-100 hover:bg-primary/10'
+                : 'scale-75 border-border text-muted-foreground opacity-0'
             )}
           >
             <Plus className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="center" side="bottom" className="min-w-[140px]">
-          {stepOptions.map(({ type, icon: Icon, label }) => (
+        <DropdownMenuContent align="center" side="bottom" className="min-w-[180px]">
+          {stepOptions.map(({ type, icon: Icon, label, description }) => (
             <DropdownMenuItem
               key={type}
               onClick={() => onAddStep(type)}
-              className="cursor-pointer"
+              className="flex items-start gap-3 py-2"
             >
-              <Icon className="mr-2 h-4 w-4" />
-              <span>{label}</span>
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
+                <Icon className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-medium">{label}</span>
+                <span className="text-xs text-muted-foreground">{description}</span>
+              </div>
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

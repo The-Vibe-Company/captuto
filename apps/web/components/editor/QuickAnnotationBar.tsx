@@ -1,14 +1,20 @@
 'use client';
 
 import { Circle, MoveRight, Type, MoreHorizontal, Highlighter, EyeOff } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import type { AnnotationType } from '@/lib/types/editor';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 interface QuickAnnotationBarProps {
   onToolSelect: (tool: AnnotationType) => void;
@@ -30,38 +36,51 @@ export function QuickAnnotationBar({ onToolSelect, className }: QuickAnnotationB
   return (
     <div
       className={cn(
-        'flex items-center gap-1 rounded-lg border border-stone-200 bg-white/95 p-1 shadow-sm backdrop-blur-sm transition-opacity',
+        'flex items-center gap-0.5 rounded-lg border border-border bg-background/95 p-1 shadow-sm backdrop-blur-sm',
         className
       )}
     >
       {QUICK_TOOLS.map(({ type, icon: Icon, label }) => (
-        <button
-          key={type}
-          type="button"
-          onClick={() => onToolSelect(type)}
-          className="flex h-7 w-7 items-center justify-center rounded text-stone-600 transition-colors hover:bg-violet-100 hover:text-violet-700"
-          title={label}
-        >
-          <Icon className="h-4 w-4" />
-        </button>
+        <Tooltip key={type}>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onToolSelect(type)}
+              className="h-7 w-7 hover:bg-primary/10 hover:text-primary"
+            >
+              <Icon className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="text-xs">
+            {label}
+          </TooltipContent>
+        </Tooltip>
       ))}
 
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            type="button"
-            className="flex h-7 w-7 items-center justify-center rounded text-stone-600 transition-colors hover:bg-stone-100 hover:text-stone-900"
-            title="Plus d'outils"
-          >
-            <MoreHorizontal className="h-4 w-4" />
-          </button>
-        </DropdownMenuTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 hover:bg-muted"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="text-xs">
+            Plus d&apos;outils
+          </TooltipContent>
+        </Tooltip>
         <DropdownMenuContent align="start" className="min-w-[120px]">
           {MORE_TOOLS.map(({ type, icon: Icon, label }) => (
             <DropdownMenuItem
               key={type}
               onClick={() => onToolSelect(type)}
-              className="flex items-center gap-2"
+              className="gap-2"
             >
               <Icon className="h-4 w-4" />
               <span>{label}</span>

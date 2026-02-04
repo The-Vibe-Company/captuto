@@ -15,6 +15,15 @@ import {
 } from 'lucide-react';
 import type { SourceWithSignedUrl } from '@/lib/types/editor';
 import { getSourceActionType, formatSourceUrl } from '@/lib/types/editor';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 interface SourcesSidebarProps {
@@ -51,121 +60,141 @@ function TimelineItem({
       {/* Timeline dot/icon */}
       <div
         className={cn(
-          'absolute left-0 flex h-6 w-6 items-center justify-center rounded-full ring-4 ring-white',
-          isClick ? 'bg-violet-500' : 'bg-blue-500'
+          'absolute left-0 flex h-6 w-6 items-center justify-center rounded-full ring-4 ring-background transition-transform group-hover:scale-110',
+          isClick ? 'bg-primary' : 'bg-blue-500'
         )}
       >
         {isClick ? (
-          <MousePointer2 className="h-3 w-3 text-white" />
+          <MousePointer2 className="h-3 w-3 text-primary-foreground" />
         ) : (
           <Globe className="h-3 w-3 text-white" />
         )}
       </div>
 
-      <div
+      <Card
         className={cn(
-          'rounded-lg border p-2 transition-all',
+          'overflow-hidden transition-all duration-200 group-hover:shadow-md',
           isClick
-            ? 'border-violet-100 bg-violet-50/50 hover:border-violet-200'
-            : 'border-blue-100 bg-blue-50/50 hover:border-blue-200'
+            ? 'border-primary/20 bg-primary/5 hover:border-primary/30'
+            : 'border-blue-200 bg-blue-50/50 hover:border-blue-300 dark:border-blue-900 dark:bg-blue-950/30'
         )}
       >
-        {/* Action type label */}
-        <div className="mb-1.5 flex items-center justify-between">
-          <span
-            className={cn(
-              'text-xs font-medium',
-              isClick ? 'text-violet-600' : 'text-blue-600'
-            )}
-          >
-            {isClick ? 'Click' : 'Page Change'}
-          </span>
-          <span className="text-xs text-stone-400">#{index + 1}</span>
-        </div>
-
-        {/* Screenshot thumbnail (if exists) */}
-        {source.signedScreenshotUrl && (
-          <div className="relative mb-2 aspect-video w-full overflow-hidden rounded-md bg-stone-100">
-            <Image
-              src={source.signedScreenshotUrl}
-              alt={`Action ${index + 1}`}
-              fill
-              className="object-cover"
-              sizes="250px"
-            />
-
-            {/* Click indicator on screenshot */}
-            {isClick &&
-              source.click_x != null &&
-              source.click_y != null &&
-              source.viewport_width &&
-              source.viewport_height && (
-                <div
-                  className="pointer-events-none absolute"
-                  style={{
-                    left: `${(source.click_x / source.viewport_width) * 100}%`,
-                    top: `${(source.click_y / source.viewport_height) * 100}%`,
-                    transform: 'translate(-50%, -50%)',
-                  }}
-                >
-                  <div className="h-3 w-3 rounded-full bg-violet-500 shadow-md ring-2 ring-white" />
-                </div>
+        <CardContent className="p-2">
+          {/* Action type label */}
+          <div className="mb-1.5 flex items-center justify-between">
+            <Badge
+              variant="secondary"
+              className={cn(
+                'text-[10px] font-medium',
+                isClick
+                  ? 'bg-primary/10 text-primary hover:bg-primary/15'
+                  : 'bg-blue-100 text-blue-600 hover:bg-blue-150 dark:bg-blue-900/50 dark:text-blue-400'
               )}
+            >
+              {isClick ? 'Click' : 'Navigation'}
+            </Badge>
+            <span className="text-[10px] tabular-nums text-muted-foreground">
+              #{index + 1}
+            </span>
           </div>
-        )}
 
-        {/* Info section */}
-        <div className="space-y-1">
-          {/* Element info for clicks */}
-          {isClick && elementInfo?.text && (
-            <p className="truncate text-xs text-stone-600">{elementInfo.text}</p>
-          )}
+          {/* Screenshot thumbnail (if exists) */}
+          {source.signedScreenshotUrl && (
+            <div className="relative mb-2 h-32 w-full overflow-hidden rounded-md bg-muted">
+              <Image
+                src={source.signedScreenshotUrl}
+                alt={`Action ${index + 1}`}
+                fill
+                className="object-cover object-top transition-transform group-hover:scale-105"
+                sizes="250px"
+              />
 
-          {/* URL for navigation */}
-          {!isClick && source.url && (
-            <div className="flex items-center gap-1 text-xs text-stone-500">
-              <ExternalLink className="h-3 w-3 flex-shrink-0" />
-              <span className="truncate">{formatSourceUrl(source.url)}</span>
+              {/* Click indicator on screenshot */}
+              {isClick &&
+                source.click_x != null &&
+                source.click_y != null &&
+                source.viewport_width &&
+                source.viewport_height && (
+                  <div
+                    className="pointer-events-none absolute"
+                    style={{
+                      left: `${(source.click_x / source.viewport_width) * 100}%`,
+                      top: `${(source.click_y / source.viewport_height) * 100}%`,
+                      transform: 'translate(-50%, -50%)',
+                    }}
+                  >
+                    <div className="h-3 w-3 animate-pulse rounded-full bg-primary shadow-lg ring-2 ring-white" />
+                  </div>
+                )}
             </div>
           )}
-        </div>
 
-        {/* Action buttons on hover */}
-        <div className="mt-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-          {source.signedScreenshotUrl && (
-            <button
-              type="button"
-              onClick={onCopy}
-              className={cn(
-                'flex h-6 w-6 items-center justify-center rounded-md text-xs transition-colors',
-                isCopied
-                  ? 'bg-green-500 text-white'
-                  : 'border border-stone-200 bg-white text-stone-600 hover:bg-stone-100'
-              )}
-              title={isCopied ? 'Copied!' : 'Copy URL'}
-            >
-              {isCopied ? (
-                <Check className="h-3 w-3" />
-              ) : (
-                <Copy className="h-3 w-3" />
-              )}
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={onCreateStep}
-            className={cn(
-              'flex h-6 w-6 items-center justify-center rounded-md text-white transition-colors',
-              isClick
-                ? 'bg-violet-500 hover:bg-violet-600'
-                : 'bg-blue-500 hover:bg-blue-600'
+          {/* Info section */}
+          <div className="space-y-1">
+            {/* Element info for clicks */}
+            {isClick && elementInfo?.text && (
+              <p className="truncate text-xs text-muted-foreground">
+                {elementInfo.text}
+              </p>
             )}
-            title="Add to tutorial"
-          >
-            <Plus className="h-3 w-3" />
-          </button>
-        </div>
-      </div>
+
+            {/* URL for navigation */}
+            {!isClick && source.url && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate">{formatSourceUrl(source.url)}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Action buttons on hover */}
+          <div className="mt-2 flex gap-1 opacity-0 transition-all duration-200 group-hover:opacity-100">
+            {source.signedScreenshotUrl && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={onCopy}
+                    className={cn(
+                      'h-7 w-7 transition-colors',
+                      isCopied && 'bg-emerald-500 text-white border-emerald-500 hover:bg-emerald-600 hover:text-white'
+                    )}
+                  >
+                    {isCopied ? (
+                      <Check className="h-3 w-3" />
+                    ) : (
+                      <Copy className="h-3 w-3" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs">
+                  {isCopied ? 'Copié !' : 'Copier l\'URL'}
+                </TooltipContent>
+              </Tooltip>
+            )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  onClick={onCreateStep}
+                  className={cn(
+                    'h-7 w-7',
+                    isClick
+                      ? 'bg-primary hover:bg-primary/90'
+                      : 'bg-blue-500 hover:bg-blue-600'
+                  )}
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Ajouter au tutoriel
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -211,105 +240,126 @@ export function SourcesSidebar({
   return (
     <aside
       className={cn(
-        'sticky top-4 flex-shrink-0 transition-all duration-200',
-        isCollapsed ? 'w-10' : 'w-72'
+        'sticky top-20 h-fit flex-shrink-0 transition-all duration-300',
+        isCollapsed ? 'w-12' : 'w-72'
       )}
     >
-      <div className="rounded-xl border border-stone-200 bg-white shadow-sm">
+      <Card className="overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-stone-100 px-3 py-2">
-          {!isCollapsed && (
-            <div className="flex items-center gap-2">
-              <Activity className="h-4 w-4 text-stone-500" />
-              <span className="text-sm font-medium text-stone-700">
-                Timeline
-              </span>
-              <span className="rounded-full bg-stone-100 px-1.5 py-0.5 text-xs text-stone-500">
-                {allSources.length}
-              </span>
-            </div>
-          )}
-          <button
-            type="button"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="flex h-6 w-6 items-center justify-center rounded text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600"
-            title={isCollapsed ? 'Expand' : 'Collapse'}
-          >
-            {isCollapsed ? (
-              <ChevronLeft className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
+        <CardHeader className="p-3 pb-0">
+          <div className="flex items-center justify-between">
+            {!isCollapsed && (
+              <div className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-muted">
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-sm font-medium">Timeline</CardTitle>
+                  <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
+                    {allSources.length}
+                  </Badge>
+                </div>
+              </div>
             )}
-          </button>
-        </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsCollapsed(!isCollapsed)}
+                  className="h-7 w-7"
+                >
+                  {isCollapsed ? (
+                    <ChevronLeft className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left" className="text-xs">
+                {isCollapsed ? 'Développer' : 'Réduire'}
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </CardHeader>
 
         {/* Timeline content */}
         {!isCollapsed && (
-          <div className="max-h-[calc(100vh-200px)] overflow-y-auto p-3">
-            <div className="relative">
-              {/* Vertical timeline line */}
-              <div className="absolute bottom-0 left-3 top-0 w-0.5 bg-stone-200" />
+          <CardContent className="p-3 pt-3">
+            <ScrollArea className="h-[calc(100vh-220px)]">
+              <div className="relative pr-2">
+                {/* Vertical timeline line */}
+                <div className="absolute bottom-0 left-3 top-0 w-0.5 bg-border" />
 
-              <div className="space-y-3">
-                {allSources.map((source, index) => {
-                  const actionType = getSourceActionType(source);
-                  const isClick = actionType === 'click';
+                <div className="space-y-3">
+                  {allSources.map((source, index) => {
+                    const actionType = getSourceActionType(source);
+                    const isClick = actionType === 'click';
 
-                  return (
-                    <TimelineItem
-                      key={source.id}
-                      source={source}
-                      index={index}
-                      isClick={isClick}
-                      isCopied={copiedId === source.id}
-                      onCopy={(e) => handleCopyImage(source, e)}
-                      onCreateStep={(e) => handleCreateStep(source, e)}
-                    />
-                  );
-                })}
+                    return (
+                      <TimelineItem
+                        key={source.id}
+                        source={source}
+                        index={index}
+                        isClick={isClick}
+                        isCopied={copiedId === source.id}
+                        onCopy={(e) => handleCopyImage(source, e)}
+                        onCreateStep={(e) => handleCreateStep(source, e)}
+                      />
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          </div>
+            </ScrollArea>
+          </CardContent>
         )}
 
         {/* Collapsed state - show icons */}
         {isCollapsed && (
-          <div className="p-1">
+          <CardContent className="p-2">
             <div className="flex flex-col gap-1">
-              {allSources.slice(0, 6).map((source, index) => {
+              {allSources.slice(0, 8).map((source, index) => {
                 const actionType = getSourceActionType(source);
                 const isClick = actionType === 'click';
 
                 return (
-                  <button
-                    key={source.id}
-                    type="button"
-                    onClick={(e) => handleCreateStep(source, e)}
-                    className={cn(
-                      'flex h-8 w-8 items-center justify-center rounded text-xs font-semibold transition-colors',
-                      isClick
-                        ? 'bg-violet-100 text-violet-600 hover:bg-violet-200'
-                        : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
-                    )}
-                    title={`Add ${isClick ? 'click' : 'navigation'} ${index + 1}`}
-                  >
-                    {isClick ? (
-                      <MousePointer2 className="h-3.5 w-3.5" />
-                    ) : (
-                      <Globe className="h-3.5 w-3.5" />
-                    )}
-                  </button>
+                  <Tooltip key={source.id}>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => handleCreateStep(source, e)}
+                        className={cn(
+                          'h-8 w-8 transition-colors',
+                          isClick
+                            ? 'text-primary hover:bg-primary/10 hover:text-primary'
+                            : 'text-blue-500 hover:bg-blue-50 hover:text-blue-600'
+                        )}
+                      >
+                        {isClick ? (
+                          <MousePointer2 className="h-4 w-4" />
+                        ) : (
+                          <Globe className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="left" className="text-xs">
+                      Ajouter {isClick ? 'le click' : 'la navigation'} #{index + 1}
+                    </TooltipContent>
+                  </Tooltip>
                 );
               })}
-              {allSources.length > 6 && (
-                <div className="flex h-8 w-8 items-center justify-center text-xs text-stone-400">
-                  +{allSources.length - 6}
+              {allSources.length > 8 && (
+                <div className="flex h-8 w-8 items-center justify-center">
+                  <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
+                    +{allSources.length - 8}
+                  </Badge>
                 </div>
               )}
             </div>
-          </div>
+          </CardContent>
         )}
-      </div>
+      </Card>
     </aside>
   );
 }
