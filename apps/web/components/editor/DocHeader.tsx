@@ -1,23 +1,31 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Check, Loader2, AlertCircle, Cloud, CloudOff } from 'lucide-react';
+import { ChevronRight, Check, Loader2, AlertCircle, Cloud, CloudOff, Share2 } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
+import { ShareDialog } from '@/components/dashboard/ShareDialog';
 import type { SaveStatus } from './EditorClient';
 import { cn } from '@/lib/utils';
 
 interface DocHeaderProps {
   saveStatus: SaveStatus;
+  tutorialId: string;
   tutorialTitle?: string;
+  tutorialSlug?: string | null;
 }
 
-export function DocHeader({ saveStatus, tutorialTitle }: DocHeaderProps) {
+export function DocHeader({ saveStatus, tutorialId, tutorialTitle, tutorialSlug }: DocHeaderProps) {
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+
   return (
+    <>
     <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb navigation */}
@@ -41,12 +49,30 @@ export function DocHeader({ saveStatus, tutorialTitle }: DocHeaderProps) {
           </span>
         </nav>
 
-        {/* Right side: Save status */}
+        {/* Right side: Share + Save status */}
         <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShareDialogOpen(true)}
+            className="gap-2"
+          >
+            <Share2 className="h-4 w-4" />
+            Partager
+          </Button>
           <SaveStatusIndicator status={saveStatus} />
         </div>
       </div>
     </header>
+
+    <ShareDialog
+      open={shareDialogOpen}
+      onOpenChange={setShareDialogOpen}
+      tutorialId={tutorialId}
+      tutorialTitle={tutorialTitle || 'Sans titre'}
+      tutorialSlug={tutorialSlug || null}
+    />
+    </>
   );
 }
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { MoreVertical, Pencil, Share2, Trash2, Loader2, Play, ImageIcon, CheckCircle2, AlertCircle } from 'lucide-react';
+import { MoreVertical, Pencil, Share2, Trash2, Loader2, Play, ImageIcon, Globe, GlobeLock } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -38,26 +38,16 @@ export interface TutorialCardProps {
   onProcess?: () => Promise<void>;
 }
 
-const statusConfig = {
-  draft: {
-    label: 'Brouillon',
-    className: 'bg-stone-100 text-stone-700 border-stone-200',
-    icon: null,
-  },
-  processing: {
-    label: 'En attente de traitement',
-    className: 'bg-amber-100 text-amber-700 border-amber-200',
-    icon: Loader2,
-  },
-  ready: {
-    label: 'Prêt',
+const publishedConfig = {
+  published: {
+    label: 'Publié',
     className: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-    icon: CheckCircle2,
+    icon: Globe,
   },
-  error: {
-    label: 'Erreur',
-    className: 'bg-red-100 text-red-700 border-red-200',
-    icon: AlertCircle,
+  notPublished: {
+    label: 'Non publié',
+    className: 'bg-stone-100 text-stone-600 border-stone-200',
+    icon: GlobeLock,
   },
 };
 
@@ -80,8 +70,9 @@ export function TutorialCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const statusInfo = statusConfig[status];
-  const StatusIcon = statusInfo.icon;
+  const isPublished = visibility === 'link_only' || visibility === 'public';
+  const publishInfo = isPublished ? publishedConfig.published : publishedConfig.notPublished;
+  const PublishIcon = publishInfo.icon;
 
   const handleProcess = async () => {
     if (!onProcess) return;
@@ -131,19 +122,13 @@ export function TutorialCard({
             </div>
           )}
 
-          {/* Status Badge */}
+          {/* Published Status Badge */}
           <Badge
             variant="outline"
-            className={`absolute left-2 top-2 gap-1.5 border px-2 py-1 text-xs font-medium shadow-sm ${statusInfo.className}`}
+            className={`absolute left-2 top-2 gap-1.5 border px-2 py-1 text-xs font-medium shadow-sm ${publishInfo.className}`}
           >
-            {StatusIcon && status === 'processing' && !isProcessing && (
-              <StatusIcon className="h-3 w-3 animate-spin" />
-            )}
-            {StatusIcon && status !== 'processing' && (
-              <StatusIcon className="h-3 w-3" />
-            )}
-            {isProcessing && <Loader2 className="h-3 w-3 animate-spin" />}
-            {statusInfo.label}
+            <PublishIcon className="h-3 w-3" />
+            {publishInfo.label}
           </Badge>
 
           {/* Process Button - Only show for processing status */}

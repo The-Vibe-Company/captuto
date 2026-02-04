@@ -140,6 +140,7 @@ export function StepScreenshot({
                 onUpdateAnnotation={onUpdateAnnotation}
                 onDeleteAnnotation={onDeleteAnnotation}
                 containerRef={containerRef}
+                readOnly={readOnly}
               />
             </div>
           </div>
