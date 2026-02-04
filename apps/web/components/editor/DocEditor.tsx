@@ -16,13 +16,22 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Plus, FileText, Heading, Minus } from 'lucide-react';
+import { Plus, FileText, Heading, Minus, Sparkles } from 'lucide-react';
 import type { Tutorial, StepWithSignedUrl, SourceWithSignedUrl, Annotation } from '@/lib/types/editor';
 import type { SaveStatus } from './EditorClient';
 import { DocHeader } from './DocHeader';
 import { DocStepCard } from './DocStepCard';
 import { SourcesSidebar } from './SourcesSidebar';
 import { AddStepBetween } from './AddStepBetween';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export type NewStepType = 'text' | 'heading' | 'divider';
 
@@ -31,8 +40,6 @@ interface DocEditorProps {
   sources: SourceWithSignedUrl[];
   steps: StepWithSignedUrl[];
   saveStatus: SaveStatus;
-  selectedStepId: string | null;
-  onSelectStep: (stepId: string) => void;
   onStepCaptionChange: (stepId: string, caption: string) => void;
   onStepAnnotationsChange: (stepId: string, annotations: Annotation[]) => void;
   onDeleteStep: (stepId: string) => void;
@@ -48,8 +55,6 @@ export function DocEditor({
   sources,
   steps,
   saveStatus,
-  selectedStepId,
-  onSelectStep,
   onStepCaptionChange,
   onStepAnnotationsChange,
   onDeleteStep,
@@ -88,115 +93,149 @@ export function DocEditor({
   let screenshotStepNumber = 0;
 
   return (
-    <>
-      <DocHeader saveStatus={saveStatus} />
+    <TooltipProvider delayDuration={100}>
+      <div className="min-h-screen bg-background">
+        <DocHeader saveStatus={saveStatus} tutorialTitle={tutorial.title} />
 
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <div className="flex gap-6">
-          {/* Main content area */}
-          <main className="min-w-0 flex-1">
-            {/* Tutorial header */}
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold text-stone-900">
-                {tutorial.title || 'Sans titre'}
-              </h1>
-              {tutorial.description && (
-                <p className="mt-2 text-stone-600">{tutorial.description}</p>
-              )}
-            </div>
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="flex gap-8">
+            {/* Main content area */}
+            <main className="min-w-0 flex-1">
+              {/* Tutorial header */}
+              <div className="mb-8">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                      {tutorial.title || 'Sans titre'}
+                    </h1>
+                    {tutorial.description && (
+                      <p className="text-sm text-muted-foreground max-w-2xl">
+                        {tutorial.description}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="tabular-nums">{steps.length}</span>
+                    <span>étapes</span>
+                  </div>
+                </div>
+                <Separator className="mt-6" />
+              </div>
 
-            {/* Steps list */}
-            <div className="space-y-4">
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={steps.map((s) => s.id)}
-                  strategy={verticalListSortingStrategy}
+              {/* Steps list */}
+              <div className="space-y-1">
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
                 >
-                  {steps.map((step, index) => {
-                    // Only count image and text steps for the numbered badge
-                    const isImageStep = step.step_type === 'image';
-                    const isTextStep = step.step_type === 'text';
-                    if (isImageStep || isTextStep) {
-                      screenshotStepNumber++;
-                    }
+                  <SortableContext
+                    items={steps.map((s) => s.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {steps.map((step, index) => {
+                      // Only count image and text steps for the numbered badge
+                      const isImageStep = step.step_type === 'image';
+                      const isTextStep = step.step_type === 'text';
+                      if (isImageStep || isTextStep) {
+                        screenshotStepNumber++;
+                      }
 
-                    return (
-                      <div key={step.id}>
-                        {/* Add step button before the first step */}
-                        {index === 0 && (
-                          <AddStepBetween
-                            onAddStep={(type) => onAddStep(type, null)}
+                      return (
+                        <div key={step.id}>
+                          {/* Add step button before the first step */}
+                          {index === 0 && (
+                            <AddStepBetween
+                              onAddStep={(type) => onAddStep(type, null)}
+                            />
+                          )}
+                          <DocStepCard
+                            step={step}
+                            stepNumber={
+                              step.step_type === 'heading' || step.step_type === 'divider'
+                                ? 0
+                                : screenshotStepNumber
+                            }
+                            sources={sources}
+                            onCaptionChange={(caption) => onStepCaptionChange(step.id, caption)}
+                            onAnnotationsChange={(annotations) =>
+                              onStepAnnotationsChange(step.id, annotations)
+                            }
+                            onDelete={() => onDeleteStep(step.id)}
+                            onRemoveImage={() => onRemoveStepImage(step.id)}
+                            onSetImage={(source) => onSetStepImage(step.id, source)}
                           />
-                        )}
-                        <DocStepCard
-                          step={step}
-                          stepNumber={
-                            step.step_type === 'heading' || step.step_type === 'divider'
-                              ? 0
-                              : screenshotStepNumber
-                          }
-                          sources={sources}
-                          onCaptionChange={(caption) => onStepCaptionChange(step.id, caption)}
-                          onAnnotationsChange={(annotations) =>
-                            onStepAnnotationsChange(step.id, annotations)
-                          }
-                          onDelete={() => onDeleteStep(step.id)}
-                          onRemoveImage={() => onRemoveStepImage(step.id)}
-                          onSetImage={(source) => onSetStepImage(step.id, source)}
+                          {/* Add step button after each step */}
+                          <AddStepBetween
+                            onAddStep={(type) => onAddStep(type, step.id)}
+                          />
+                        </div>
+                      );
+                    })}
+                  </SortableContext>
+                </DndContext>
+
+                {/* Empty state */}
+                {steps.length === 0 && (
+                  <Card className="border-dashed">
+                    <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                      <div className="rounded-full bg-muted p-3 mb-4">
+                        <Sparkles className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <h3 className="font-medium text-foreground mb-1">
+                        Aucune étape pour le moment
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-6 max-w-sm">
+                        Commencez à créer votre tutoriel en ajoutant des étapes depuis la timeline ou en créant des étapes manuellement.
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <AddStepButton
+                          icon={FileText}
+                          label="Texte"
+                          onClick={() => onAddStep('text', null)}
                         />
-                        {/* Add step button after each step */}
-                        <AddStepBetween
-                          onAddStep={(type) => onAddStep(type, step.id)}
+                        <AddStepButton
+                          icon={Heading}
+                          label="Titre"
+                          onClick={() => onAddStep('heading', null)}
                         />
                       </div>
-                    );
-                  })}
-                </SortableContext>
-              </DndContext>
+                    </CardContent>
+                  </Card>
+                )}
 
-              {/* Empty state */}
-              {steps.length === 0 && (
-                <div className="rounded-xl border-2 border-dashed border-stone-200 py-16 text-center">
-                  <p className="text-stone-500">Aucune étape pour le moment.</p>
-                  <p className="mt-1 text-sm text-stone-400">
-                    Ajoutez une étape ci-dessous.
-                  </p>
-                </div>
-              )}
-
-              {/* Add step buttons */}
-              <div className="flex items-center justify-center gap-2 pt-4">
-                <AddStepButton
-                  icon={FileText}
-                  label="Texte"
-                  onClick={() => onAddStep('text', steps[steps.length - 1]?.id)}
-                />
-                <AddStepButton
-                  icon={Heading}
-                  label="Titre"
-                  onClick={() => onAddStep('heading', steps[steps.length - 1]?.id)}
-                />
-                <AddStepButton
-                  icon={Minus}
-                  label="Séparateur"
-                  onClick={() => onAddStep('divider', steps[steps.length - 1]?.id)}
-                />
+                {/* Add step buttons */}
+                {steps.length > 0 && (
+                  <div className="flex items-center justify-center gap-2 pt-6">
+                    <AddStepButton
+                      icon={FileText}
+                      label="Texte"
+                      onClick={() => onAddStep('text', steps[steps.length - 1]?.id)}
+                    />
+                    <AddStepButton
+                      icon={Heading}
+                      label="Titre"
+                      onClick={() => onAddStep('heading', steps[steps.length - 1]?.id)}
+                    />
+                    <AddStepButton
+                      icon={Minus}
+                      label="Séparateur"
+                      onClick={() => onAddStep('divider', steps[steps.length - 1]?.id)}
+                    />
+                  </div>
+                )}
               </div>
-            </div>
-          </main>
+            </main>
 
-          {/* Right sidebar - Sources */}
-          <SourcesSidebar
-            sources={sources}
-            onCreateStepFromSource={onCreateStepFromSource}
-          />
+            {/* Right sidebar - Sources */}
+            <SourcesSidebar
+              sources={sources}
+              onCreateStepFromSource={onCreateStepFromSource}
+            />
+          </div>
         </div>
       </div>
-    </>
+    </TooltipProvider>
   );
 }
 
@@ -211,14 +250,22 @@ function AddStepButton({
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex items-center gap-2 rounded-lg border border-dashed border-stone-300 bg-white px-4 py-2 text-sm text-stone-500 transition-colors hover:border-violet-400 hover:bg-violet-50 hover:text-violet-600"
-    >
-      <Plus className="h-4 w-4" />
-      <Icon className="h-4 w-4" />
-      <span>{label}</span>
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onClick}
+          className="h-9 gap-2 border-dashed hover:border-primary hover:bg-primary/5 hover:text-primary transition-colors"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          <Icon className="h-3.5 w-3.5" />
+          <span className="text-xs">{label}</span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="bottom" className="text-xs">
+        Ajouter une étape {label.toLowerCase()}
+      </TooltipContent>
+    </Tooltip>
   );
 }

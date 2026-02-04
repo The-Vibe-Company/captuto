@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, Suspense, lazy } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 // Lazy load the Tiptap editor component - only loaded when user clicks to edit
@@ -66,8 +67,8 @@ export function InlineCaption({
             className={cn(
               'max-w-none',
               isHeading
-                ? 'text-lg font-semibold text-stone-900'
-                : 'prose prose-sm prose-stone prose-strong:text-violet-600'
+                ? 'text-lg font-semibold text-foreground'
+                : 'prose prose-sm dark:prose-invert prose-strong:text-primary'
             )}
             dangerouslySetInnerHTML={{ __html: content }}
           />
@@ -81,20 +82,20 @@ export function InlineCaption({
     return (
       <div
         onClick={() => setIsEditing(true)}
-        className="cursor-text rounded-md px-2 py-1 transition-colors hover:bg-stone-100"
+        className="cursor-text rounded-md px-2 py-1 transition-colors hover:bg-muted"
       >
         {content ? (
           <div
             className={cn(
               'max-w-none',
               isHeading
-                ? 'text-lg font-semibold text-stone-900'
-                : 'prose prose-sm prose-stone prose-strong:text-violet-600'
+                ? 'text-lg font-semibold text-foreground'
+                : 'prose prose-sm dark:prose-invert prose-strong:text-primary'
             )}
             dangerouslySetInnerHTML={{ __html: content }}
           />
         ) : (
-          <span className="text-stone-400 italic">
+          <span className="text-muted-foreground italic">
             {placeholder || 'Cliquez pour ajouter une description...'}
           </span>
         )}
@@ -106,13 +107,9 @@ export function InlineCaption({
   return (
     <div
       ref={containerRef}
-      className="rounded-md border border-violet-300 bg-white px-2 py-1 ring-2 ring-violet-100"
+      className="rounded-md border border-primary bg-background px-2 py-1 ring-2 ring-primary/20"
     >
-      <Suspense
-        fallback={
-          <div className="min-h-[1.5em] animate-pulse bg-stone-100 rounded" />
-        }
-      >
+      <Suspense fallback={<Skeleton className="h-6 w-full" />}>
         <TiptapEditor
           content={content}
           onChange={onChange}
