@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import Image from 'next/image';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Trash2, FileText, Heading, Minus } from 'lucide-react';
-import type { StepWithSignedUrl, Annotation } from '@/lib/types/editor';
+import { GripVertical, Trash2, FileText, Heading, Minus, ImageOff, ImagePlus, X } from 'lucide-react';
+import type { StepWithSignedUrl, SourceWithSignedUrl, Annotation } from '@/lib/types/editor';
 import { InlineCaption } from './InlineCaption';
 import { StepScreenshot } from './StepScreenshot';
 import { cn } from '@/lib/utils';
@@ -12,20 +13,30 @@ import { cn } from '@/lib/utils';
 interface DocStepCardProps {
   step: StepWithSignedUrl;
   stepNumber: number;
+  sources: SourceWithSignedUrl[];
   onCaptionChange: (caption: string) => void;
   onAnnotationsChange: (annotations: Annotation[]) => void;
   onDelete: () => void;
+  onRemoveImage: () => void;
+  onSetImage: (source: SourceWithSignedUrl) => void;
 }
 
 export function DocStepCard({
   step,
   stepNumber,
+  sources,
   onCaptionChange,
   onAnnotationsChange,
   onDelete,
+  onRemoveImage,
+  onSetImage,
 }: DocStepCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [showImagePicker, setShowImagePicker] = useState(false);
   const annotations = step.annotations || [];
+
+  // Filter sources that have screenshots
+  const availableSources = sources.filter((s) => s.signedScreenshotUrl);
 
   // Handler to update a single annotation
   const handleUpdateAnnotation = useCallback(
@@ -231,7 +242,19 @@ export function DocStepCard({
 
       {/* Screenshot (if exists) */}
       {hasScreenshot ? (
-        <div className="p-4 pt-3">
+        <div className="relative p-4 pt-3">
+          {/* Remove image button */}
+          <button
+            type="button"
+            onClick={onRemoveImage}
+            className={cn(
+              'absolute right-6 top-5 z-10 flex h-7 w-7 items-center justify-center rounded-md bg-red-500/90 text-white shadow-sm transition-all hover:bg-red-600',
+              isHovered ? 'opacity-100' : 'opacity-0'
+            )}
+            title="Supprimer l'image"
+          >
+            <ImageOff className="h-4 w-4" />
+          </button>
           <StepScreenshot
             src={step.signedScreenshotUrl!}
             alt={`Step ${stepNumber} screenshot`}
@@ -242,10 +265,56 @@ export function DocStepCard({
           />
         </div>
       ) : (
-        /* Text-only step indicator */
-        <div className="flex items-center gap-2 px-4 pb-4 pt-2">
-          <FileText className="h-4 w-4 text-slate-400" />
-          <span className="text-xs text-slate-400">Étape texte uniquement</span>
+        /* Text-only step - show option to add image */
+        <div className="px-4 pb-4 pt-2">
+          {showImagePicker ? (
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs font-medium text-slate-600">Choisir une image</span>
+                <button
+                  type="button"
+                  onClick={() => setShowImagePicker(false)}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              {availableSources.length > 0 ? (
+                <div className="grid grid-cols-4 gap-2">
+                  {availableSources.map((source) => (
+                    <button
+                      key={source.id}
+                      type="button"
+                      onClick={() => {
+                        onSetImage(source);
+                        setShowImagePicker(false);
+                      }}
+                      className="group relative aspect-video overflow-hidden rounded-md border border-slate-200 bg-white transition-all hover:border-violet-400 hover:ring-2 hover:ring-violet-200"
+                    >
+                      <Image
+                        src={source.signedScreenshotUrl!}
+                        alt="Source thumbnail"
+                        fill
+                        className="object-cover"
+                        sizes="100px"
+                      />
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400">Aucune image disponible dans la timeline</p>
+              )}
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowImagePicker(true)}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 py-3 text-sm text-slate-500 transition-colors hover:border-violet-400 hover:bg-violet-50 hover:text-violet-600"
+            >
+              <ImagePlus className="h-4 w-4" />
+              <span>Ajouter une image</span>
+            </button>
+          )}
         </div>
       )}
     </div>

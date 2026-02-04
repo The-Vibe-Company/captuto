@@ -38,6 +38,8 @@ interface DocEditorProps {
   onReorderSteps: (newSteps: StepWithSignedUrl[]) => void;
   onAddStep: (type: NewStepType, afterStepId?: string) => void;
   onCreateStepFromSource: (source: SourceWithSignedUrl) => void;
+  onRemoveStepImage: (stepId: string) => void;
+  onSetStepImage: (stepId: string, source: SourceWithSignedUrl) => void;
 }
 
 export function DocEditor({
@@ -53,6 +55,8 @@ export function DocEditor({
   onReorderSteps,
   onAddStep,
   onCreateStepFromSource,
+  onRemoveStepImage,
+  onSetStepImage,
 }: DocEditorProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -128,11 +132,14 @@ export function DocEditor({
                             ? 0
                             : screenshotStepNumber
                         }
+                        sources={sources}
                         onCaptionChange={(caption) => onStepCaptionChange(step.id, caption)}
                         onAnnotationsChange={(annotations) =>
                           onStepAnnotationsChange(step.id, annotations)
                         }
                         onDelete={() => onDeleteStep(step.id)}
+                        onRemoveImage={() => onRemoveStepImage(step.id)}
+                        onSetImage={(source) => onSetStepImage(step.id, source)}
                       />
                     );
                   })}

@@ -323,6 +323,95 @@ export function EditorClient({
     }
   }, [initialTutorial.id]);
 
+  // Handle removing the image from a step
+  const handleRemoveStepImage = useCallback(async (stepId: string) => {
+    const previousSteps = steps;
+
+    // Optimistic update
+    setSteps((prev) =>
+      prev.map((s) =>
+        s.id === stepId
+          ? {
+              ...s,
+              source_id: null,
+              signedScreenshotUrl: null,
+              source: null,
+              click_x: null,
+              click_y: null,
+              viewport_width: null,
+              viewport_height: null,
+              annotations: null,
+            }
+          : s
+      )
+    );
+
+    try {
+      const response = await fetch(`/api/steps/${stepId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source_id: null }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove image');
+      }
+    } catch (error) {
+      console.error('Failed to remove step image:', error);
+      setSteps(previousSteps);
+    }
+  }, [steps]);
+
+  // Handle setting/changing the image of a step
+  const handleSetStepImage = useCallback(async (stepId: string, source: SourceWithSignedUrl) => {
+    const previousSteps = steps;
+
+    // Optimistic update
+    setSteps((prev) =>
+      prev.map((s) =>
+        s.id === stepId
+          ? {
+              ...s,
+              source_id: source.id,
+              signedScreenshotUrl: source.signedScreenshotUrl,
+              source: source,
+              click_x: source.click_x,
+              click_y: source.click_y,
+              viewport_width: source.viewport_width,
+              viewport_height: source.viewport_height,
+              element_info: source.element_info,
+              // Generate click indicator annotation if source has coordinates
+              annotations: source.click_x != null && source.click_y != null &&
+                          source.viewport_width && source.viewport_height
+                ? [{
+                    id: crypto.randomUUID(),
+                    type: 'click-indicator' as const,
+                    x: source.click_x / source.viewport_width,
+                    y: source.click_y / source.viewport_height,
+                    color: '#8b5cf6',
+                  }]
+                : null,
+            }
+          : s
+      )
+    );
+
+    try {
+      const response = await fetch(`/api/steps/${stepId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source_id: source.id }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to set image');
+      }
+    } catch (error) {
+      console.error('Failed to set step image:', error);
+      setSteps(previousSteps);
+    }
+  }, [steps]);
+
   // Auto-save with debounce (1 second delay)
   useEffect(() => {
     if (!hasChanges) return;
@@ -370,6 +459,8 @@ export function EditorClient({
       onReorderSteps={handleReorderSteps}
       onAddStep={handleAddStep}
       onCreateStepFromSource={handleCreateStepFromSource}
+      onRemoveStepImage={handleRemoveStepImage}
+      onSetStepImage={handleSetStepImage}
     />
   );
 }
