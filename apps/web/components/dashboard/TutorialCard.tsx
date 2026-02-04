@@ -41,7 +41,7 @@ export interface TutorialCardProps {
 const statusConfig = {
   draft: {
     label: 'Brouillon',
-    className: 'bg-gray-100 text-gray-700 border-gray-200',
+    className: 'bg-stone-100 text-stone-700 border-stone-200',
     icon: null,
   },
   processing: {
@@ -113,7 +113,7 @@ export function TutorialCard({
     <>
       <Card className="group overflow-hidden transition-all hover:shadow-lg cursor-pointer" onClick={onEdit}>
         {/* Thumbnail */}
-        <div className="relative aspect-video bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="relative aspect-video bg-gradient-to-br from-stone-50 to-stone-100">
           {thumbnailUrl ? (
             <Image
               src={thumbnailUrl}
@@ -123,11 +123,11 @@ export function TutorialCard({
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
-            <div className="flex h-full flex-col items-center justify-center text-gray-300">
-              <div className="rounded-xl bg-gray-200/50 p-4">
+            <div className="flex h-full flex-col items-center justify-center text-stone-300">
+              <div className="rounded-xl bg-stone-200/50 p-4">
                 <ImageIcon className="h-10 w-10" />
               </div>
-              <span className="mt-2 text-xs text-gray-400">Aucun aperçu</span>
+              <span className="mt-2 text-xs text-stone-400">Aucun aperçu</span>
             </div>
           )}
 
@@ -155,7 +155,7 @@ export function TutorialCard({
               <Button
                 onClick={handleProcess}
                 disabled={isProcessing}
-                className="gap-2 bg-white text-gray-900 hover:bg-gray-100"
+                className="gap-2 bg-white text-stone-900 hover:bg-stone-100"
                 size="sm"
               >
                 {isProcessing ? (
@@ -212,8 +212,8 @@ export function TutorialCard({
 
         {/* Content */}
         <CardContent className="p-4">
-          <h3 className="truncate font-medium text-gray-900">{title}</h3>
-          <div className="mt-2 flex items-center justify-between text-sm text-gray-500">
+          <h3 className="truncate font-medium text-stone-900">{title}</h3>
+          <div className="mt-2 flex items-center justify-between text-sm text-stone-500">
             <span>{stepsCount} etape{stepsCount !== 1 ? 's' : ''}</span>
             <span>{formattedDate}</span>
           </div>

@@ -131,7 +131,7 @@ export function ShareDialog({
 
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+            <Loader2 className="h-6 w-6 animate-spin text-stone-400" />
           </div>
         ) : (
           <div className="space-y-6">
@@ -151,14 +151,14 @@ export function ShareDialog({
                     'flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors',
                     visibility === 'private'
                       ? 'border-violet-500 bg-violet-50'
-                      : 'border-slate-200 hover:bg-slate-50'
+                      : 'border-stone-200 hover:bg-stone-50'
                   )}
                 >
                   <RadioGroupItem value="private" id="visibility-private" />
-                  <Lock className="h-4 w-4 text-slate-500" />
+                  <Lock className="h-4 w-4 text-stone-500" />
                   <div className="flex-1">
                     <p className="text-sm font-medium">Prive</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-stone-500">
                       Seul vous pouvez voir ce tutoriel
                     </p>
                   </div>
@@ -171,14 +171,14 @@ export function ShareDialog({
                     'flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors',
                     visibility === 'link_only'
                       ? 'border-violet-500 bg-violet-50'
-                      : 'border-slate-200 hover:bg-slate-50'
+                      : 'border-stone-200 hover:bg-stone-50'
                   )}
                 >
                   <RadioGroupItem value="link_only" id="visibility-link" />
-                  <Link2 className="h-4 w-4 text-slate-500" />
+                  <Link2 className="h-4 w-4 text-stone-500" />
                   <div className="flex-1">
                     <p className="text-sm font-medium">Lien uniquement</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-stone-500">
                       Toute personne ayant le lien peut voir
                     </p>
                   </div>
@@ -191,7 +191,7 @@ export function ShareDialog({
                     'flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors',
                     visibility === 'public'
                       ? 'border-violet-500 bg-violet-50'
-                      : 'border-slate-200 hover:bg-slate-50',
+                      : 'border-stone-200 hover:bg-stone-50',
                     !tutorialSlug && 'cursor-not-allowed opacity-50'
                   )}
                 >
@@ -200,10 +200,10 @@ export function ShareDialog({
                     id="visibility-public"
                     disabled={!tutorialSlug}
                   />
-                  <Globe className="h-4 w-4 text-slate-500" />
+                  <Globe className="h-4 w-4 text-stone-500" />
                   <div className="flex-1">
                     <p className="text-sm font-medium">Public</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-stone-500">
                       {tutorialSlug
                         ? 'Accessible via une URL personnalisee'
                         : 'Necessice un slug pour etre public'}
@@ -220,9 +220,9 @@ export function ShareDialog({
 
                 {/* Token URL */}
                 <div className="space-y-1.5">
-                  <p className="text-xs text-slate-500">Lien de partage</p>
+                  <p className="text-xs text-stone-500">Lien de partage</p>
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 truncate rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+                    <div className="flex-1 truncate rounded-md border border-stone-200 bg-stone-50 px-3 py-2 text-sm">
                       {settings.tokenUrl}
                     </div>
                     <Button
@@ -251,9 +251,9 @@ export function ShareDialog({
                 {/* Slug URL (if public) */}
                 {visibility === 'public' && settings.slugUrl && (
                   <div className="space-y-1.5">
-                    <p className="text-xs text-slate-500">URL publique (SEO)</p>
+                    <p className="text-xs text-stone-500">URL publique (SEO)</p>
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 truncate rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+                      <div className="flex-1 truncate rounded-md border border-stone-200 bg-stone-50 px-3 py-2 text-sm">
                         {settings.slugUrl}
                       </div>
                       <Button
@@ -309,7 +309,7 @@ export function ShareDialog({
                     )}
                   </Button>
                 </div>
-                <pre className="overflow-x-auto rounded-md border border-slate-200 bg-slate-900 p-3 text-xs text-slate-300">
+                <pre className="overflow-x-auto rounded-md border border-stone-200 bg-stone-900 p-3 text-xs text-stone-300">
                   {getEmbedCode()}
                 </pre>
               </div>
@@ -317,7 +317,7 @@ export function ShareDialog({
 
             {/* Saving indicator */}
             {saving && (
-              <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
+              <div className="flex items-center justify-center gap-2 text-sm text-stone-500">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Enregistrement...
               </div>

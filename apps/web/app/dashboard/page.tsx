@@ -99,7 +99,7 @@ export default function DashboardPage() {
             setLoading(true);
             fetchTutorials();
           }}
-          className="mt-4 text-sm text-blue-600 hover:underline"
+          className="mt-4 text-sm text-violet-600 hover:underline"
         >
           Réessayer
         </button>
@@ -112,8 +112,8 @@ export default function DashboardPage() {
       {/* Page Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Mes tutoriels</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-stone-900">Mes tutoriels</h1>
+          <p className="mt-1 text-sm text-stone-500">
             Gérez et partagez vos tutoriels
           </p>
         </div>
@@ -128,16 +128,16 @@ export default function DashboardPage() {
         </div>
       ) : tutorials.length === 0 ? (
         <div className="rounded-xl bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-            <Plus className="h-6 w-6 text-blue-600" />
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-violet-100">
+            <Plus className="h-6 w-6 text-violet-600" />
           </div>
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-semibold text-stone-900">
             Aucun tutoriel
           </h2>
-          <p className="mt-2 text-gray-500">
+          <p className="mt-2 text-stone-500">
             Utilisez l'extension Chrome pour créer votre premier tutoriel.
           </p>
-          <p className="mt-4 text-sm text-gray-400">
+          <p className="mt-4 text-sm text-stone-400">
             Cliquez sur l'icône Vibe Tuto dans Chrome pour commencer
             l'enregistrement.
           </p>

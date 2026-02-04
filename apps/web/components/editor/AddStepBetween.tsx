@@ -51,7 +51,7 @@ export function AddStepBetween({ onAddStep }: AddStepBetweenProps) {
               'relative z-10 flex h-6 w-6 items-center justify-center rounded-full border bg-white shadow-sm transition-all duration-200',
               isHovered || isOpen
                 ? 'scale-100 border-violet-400 text-violet-600 opacity-100'
-                : 'scale-75 border-slate-200 text-slate-400 opacity-0'
+                : 'scale-75 border-stone-200 text-stone-400 opacity-0'
             )}
           >
             <Plus className="h-3.5 w-3.5" />

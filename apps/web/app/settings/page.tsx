@@ -45,7 +45,7 @@ export default function SettingsPage() {
       {/* Back link */}
       <Link
         href="/dashboard"
-        className="mb-6 inline-flex items-center text-sm text-gray-500 hover:text-gray-900"
+        className="mb-6 inline-flex items-center text-sm text-stone-500 hover:text-stone-900"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Retour au dashboard
@@ -53,8 +53,8 @@ export default function SettingsPage() {
 
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Parametres</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-stone-900">Parametres</h1>
+        <p className="mt-1 text-sm text-stone-500">
           Gerez vos preferences et parametres de compte
         </p>
       </div>
@@ -78,8 +78,8 @@ export default function SettingsPage() {
                 </div>
               )}
               <CardHeader className="flex flex-row items-center gap-4 pb-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
-                  <Icon className="h-5 w-5 text-gray-600" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-stone-100">
+                  <Icon className="h-5 w-5 text-stone-600" />
                 </div>
                 <div>
                   <CardTitle className="text-base">{section.title}</CardTitle>

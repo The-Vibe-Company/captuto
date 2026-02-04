@@ -28,7 +28,7 @@ export function AnnotationToolbar({
   hasAnnotations,
 }: AnnotationToolbarProps) {
   return (
-    <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-1.5 shadow-lg">
+    <div className="flex items-center gap-1 rounded-lg border border-stone-200 bg-white p-1.5 shadow-lg">
       {TOOLS.map(({ type, icon: Icon, label }) => (
         <button
           key={type}
@@ -37,7 +37,7 @@ export function AnnotationToolbar({
             'flex h-8 items-center gap-1.5 rounded-md px-2 text-sm font-medium transition-colors',
             activeTool === type
               ? 'bg-violet-100 text-violet-700'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
           )}
           onClick={() => onToolChange(activeTool === type ? null : type)}
           title={label}
@@ -47,7 +47,7 @@ export function AnnotationToolbar({
         </button>
       ))}
 
-      <div className="mx-1 h-6 w-px bg-slate-200" />
+      <div className="mx-1 h-6 w-px bg-stone-200" />
 
       <button
         type="button"
@@ -55,7 +55,7 @@ export function AnnotationToolbar({
           'flex h-8 items-center gap-1.5 rounded-md px-2 text-sm font-medium transition-colors',
           hasAnnotations
             ? 'text-red-500 hover:bg-red-50 hover:text-red-600'
-            : 'cursor-not-allowed text-slate-300'
+            : 'cursor-not-allowed text-stone-300'
         )}
         onClick={onClearAll}
         disabled={!hasAnnotations}
@@ -65,7 +65,7 @@ export function AnnotationToolbar({
         <span className="hidden text-xs sm:inline">Effacer</span>
       </button>
 
-      <div className="mx-1 h-6 w-px bg-slate-200" />
+      <div className="mx-1 h-6 w-px bg-stone-200" />
 
       <button
         type="button"

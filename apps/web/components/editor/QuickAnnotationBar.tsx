@@ -30,7 +30,7 @@ export function QuickAnnotationBar({ onToolSelect, className }: QuickAnnotationB
   return (
     <div
       className={cn(
-        'flex items-center gap-1 rounded-lg border border-slate-200 bg-white/95 p-1 shadow-sm backdrop-blur-sm transition-opacity',
+        'flex items-center gap-1 rounded-lg border border-stone-200 bg-white/95 p-1 shadow-sm backdrop-blur-sm transition-opacity',
         className
       )}
     >
@@ -39,7 +39,7 @@ export function QuickAnnotationBar({ onToolSelect, className }: QuickAnnotationB
           key={type}
           type="button"
           onClick={() => onToolSelect(type)}
-          className="flex h-7 w-7 items-center justify-center rounded text-slate-600 transition-colors hover:bg-violet-100 hover:text-violet-700"
+          className="flex h-7 w-7 items-center justify-center rounded text-stone-600 transition-colors hover:bg-violet-100 hover:text-violet-700"
           title={label}
         >
           <Icon className="h-4 w-4" />
@@ -50,7 +50,7 @@ export function QuickAnnotationBar({ onToolSelect, className }: QuickAnnotationB
         <DropdownMenuTrigger asChild>
           <button
             type="button"
-            className="flex h-7 w-7 items-center justify-center rounded text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+            className="flex h-7 w-7 items-center justify-center rounded text-stone-600 transition-colors hover:bg-stone-100 hover:text-stone-900"
             title="Plus d'outils"
           >
             <MoreHorizontal className="h-4 w-4" />
