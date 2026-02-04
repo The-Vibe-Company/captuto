@@ -88,10 +88,10 @@ export function DocEditor({
   let screenshotStepNumber = 0;
 
   return (
-    <div className="min-h-screen bg-white">
+    <>
       <DocHeader saveStatus={saveStatus} />
 
-      <div className="mx-auto max-w-7xl px-4 py-8">
+      <div className="mx-auto max-w-6xl px-6 py-8">
         <div className="flex gap-6">
           {/* Main content area */}
           <main className="min-w-0 flex-1">
@@ -196,7 +196,7 @@ export function DocEditor({
           />
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

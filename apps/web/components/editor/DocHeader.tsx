@@ -38,8 +38,8 @@ export function DocHeader({ saveStatus }: DocHeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
+    <header className="sticky top-16 z-30 border-b border-stone-100 bg-white/95 backdrop-blur-sm">
+      <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-6">
         {/* Back link */}
         <Link
           href="/dashboard"
