@@ -38,11 +38,11 @@ export async function PATCH(
 
     // 4. Parse request body
     const body = await request.json();
-    const { text_content, annotations } = body;
+    const { text_content, annotations, source_id } = body;
 
     // Build update object with only provided fields
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateData: { text_content?: string; annotations?: any } = {};
+    const updateData: { text_content?: string; annotations?: any; source_id?: string | null } = {};
 
     if (text_content !== undefined) {
       if (typeof text_content !== 'string') {
@@ -56,6 +56,18 @@ export async function PATCH(
         return NextResponse.json({ error: 'Invalid annotations' }, { status: 400 });
       }
       updateData.annotations = annotations;
+    }
+
+    // Handle source_id changes (null to remove image, or new source_id to add/change image)
+    if (source_id !== undefined) {
+      if (source_id !== null && typeof source_id !== 'string') {
+        return NextResponse.json({ error: 'Invalid source_id' }, { status: 400 });
+      }
+      updateData.source_id = source_id;
+      // Clear annotations when removing the image
+      if (source_id === null) {
+        updateData.annotations = null;
+      }
     }
 
     if (Object.keys(updateData).length === 0) {
