@@ -22,6 +22,7 @@ import type { SaveStatus } from './EditorClient';
 import { DocHeader } from './DocHeader';
 import { DocStepCard } from './DocStepCard';
 import { SourcesSidebar } from './SourcesSidebar';
+import { AddStepBetween } from './AddStepBetween';
 
 export type NewStepType = 'text' | 'heading' | 'divider';
 
@@ -115,7 +116,7 @@ export function DocEditor({
                   items={steps.map((s) => s.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  {steps.map((step) => {
+                  {steps.map((step, index) => {
                     // Only count image and text steps for the numbered badge
                     const isImageStep = step.step_type === 'image';
                     const isTextStep = step.step_type === 'text';
@@ -124,23 +125,34 @@ export function DocEditor({
                     }
 
                     return (
-                      <DocStepCard
-                        key={step.id}
-                        step={step}
-                        stepNumber={
-                          step.step_type === 'heading' || step.step_type === 'divider'
-                            ? 0
-                            : screenshotStepNumber
-                        }
-                        sources={sources}
-                        onCaptionChange={(caption) => onStepCaptionChange(step.id, caption)}
-                        onAnnotationsChange={(annotations) =>
-                          onStepAnnotationsChange(step.id, annotations)
-                        }
-                        onDelete={() => onDeleteStep(step.id)}
-                        onRemoveImage={() => onRemoveStepImage(step.id)}
-                        onSetImage={(source) => onSetStepImage(step.id, source)}
-                      />
+                      <div key={step.id}>
+                        {/* Add step button before the first step */}
+                        {index === 0 && (
+                          <AddStepBetween
+                            onAddStep={(type) => onAddStep(type, undefined)}
+                          />
+                        )}
+                        <DocStepCard
+                          step={step}
+                          stepNumber={
+                            step.step_type === 'heading' || step.step_type === 'divider'
+                              ? 0
+                              : screenshotStepNumber
+                          }
+                          sources={sources}
+                          onCaptionChange={(caption) => onStepCaptionChange(step.id, caption)}
+                          onAnnotationsChange={(annotations) =>
+                            onStepAnnotationsChange(step.id, annotations)
+                          }
+                          onDelete={() => onDeleteStep(step.id)}
+                          onRemoveImage={() => onRemoveStepImage(step.id)}
+                          onSetImage={(source) => onSetStepImage(step.id, source)}
+                        />
+                        {/* Add step button after each step */}
+                        <AddStepBetween
+                          onAddStep={(type) => onAddStep(type, step.id)}
+                        />
+                      </div>
                     );
                   })}
                 </SortableContext>
