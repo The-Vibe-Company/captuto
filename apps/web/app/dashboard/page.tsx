@@ -8,6 +8,7 @@ import { TutorialCard, TutorialCardProps } from '@/components/dashboard/Tutorial
 import { TutorialCardSkeleton } from '@/components/dashboard/TutorialCardSkeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 type Tutorial = Omit<TutorialCardProps, 'onEdit' | 'onDelete' | 'onShare' | 'onProcess'>;
 
@@ -131,17 +132,15 @@ export default function DashboardPage() {
   }
 
   return (
-    <div>
-      {/* Page Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-stone-900">Mes tutoriels</h1>
-          <p className="mt-1 text-sm text-stone-500">
-            Gérez et partagez vos tutoriels
-          </p>
-        </div>
-      </div>
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Mes tutoriels' },
+        ]}
+      />
 
+      <div className="mx-auto max-w-6xl px-6 py-8">
       {/* Content */}
       {loading ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -180,6 +179,7 @@ export default function DashboardPage() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
