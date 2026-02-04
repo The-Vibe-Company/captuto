@@ -1,10 +1,13 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus } from 'lucide-react';
+import { Plus, AlertCircle, RefreshCw } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { TutorialCard, TutorialCardProps } from '@/components/dashboard/TutorialCard';
 import { TutorialCardSkeleton } from '@/components/dashboard/TutorialCardSkeleton';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 type Tutorial = Omit<TutorialCardProps, 'onEdit' | 'onDelete' | 'onShare' | 'onProcess'>;
 
@@ -33,12 +36,6 @@ export default function DashboardPage() {
     queryKey: ['tutorials'],
     queryFn: fetchTutorials,
   });
-
-  // Redirect to login on unauthorized error
-  if (error?.message === 'UNAUTHORIZED') {
-    router.push('/login');
-    return null;
-  }
 
   const deleteMutation = useMutation({
     mutationFn: async (tutorialId: string) => {
@@ -99,17 +96,37 @@ export default function DashboardPage() {
     await processMutation.mutateAsync(tutorialId);
   };
 
-  if (error && error.message !== 'UNAUTHORIZED') {
+  // Redirect to login on unauthorized error
+  useEffect(() => {
+    if (error?.message === 'UNAUTHORIZED') {
+      router.push('/login');
+    }
+  }, [error, router]);
+
+  // Show nothing while redirecting to login
+  if (error?.message === 'UNAUTHORIZED') {
+    return null;
+  }
+
+  if (error) {
     return (
-      <div className="rounded-xl bg-white p-8 text-center shadow-sm">
-        <p className="text-red-600">{error.message}</p>
-        <button
-          onClick={() => refetch()}
-          className="mt-4 text-sm text-violet-600 hover:underline"
-        >
-          Réessayer
-        </button>
-      </div>
+      <Card className="border-red-100">
+        <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+            <AlertCircle className="h-6 w-6 text-red-600" />
+          </div>
+          <p className="mb-4 text-red-600">{error.message}</p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            className="gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Reessayer
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -133,21 +150,23 @@ export default function DashboardPage() {
           ))}
         </div>
       ) : tutorials.length === 0 ? (
-        <div className="rounded-xl bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-violet-100">
-            <Plus className="h-6 w-6 text-violet-600" />
-          </div>
-          <h2 className="text-xl font-semibold text-stone-900">
-            Aucun tutoriel
-          </h2>
-          <p className="mt-2 text-stone-500">
-            Utilisez l'extension Chrome pour créer votre premier tutoriel.
-          </p>
-          <p className="mt-4 text-sm text-stone-400">
-            Cliquez sur l'icône Vibe Tuto dans Chrome pour commencer
-            l'enregistrement.
-          </p>
-        </div>
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-violet-100">
+              <Plus className="h-6 w-6 text-violet-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-stone-900">
+              Aucun tutoriel
+            </h2>
+            <p className="mt-2 text-stone-500">
+              Utilisez l&apos;extension Chrome pour creer votre premier tutoriel.
+            </p>
+            <p className="mt-4 text-sm text-stone-400">
+              Cliquez sur l&apos;icone Vibe Tuto dans Chrome pour commencer
+              l&apos;enregistrement.
+            </p>
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {tutorials.map((tutorial) => (
