@@ -100,7 +100,7 @@ export function DocStepCard({
               {...attributes}
               {...listeners}
               className={cn(
-                'cursor-grab touch-none text-slate-300 transition-opacity hover:text-slate-400',
+                'cursor-grab touch-none text-stone-300 transition-opacity hover:text-stone-400',
                 isHovered ? 'opacity-100' : 'opacity-0'
               )}
             >
@@ -110,9 +110,9 @@ export function DocStepCard({
 
           {/* Divider line */}
           <div className="flex flex-1 items-center gap-3">
-            <div className="h-px flex-1 bg-slate-200" />
-            <Minus className="h-4 w-4 text-slate-300" />
-            <div className="h-px flex-1 bg-slate-200" />
+            <div className="h-px flex-1 bg-stone-200" />
+            <Minus className="h-4 w-4 text-stone-300" />
+            <div className="h-px flex-1 bg-stone-200" />
           </div>
 
           {/* Delete (hidden in readOnly) */}
@@ -121,7 +121,7 @@ export function DocStepCard({
               type="button"
               onClick={onDelete}
               className={cn(
-                'text-slate-300 transition-all hover:text-red-500',
+                'text-stone-300 transition-all hover:text-red-500',
                 isHovered ? 'opacity-100' : 'opacity-0'
               )}
             >
@@ -153,7 +153,7 @@ export function DocStepCard({
               {...attributes}
               {...listeners}
               className={cn(
-                'mt-2 cursor-grab touch-none text-slate-300 transition-opacity hover:text-slate-400',
+                'mt-2 cursor-grab touch-none text-stone-300 transition-opacity hover:text-stone-400',
                 isHovered ? 'opacity-100' : 'opacity-0'
               )}
             >
@@ -183,7 +183,7 @@ export function DocStepCard({
               type="button"
               onClick={onDelete}
               className={cn(
-                'mt-2 text-slate-300 transition-all hover:text-red-500',
+                'mt-2 text-stone-300 transition-all hover:text-red-500',
                 isHovered ? 'opacity-100' : 'opacity-0'
               )}
             >
@@ -201,7 +201,7 @@ export function DocStepCard({
       ref={readOnly ? undefined : setNodeRef}
       style={readOnly ? undefined : style}
       className={cn(
-        'group relative rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md',
+        'group relative rounded-xl border border-stone-200 bg-white shadow-sm transition-shadow hover:shadow-md',
         !readOnly && isDragging && 'z-50 opacity-50 shadow-lg'
       )}
       onMouseEnter={() => setIsHovered(true)}
@@ -216,7 +216,7 @@ export function DocStepCard({
               {...attributes}
               {...listeners}
               className={cn(
-                'cursor-grab touch-none text-slate-300 transition-opacity hover:text-slate-400',
+                'cursor-grab touch-none text-stone-300 transition-opacity hover:text-stone-400',
                 isHovered ? 'opacity-100' : 'opacity-0'
               )}
             >
@@ -249,7 +249,7 @@ export function DocStepCard({
             type="button"
             onClick={onDelete}
             className={cn(
-              'mt-1 text-slate-300 transition-all hover:text-red-500',
+              'mt-1 text-stone-300 transition-all hover:text-red-500',
               isHovered ? 'opacity-100' : 'opacity-0'
             )}
           >
@@ -289,13 +289,13 @@ export function DocStepCard({
         /* Text-only step - show option to add image (only in edit mode) */
         <div className="px-4 pb-4 pt-2">
           {showImagePicker ? (
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <div className="rounded-lg border border-stone-200 bg-stone-50 p-3">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-600">Choisir une image</span>
+                <span className="text-xs font-medium text-stone-600">Choisir une image</span>
                 <button
                   type="button"
                   onClick={() => setShowImagePicker(false)}
-                  className="text-slate-400 hover:text-slate-600"
+                  className="text-stone-400 hover:text-stone-600"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -310,7 +310,7 @@ export function DocStepCard({
                         onSetImage?.(source);
                         setShowImagePicker(false);
                       }}
-                      className="group relative aspect-video overflow-hidden rounded-md border border-slate-200 bg-white transition-all hover:border-violet-400 hover:ring-2 hover:ring-violet-200"
+                      className="group relative aspect-video overflow-hidden rounded-md border border-stone-200 bg-white transition-all hover:border-violet-400 hover:ring-2 hover:ring-violet-200"
                     >
                       <Image
                         src={source.signedScreenshotUrl!}
@@ -323,14 +323,14 @@ export function DocStepCard({
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-slate-400">Aucune image disponible dans la timeline</p>
+                <p className="text-xs text-stone-400">Aucune image disponible dans la timeline</p>
               )}
             </div>
           ) : (
             <button
               type="button"
               onClick={() => setShowImagePicker(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 py-3 text-sm text-slate-500 transition-colors hover:border-violet-400 hover:bg-violet-50 hover:text-violet-600"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-stone-300 bg-stone-50 py-3 text-sm text-stone-500 transition-colors hover:border-violet-400 hover:bg-violet-50 hover:text-violet-600"
             >
               <ImagePlus className="h-4 w-4" />
               <span>Ajouter une image</span>

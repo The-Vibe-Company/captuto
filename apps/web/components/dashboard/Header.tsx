@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { LayoutDashboard, Settings, HelpCircle, LogOut, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, Settings, HelpCircle, LogOut, ExternalLink, Play } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,14 +43,17 @@ export function Header({ userEmail }: HeaderProps) {
     .toUpperCase();
 
   return (
-    <header className="border-b bg-white">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 border-b border-stone-100 bg-white/80 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         {/* Logo */}
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white font-bold">
-            V
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-violet-600 shadow-sm">
+            <Play className="h-4 w-4 fill-white text-white" />
           </div>
-          <span className="text-xl font-semibold text-gray-900">Vibe Tuto</span>
+          <span className="text-lg font-semibold tracking-tight text-stone-900">Vibe Tuto</span>
+          <span className="ml-1 rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-600">
+            Beta
+          </span>
         </Link>
 
         {/* User Menu */}
@@ -58,7 +61,7 @@ export function Header({ userEmail }: HeaderProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-blue-100 text-blue-600">
+                <AvatarFallback className="bg-violet-100 text-violet-600">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -67,8 +70,8 @@ export function Header({ userEmail }: HeaderProps) {
           <DropdownMenuContent align="end" className="w-64">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium text-gray-900">Mon compte</p>
-                <p className="text-xs text-gray-500 truncate">{userEmail}</p>
+                <p className="text-sm font-medium text-stone-900">Mon compte</p>
+                <p className="text-xs text-stone-500 truncate">{userEmail}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -94,7 +97,7 @@ export function Header({ userEmail }: HeaderProps) {
               >
                 <HelpCircle className="mr-2 h-4 w-4" />
                 Centre d'aide
-                <ExternalLink className="ml-auto h-3 w-3 text-gray-400" />
+                <ExternalLink className="ml-auto h-3 w-3 text-stone-400" />
               </a>
             </DropdownMenuItem>
             <DropdownMenuSeparator />

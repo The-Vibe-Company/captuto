@@ -94,8 +94,8 @@ export function StepScreenshot({
       {/* Screenshot container */}
       <div
         className={cn(
-          'relative overflow-hidden rounded-lg border bg-slate-100 transition-all',
-          isAnnotating ? 'border-violet-400 ring-2 ring-violet-200' : 'border-slate-200'
+          'relative overflow-hidden rounded-lg border bg-stone-100 transition-all',
+          isAnnotating ? 'border-violet-400 ring-2 ring-violet-200' : 'border-stone-200'
         )}
       >
         {/* Scrollable zoom container */}
@@ -147,7 +147,7 @@ export function StepScreenshot({
         <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2">
 
           {/* Zoom controls */}
-          <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white/90 p-1 shadow-sm backdrop-blur-sm">
+          <div className="flex items-center gap-1 rounded-lg border border-stone-200 bg-white/90 p-1 shadow-sm backdrop-blur-sm">
             <button
               type="button"
               onClick={handleZoomOut}
@@ -155,15 +155,15 @@ export function StepScreenshot({
               className={cn(
                 'flex h-6 w-6 items-center justify-center rounded transition-colors',
                 zoomIndex === 0
-                  ? 'cursor-not-allowed text-slate-300'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'cursor-not-allowed text-stone-300'
+                  : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
               )}
               title="Zoom out"
             >
               <ZoomOut className="h-4 w-4" />
             </button>
 
-            <span className="min-w-[3rem] text-center text-xs font-medium text-slate-600">
+            <span className="min-w-[3rem] text-center text-xs font-medium text-stone-600">
               {zoom}x
             </span>
 
@@ -174,8 +174,8 @@ export function StepScreenshot({
               className={cn(
                 'flex h-6 w-6 items-center justify-center rounded transition-colors',
                 zoomIndex === ZOOM_LEVELS.length - 1
-                  ? 'cursor-not-allowed text-slate-300'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'cursor-not-allowed text-stone-300'
+                  : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
               )}
               title="Zoom in"
             >

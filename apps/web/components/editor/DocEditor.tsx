@@ -88,20 +88,20 @@ export function DocEditor({
   let screenshotStepNumber = 0;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <>
       <DocHeader saveStatus={saveStatus} />
 
-      <div className="mx-auto max-w-7xl px-4 py-8">
+      <div className="mx-auto max-w-6xl px-6 py-8">
         <div className="flex gap-6">
           {/* Main content area */}
           <main className="min-w-0 flex-1">
             {/* Tutorial header */}
             <div className="mb-8">
-              <h1 className="text-2xl font-bold text-slate-900">
+              <h1 className="text-2xl font-bold text-stone-900">
                 {tutorial.title || 'Sans titre'}
               </h1>
               {tutorial.description && (
-                <p className="mt-2 text-slate-600">{tutorial.description}</p>
+                <p className="mt-2 text-stone-600">{tutorial.description}</p>
               )}
             </div>
 
@@ -160,9 +160,9 @@ export function DocEditor({
 
               {/* Empty state */}
               {steps.length === 0 && (
-                <div className="rounded-xl border-2 border-dashed border-slate-200 py-16 text-center">
-                  <p className="text-slate-500">Aucune étape pour le moment.</p>
-                  <p className="mt-1 text-sm text-slate-400">
+                <div className="rounded-xl border-2 border-dashed border-stone-200 py-16 text-center">
+                  <p className="text-stone-500">Aucune étape pour le moment.</p>
+                  <p className="mt-1 text-sm text-stone-400">
                     Ajoutez une étape ci-dessous.
                   </p>
                 </div>
@@ -196,7 +196,7 @@ export function DocEditor({
           />
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -214,7 +214,7 @@ function AddStepButton({
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-white px-4 py-2 text-sm text-slate-500 transition-colors hover:border-violet-400 hover:bg-violet-50 hover:text-violet-600"
+      className="flex items-center gap-2 rounded-lg border border-dashed border-stone-300 bg-white px-4 py-2 text-sm text-stone-500 transition-colors hover:border-violet-400 hover:bg-violet-50 hover:text-violet-600"
     >
       <Plus className="h-4 w-4" />
       <Icon className="h-4 w-4" />

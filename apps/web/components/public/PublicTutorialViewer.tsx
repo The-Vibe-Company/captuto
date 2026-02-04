@@ -1,6 +1,6 @@
 'use client';
 
-import { Share2, ExternalLink, Clock, Calendar } from 'lucide-react';
+import { Share2, ExternalLink, Clock, Calendar, Play } from 'lucide-react';
 import { DocStepCard } from '@/components/editor/DocStepCard';
 import type { StepWithSignedUrl } from '@/lib/types/editor';
 import { Button } from '@/components/ui/button';
@@ -68,16 +68,16 @@ export function PublicTutorialViewer({
   };
 
   return (
-    <div className={isEmbed ? 'min-h-screen bg-white' : 'min-h-screen bg-slate-50'}>
+    <div className={isEmbed ? 'min-h-screen bg-white' : 'min-h-screen bg-stone-50'}>
       {/* Header (hidden in embed mode) */}
       {!isEmbed && (
-        <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-sm">
+        <header className="sticky top-0 z-40 border-b border-stone-200 bg-white/80 backdrop-blur-sm">
           <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500">
-                <span className="text-sm font-bold text-white">V</span>
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-violet-600 shadow-sm">
+                <Play className="h-4 w-4 fill-white text-white" />
               </div>
-              <span className="font-semibold text-slate-900">Vibe Tuto</span>
+              <span className="text-lg font-semibold tracking-tight text-stone-900">Vibe Tuto</span>
             </div>
 
             <Button
@@ -97,19 +97,19 @@ export function PublicTutorialViewer({
       <main className={isEmbed ? 'p-4' : 'mx-auto max-w-4xl px-6 py-8'}>
         {/* Title and description */}
         <div className={isEmbed ? 'mb-6' : 'mb-8'}>
-          <h1 className={`font-bold text-slate-900 ${isEmbed ? 'text-xl' : 'text-3xl'}`}>
+          <h1 className={`font-bold text-stone-900 ${isEmbed ? 'text-xl' : 'text-3xl'}`}>
             {tutorial.title}
           </h1>
 
           {tutorial.description && (
-            <p className={`mt-2 text-slate-600 ${isEmbed ? 'text-sm' : 'text-lg'}`}>
+            <p className={`mt-2 text-stone-600 ${isEmbed ? 'text-sm' : 'text-lg'}`}>
               {tutorial.description}
             </p>
           )}
 
           {/* Meta info (hidden in embed) */}
           {!isEmbed && tutorial.publishedAt && (
-            <div className="mt-4 flex items-center gap-4 text-sm text-slate-500">
+            <div className="mt-4 flex items-center gap-4 text-sm text-stone-500">
               <div className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4" />
                 <span>{formatDate(tutorial.publishedAt)}</span>
@@ -144,20 +144,20 @@ export function PublicTutorialViewer({
 
         {/* Empty state */}
         {visibleSteps.length === 0 && (
-          <div className="rounded-lg border border-slate-200 bg-white p-12 text-center">
-            <p className="text-slate-500">Ce tutoriel n'a pas encore de contenu.</p>
+          <div className="rounded-lg border border-stone-200 bg-white p-12 text-center">
+            <p className="text-stone-500">Ce tutoriel n'a pas encore de contenu.</p>
           </div>
         )}
       </main>
 
       {/* Footer for embed (link to full version) */}
       {isEmbed && shareUrl && (
-        <footer className="border-t border-slate-200 bg-slate-50 p-3">
+        <footer className="border-t border-stone-200 bg-stone-50 p-3">
           <a
             href={shareUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 text-sm text-slate-600 hover:text-violet-600"
+            className="flex items-center justify-center gap-2 text-sm text-stone-600 hover:text-violet-600"
           >
             <ExternalLink className="h-4 w-4" />
             <span>Voir le tutoriel complet</span>

@@ -44,7 +44,7 @@ export function InlineCaption({
       attributes: {
         class: cn(
           'focus:outline-none min-h-[1.5em] max-w-none',
-          isHeading ? 'text-lg font-semibold' : 'prose prose-sm prose-slate'
+          isHeading ? 'text-lg font-semibold' : 'prose prose-sm prose-stone'
         ),
       },
     },
@@ -104,8 +104,8 @@ export function InlineCaption({
             className={cn(
               'max-w-none',
               isHeading
-                ? 'text-lg font-semibold text-slate-900'
-                : 'prose prose-sm prose-slate prose-strong:text-violet-600'
+                ? 'text-lg font-semibold text-stone-900'
+                : 'prose prose-sm prose-stone prose-strong:text-violet-600'
             )}
             dangerouslySetInnerHTML={{ __html: content }}
           />
@@ -119,20 +119,20 @@ export function InlineCaption({
     return (
       <div
         onClick={() => setIsEditing(true)}
-        className="cursor-text rounded-md px-2 py-1 transition-colors hover:bg-slate-100"
+        className="cursor-text rounded-md px-2 py-1 transition-colors hover:bg-stone-100"
       >
         {content ? (
           <div
             className={cn(
               'max-w-none',
               isHeading
-                ? 'text-lg font-semibold text-slate-900'
-                : 'prose prose-sm prose-slate prose-strong:text-violet-600'
+                ? 'text-lg font-semibold text-stone-900'
+                : 'prose prose-sm prose-stone prose-strong:text-violet-600'
             )}
             dangerouslySetInnerHTML={{ __html: content }}
           />
         ) : (
-          <span className="text-slate-400 italic">
+          <span className="text-stone-400 italic">
             {placeholder || 'Cliquez pour ajouter une description...'}
           </span>
         )}
@@ -148,7 +148,7 @@ export function InlineCaption({
     >
       <EditorContent editor={editor} />
       {!isHeading && (
-        <div className="mt-1 flex gap-1 border-t border-slate-100 pt-1">
+        <div className="mt-1 flex gap-1 border-t border-stone-100 pt-1">
           <button
             type="button"
             onClick={() => editor?.chain().focus().toggleBold().run()}
@@ -156,7 +156,7 @@ export function InlineCaption({
               'rounded px-2 py-0.5 text-xs font-medium transition-colors',
               editor?.isActive('bold')
                 ? 'bg-violet-100 text-violet-700'
-                : 'text-slate-500 hover:bg-slate-100'
+                : 'text-stone-500 hover:bg-stone-100'
             )}
           >
             B
@@ -168,7 +168,7 @@ export function InlineCaption({
               'rounded px-2 py-0.5 text-xs italic transition-colors',
               editor?.isActive('italic')
                 ? 'bg-violet-100 text-violet-700'
-                : 'text-slate-500 hover:bg-slate-100'
+                : 'text-stone-500 hover:bg-stone-100'
             )}
           >
             I
@@ -180,7 +180,7 @@ export function InlineCaption({
               'rounded px-2 py-0.5 text-xs font-mono transition-colors',
               editor?.isActive('code')
                 ? 'bg-violet-100 text-violet-700'
-                : 'text-slate-500 hover:bg-slate-100'
+                : 'text-stone-500 hover:bg-stone-100'
             )}
           >
             {'</>'}
