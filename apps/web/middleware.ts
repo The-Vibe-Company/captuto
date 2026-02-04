@@ -5,8 +5,9 @@ export async function middleware(request: NextRequest) {
   const response = await updateSession(request);
 
   // Allow embedding for /t/[token]/embed routes
+  // Remove X-Frame-Options and use CSP frame-ancestors instead (modern standard)
   if (request.nextUrl.pathname.match(/^\/t\/[^/]+\/embed$/)) {
-    response.headers.set('X-Frame-Options', 'ALLOWALL');
+    response.headers.delete('X-Frame-Options');
     response.headers.set('Content-Security-Policy', 'frame-ancestors *');
   }
 
