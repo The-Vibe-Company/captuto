@@ -38,7 +38,6 @@ interface DocEditorProps {
   onReorderSteps: (newSteps: StepWithSignedUrl[]) => void;
   onAddStep: (type: NewStepType, afterStepId?: string) => void;
   onCreateStepFromSource: (source: SourceWithSignedUrl) => void;
-  onPreview: () => void;
 }
 
 export function DocEditor({
@@ -54,7 +53,6 @@ export function DocEditor({
   onReorderSteps,
   onAddStep,
   onCreateStepFromSource,
-  onPreview,
 }: DocEditorProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -86,7 +84,7 @@ export function DocEditor({
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <DocHeader saveStatus={saveStatus} onPreview={onPreview} />
+      <DocHeader saveStatus={saveStatus} />
 
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="flex gap-6">

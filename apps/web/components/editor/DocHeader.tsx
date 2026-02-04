@@ -1,15 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronLeft, Check, Loader2, AlertCircle, Eye } from 'lucide-react';
+import { ChevronLeft, Check, Loader2, AlertCircle } from 'lucide-react';
 import type { SaveStatus } from './EditorClient';
 
 interface DocHeaderProps {
   saveStatus: SaveStatus;
-  onPreview: () => void;
 }
 
-export function DocHeader({ saveStatus, onPreview }: DocHeaderProps) {
+export function DocHeader({ saveStatus }: DocHeaderProps) {
   const renderSaveStatus = () => {
     switch (saveStatus) {
       case 'saving':
@@ -53,15 +52,6 @@ export function DocHeader({ saveStatus, onPreview }: DocHeaderProps) {
         {/* Actions */}
         <div className="flex items-center gap-4">
           {renderSaveStatus()}
-
-          <button
-            type="button"
-            onClick={onPreview}
-            className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
-          >
-            <Eye className="h-4 w-4" />
-            Aperçu
-          </button>
         </div>
       </div>
     </header>

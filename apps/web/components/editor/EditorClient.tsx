@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { DocEditor, type NewStepType } from './DocEditor';
-import { PreviewOverlay } from './PreviewOverlay';
 import type { Tutorial, SourceWithSignedUrl, StepWithSignedUrl, Annotation } from '@/lib/types/editor';
 
 export type SaveStatus = 'saved' | 'saving' | 'unsaved' | 'error';
@@ -29,11 +28,8 @@ export function EditorClient({
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved');
   const [isReordering, setIsReordering] = useState(false);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [previewStepIndex, setPreviewStepIndex] = useState(0);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const selectedStepIndex = steps.findIndex((s) => s.id === selectedStepId);
   const hasChanges = Object.keys(pendingChanges).length > 0 || Object.keys(pendingAnnotations).length > 0;
 
   const handleSelectStep = useCallback((stepId: string) => {
@@ -150,21 +146,6 @@ export function EditorClient({
       setIsReordering(false);
     }
   }, [steps, initialTutorial.id]);
-
-  // Preview handlers
-  const handleOpenPreview = useCallback(() => {
-    const index = selectedStepIndex >= 0 ? selectedStepIndex : 0;
-    setPreviewStepIndex(index);
-    setIsPreviewOpen(true);
-  }, [selectedStepIndex]);
-
-  const handleClosePreview = useCallback(() => {
-    setIsPreviewOpen(false);
-  }, []);
-
-  const handlePreviewStepChange = useCallback((index: number) => {
-    setPreviewStepIndex(index);
-  }, []);
 
   // Handle step deletion
   const handleDeleteStep = useCallback(async (stepId: string) => {
@@ -364,52 +345,31 @@ export function EditorClient({
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      const isInputField = target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' || target.isContentEditable;
-
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault();
         handleSave();
-        return;
-      }
-
-      if ((e.metaKey || e.ctrlKey) && e.key === 'p' && !isPreviewOpen) {
-        e.preventDefault();
-        handleOpenPreview();
         return;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSave, isPreviewOpen, handleOpenPreview]);
+  }, [handleSave]);
 
   return (
-    <>
-      <DocEditor
-        tutorial={initialTutorial}
-        sources={sources}
-        steps={steps}
-        saveStatus={isSaving || isReordering ? 'saving' : saveStatus}
-        selectedStepId={selectedStepId}
-        onSelectStep={handleSelectStep}
-        onStepCaptionChange={handleStepCaptionChange}
-        onStepAnnotationsChange={handleStepAnnotationsChange}
-        onDeleteStep={handleDeleteStep}
-        onReorderSteps={handleReorderSteps}
-        onAddStep={handleAddStep}
-        onCreateStepFromSource={handleCreateStepFromSource}
-        onPreview={handleOpenPreview}
-      />
-
-      {isPreviewOpen && (
-        <PreviewOverlay
-          steps={steps}
-          currentStepIndex={previewStepIndex}
-          onStepChange={handlePreviewStepChange}
-          onClose={handleClosePreview}
-        />
-      )}
-    </>
+    <DocEditor
+      tutorial={initialTutorial}
+      sources={sources}
+      steps={steps}
+      saveStatus={isSaving || isReordering ? 'saving' : saveStatus}
+      selectedStepId={selectedStepId}
+      onSelectStep={handleSelectStep}
+      onStepCaptionChange={handleStepCaptionChange}
+      onStepAnnotationsChange={handleStepAnnotationsChange}
+      onDeleteStep={handleDeleteStep}
+      onReorderSteps={handleReorderSteps}
+      onAddStep={handleAddStep}
+      onCreateStepFromSource={handleCreateStepFromSource}
+    />
   );
 }
