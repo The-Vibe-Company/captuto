@@ -4,6 +4,7 @@ import { Share2, ExternalLink, Clock, Calendar, Play } from 'lucide-react';
 import { DocStepCard } from '@/components/editor/DocStepCard';
 import type { StepWithSignedUrl } from '@/lib/types/editor';
 import { Button } from '@/components/ui/button';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { useState } from 'react';
 
 interface PublicTutorial {
@@ -68,6 +69,7 @@ export function PublicTutorialViewer({
   };
 
   return (
+    <TooltipProvider delayDuration={100}>
     <div className={isEmbed ? 'min-h-screen bg-white' : 'min-h-screen bg-stone-50'}>
       {/* Header (hidden in embed mode) */}
       {!isEmbed && (
@@ -165,5 +167,6 @@ export function PublicTutorialViewer({
         </footer>
       )}
     </div>
+    </TooltipProvider>
   );
 }
