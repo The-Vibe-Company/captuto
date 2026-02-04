@@ -44,25 +44,7 @@ export interface SourceWithSignedUrl extends Omit<Source, 'element_info'> {
 // Step type for authored content
 export type StepType = 'image' | 'text' | 'heading' | 'divider';
 
-// Base step from database
-export interface Step {
-  id: string;
-  tutorial_id: string;
-  source_id: string | null;
-  order_index: number;
-  text_content: string | null;
-  step_type: StepType;
-  annotations: Annotation[] | null;
-  created_at: string;
-}
-
-// Step with joined source data and signed URL
-export interface StepWithSource extends Omit<Step, 'annotations'> {
-  source?: SourceWithSignedUrl | null;
-  annotations?: Annotation[] | null;
-}
-
-// Legacy type for backwards compatibility during migration
+// Step with source data and signed URL for display
 export interface StepWithSignedUrl {
   id: string;
   tutorial_id: string;
@@ -84,21 +66,6 @@ export interface StepWithSignedUrl {
   url?: string | null;
 }
 
-// ============================================
-// Combined types
-// ============================================
-
-export interface TutorialWithSteps {
-  tutorial: Tutorial;
-  steps: StepWithSignedUrl[];
-}
-
-export interface TutorialWithSourcesAndSteps {
-  tutorial: Tutorial;
-  sources: SourceWithSignedUrl[];
-  steps: StepWithSource[];
-}
-
 // Annotation types for screenshot markup
 export type AnnotationType = 'circle' | 'arrow' | 'text' | 'blur' | 'highlight' | 'click-indicator';
 
@@ -118,8 +85,4 @@ export interface Annotation {
   content?: string;
   // Style options
   color?: string;
-}
-
-export interface StepWithAnnotations extends StepWithSignedUrl {
-  annotations?: Annotation[];
 }
