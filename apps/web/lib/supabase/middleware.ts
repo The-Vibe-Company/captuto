@@ -1,6 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { getSupabaseConfig } from "./config";
 
 // Protected routes that require authentication
 const PROTECTED_ROUTES = ['/dashboard', '/editor'];
@@ -10,7 +9,14 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
-  const { url, anonKey } = getSupabaseConfig();
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // If Supabase is not configured, just pass through
+  if (!url || !anonKey) {
+    console.warn('[v0] Supabase not configured, skipping auth middleware');
+    return supabaseResponse;
+  }
 
   const supabase = createServerClient(
     url,
