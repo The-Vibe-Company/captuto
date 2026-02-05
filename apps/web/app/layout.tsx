@@ -1,10 +1,21 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Sora } from "next/font/google";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], display: "swap" });
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
+const sora = Sora({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-heading",
+  weight: ["400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
   title: "CapTuto",
@@ -18,7 +29,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${sora.variable} font-sans`}>
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>

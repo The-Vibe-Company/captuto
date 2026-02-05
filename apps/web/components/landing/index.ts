@@ -1,7 +1,12 @@
 export { AnnouncementBar } from "./AnnouncementBar";
-export { SocialProofStrip } from "./SocialProofStrip";
+export { Navbar } from "./Navbar";
+export { HeroSection } from "./HeroSection";
 export { LogoCloud } from "./LogoCloud";
 export { ProblemSection } from "./ProblemSection";
+export { SolutionSection } from "./SolutionSection";
+export { HowItWorks } from "./HowItWorks";
+export { FeatureBento } from "./FeatureBento";
 export { PricingCard } from "./PricingCard";
 export { FAQAccordion } from "./FAQAccordion";
 export { FinalCTA } from "./FinalCTA";
+export { Footer } from "./Footer";

@@ -1,14 +1,14 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 const faqs = [
   {
-    question: "Is it really free?",
+    question: "How much does it cost?",
     answer:
-      "Yes, for the entire duration of the beta. The first 100 users will keep a 50% reduced rate for life, even after the official launch.",
+      "During the Beta, CapTuto is 50% off at $15/month with unlimited usage. No hidden limits.",
   },
   {
     question: "Do I need to install anything?",
@@ -28,7 +28,7 @@ const faqs = [
   {
     question: "Can I cancel at any time?",
     answer:
-      "Of course. No commitment, no credit card required to get started. You can delete your account and all your data in one click.",
+      "Of course. No commitment, cancel anytime. You can delete your account and all your data in one click.",
   },
 ];
 
@@ -36,7 +36,7 @@ export function FAQAccordion() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section className="border-t border-stone-100 bg-stone-50/50 py-24">
+    <section id="faq" className="bg-stone-50 py-24">
       <div className="mx-auto max-w-3xl px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -44,10 +44,10 @@ export function FAQAccordion() {
           viewport={{ once: true }}
           className="mb-12 text-center"
         >
-          <p className="mb-3 text-sm font-medium uppercase tracking-widest text-violet-600">
+          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-indigo-500">
             FAQ
           </p>
-          <h2 className="text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
+          <h2 className="font-heading text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
             Frequently Asked Questions
           </h2>
         </motion.div>
@@ -60,26 +60,36 @@ export function FAQAccordion() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.05 }}
-              className="overflow-hidden rounded-xl border border-stone-200 bg-white"
+              className="overflow-hidden rounded-2xl border border-stone-200/60 bg-white"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                className="flex w-full items-center justify-between px-6 py-4 text-left transition-colors hover:bg-stone-50"
+                className="flex w-full cursor-pointer items-center justify-between px-6 py-5 text-left transition-colors hover:bg-stone-50"
               >
-                <span className="font-medium text-stone-900">{faq.question}</span>
+                <span className="font-medium text-stone-900">
+                  {faq.question}
+                </span>
                 <ChevronDown
-                  className={`h-5 w-5 text-stone-400 transition-transform ${
+                  className={`h-5 w-5 flex-shrink-0 text-stone-400 transition-transform duration-200 ${
                     openIndex === i ? "rotate-180" : ""
                   }`}
                 />
               </button>
-              <div
-                className={`overflow-hidden transition-all duration-300 ${
-                  openIndex === i ? "max-h-48" : "max-h-0"
-                }`}
-              >
-                <p className="px-6 pb-4 text-stone-500 leading-relaxed">{faq.answer}</p>
-              </div>
+              <AnimatePresence initial={false}>
+                {openIndex === i && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <p className="px-6 pb-5 text-stone-500 leading-relaxed">
+                      {faq.answer}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           ))}
         </div>

@@ -16,6 +16,10 @@ const config: Config = {
       }
     },
     extend: {
+      fontFamily: {
+        heading: ['var(--font-heading)', 'sans-serif'],
+        sans: ['var(--font-inter)', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -55,7 +59,31 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)"
-      }
+      },
+      animation: {
+        'gradient-x': 'gradient-x 3s ease infinite',
+        'marquee': 'marquee 30s linear infinite',
+        'shimmer': 'shimmer 2s linear infinite',
+        'float': 'float 6s ease-in-out infinite',
+      },
+      keyframes: {
+        'gradient-x': {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+        },
+        'marquee': {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+        'shimmer': {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-20px)' },
+        },
+      },
     }
   },
   plugins: [require("tailwindcss-animate")]
