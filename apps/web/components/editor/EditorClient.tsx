@@ -2,7 +2,9 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { DocEditor, type NewStepType } from './DocEditor';
+import { GenerateDialog } from './GenerateDialog';
 import type { Tutorial, SourceWithSignedUrl, StepWithSignedUrl, Annotation } from '@/lib/types/editor';
+import type { GeneratedTutorialContent } from '@/lib/types/generation';
 
 export type SaveStatus = 'saved' | 'saving' | 'unsaved' | 'error';
 
@@ -31,6 +33,10 @@ export function EditorClient({
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved');
   const [isReordering, setIsReordering] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // AI Generation state
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
 
   const hasChanges = Object.keys(pendingChanges).length > 0 || Object.keys(pendingAnnotations).length > 0 || Object.keys(pendingUrls).length > 0;
 
@@ -468,6 +474,83 @@ export function EditorClient({
     }
   }, [steps]);
 
+  // Handle opening the generate dialog
+  const handleGenerateClick = useCallback(() => {
+    setGenerateDialogOpen(true);
+  }, []);
+
+  // Handle applying generated content
+  const handleApplyGenerated = useCallback(async (generated: GeneratedTutorialContent) => {
+    setIsGenerating(true);
+
+    try {
+      // Update title if different
+      if (generated.title && generated.title !== tutorial.title) {
+        await handleTitleChange(generated.title);
+      }
+
+      // Update description if different
+      if (generated.description && generated.description !== tutorial.description) {
+        const response = await fetch(`/api/tutorials/${tutorial.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description: generated.description }),
+        });
+
+        if (response.ok) {
+          setTutorial((prev) => ({ ...prev, description: generated.description }));
+        }
+      }
+
+      // Build updates for steps that have generated content
+      const stepUpdates = generated.steps
+        .map((genStep) => {
+          // Find the step that has this source_id
+          const existingStep = steps.find((s) => s.source_id === genStep.sourceId);
+          if (!existingStep) return null;
+
+          return {
+            id: existingStep.id,
+            text_content: genStep.textContent,
+          };
+        })
+        .filter((update): update is { id: string; text_content: string } => update !== null);
+
+      if (stepUpdates.length > 0) {
+        // Use batch update API
+        const response = await fetch('/api/steps/batch', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tutorialId: tutorial.id,
+            updates: stepUpdates,
+          }),
+        });
+
+        if (response.ok) {
+          // Update local state with new text content
+          setSteps((prev) =>
+            prev.map((step) => {
+              const update = stepUpdates.find((u) => u.id === step.id);
+              if (update) {
+                return { ...step, text_content: update.text_content };
+              }
+              return step;
+            })
+          );
+        }
+      }
+
+      setSaveStatus('saved');
+    } catch (error) {
+      console.error('Failed to apply generated content:', error);
+      setSaveStatus('error');
+      throw error; // Re-throw to let the dialog handle the error
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [tutorial, steps, handleTitleChange]);
+
   // Auto-save with debounce (1 second delay)
   useEffect(() => {
     if (!hasChanges) return;
@@ -502,21 +585,36 @@ export function EditorClient({
   }, [handleSave]);
 
   return (
-    <DocEditor
-      tutorial={tutorial}
-      sources={sources}
-      steps={steps}
-      saveStatus={isSaving || isReordering ? 'saving' : saveStatus}
-      onTitleChange={handleTitleChange}
-      onStepCaptionChange={handleStepCaptionChange}
-      onStepAnnotationsChange={handleStepAnnotationsChange}
-      onStepUrlChange={handleStepUrlChange}
-      onDeleteStep={handleDeleteStep}
-      onReorderSteps={handleReorderSteps}
-      onAddStep={handleAddStep}
-      onCreateStepFromSource={handleCreateStepFromSource}
-      onRemoveStepImage={handleRemoveStepImage}
-      onSetStepImage={handleSetStepImage}
-    />
+    <>
+      <DocEditor
+        tutorial={tutorial}
+        sources={sources}
+        steps={steps}
+        saveStatus={isSaving || isReordering ? 'saving' : saveStatus}
+        onTitleChange={handleTitleChange}
+        onStepCaptionChange={handleStepCaptionChange}
+        onStepAnnotationsChange={handleStepAnnotationsChange}
+        onStepUrlChange={handleStepUrlChange}
+        onDeleteStep={handleDeleteStep}
+        onReorderSteps={handleReorderSteps}
+        onAddStep={handleAddStep}
+        onCreateStepFromSource={handleCreateStepFromSource}
+        onRemoveStepImage={handleRemoveStepImage}
+        onSetStepImage={handleSetStepImage}
+        onGenerateClick={handleGenerateClick}
+        isGenerating={isGenerating}
+      />
+
+      <GenerateDialog
+        open={generateDialogOpen}
+        onOpenChange={setGenerateDialogOpen}
+        tutorialId={tutorial.id}
+        currentTitle={tutorial.title}
+        currentDescription={tutorial.description}
+        sources={sources}
+        steps={steps}
+        onApply={handleApplyGenerated}
+      />
+    </>
   );
 }

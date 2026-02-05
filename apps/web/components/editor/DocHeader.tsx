@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, AlertCircle, Cloud, CloudOff, Share2 } from 'lucide-react';
+import { Loader2, AlertCircle, Cloud, CloudOff, Share2, Sparkles } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -19,9 +19,20 @@ interface DocHeaderProps {
   tutorialId: string;
   tutorialTitle?: string;
   tutorialSlug?: string | null;
+  onGenerateClick?: () => void;
+  isGenerating?: boolean;
+  hasSourcesForGeneration?: boolean;
 }
 
-export function DocHeader({ saveStatus, tutorialId, tutorialTitle, tutorialSlug }: DocHeaderProps) {
+export function DocHeader({
+  saveStatus,
+  tutorialId,
+  tutorialTitle,
+  tutorialSlug,
+  onGenerateClick,
+  isGenerating,
+  hasSourcesForGeneration,
+}: DocHeaderProps) {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   return (
@@ -34,6 +45,22 @@ export function DocHeader({ saveStatus, tutorialId, tutorialTitle, tutorialSlug 
         ]}
         actions={
           <>
+            {onGenerateClick && hasSourcesForGeneration && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onGenerateClick}
+                disabled={isGenerating}
+                className="gap-2"
+              >
+                {isGenerating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+                Generate with AI
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
