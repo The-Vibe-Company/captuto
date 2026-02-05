@@ -71,8 +71,8 @@ export function getAnnotationBounds(annotation: Annotation): {
       };
     }
     case 'click-indicator': {
-      // Small bounding box around cursor
-      const size = 0.04;
+      // Bounding box around the pulsing dot + ripple area
+      const size = 0.06;
       return {
         minX: annotation.x - size / 2,
         minY: annotation.y - size / 2,
@@ -181,9 +181,9 @@ function hitTestRect(annotation: Annotation, point: { x: number; y: number }): b
   );
 }
 
-// Hit test for click indicator (circular area around cursor)
+// Hit test for click indicator (circular area around the pulsing dot)
 function hitTestClickIndicator(annotation: Annotation, point: { x: number; y: number }): boolean {
-  const hitRadius = 0.03; // 3% of canvas
+  const hitRadius = 0.04; // 4% of canvas - matches the ripple visual area
   const dx = point.x - annotation.x;
   const dy = point.y - annotation.y;
   return Math.sqrt(dx * dx + dy * dy) < hitRadius;

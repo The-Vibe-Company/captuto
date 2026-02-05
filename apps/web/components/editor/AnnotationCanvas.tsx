@@ -4,6 +4,7 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import type { Annotation, AnnotationType } from '@/lib/types/editor';
 import { findAnnotationAtPoint, moveAnnotation, getAnnotationBounds, hitTestCorner, type ResizeCorner } from '@/lib/utils/annotation-hit-test';
 import { getStrokePx, DEFAULT_ANNOTATION_STYLE } from '@/lib/constants/annotation-styles';
+import { getImageBounds } from '@/lib/utils/image-bounds';
 import type { AnnotationStyle } from './AnnotationToolbar';
 
 interface AnnotationCanvasProps {
@@ -18,10 +19,20 @@ interface AnnotationCanvasProps {
 }
 
 const SELECTION_COLOR = '#8b5cf6';
-const PIXELATE_BLOCK_SIZE = 12; // Size of each pixelated block in pixels
+const PIXELATE_BLOCK_SIZE = 12;
 
 // Auto-incrementing callout counter
 let nextCalloutNumber = 1;
+
+/** Parse hex color (#rrggbb) to {r, g, b} */
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const h = hex.replace('#', '');
+  return {
+    r: parseInt(h.slice(0, 2), 16),
+    g: parseInt(h.slice(2, 4), 16),
+    b: parseInt(h.slice(4, 6), 16),
+  };
+}
 
 export function AnnotationCanvas({
   annotations,
@@ -48,6 +59,12 @@ export function AnnotationCanvas({
   const [textInputState, setTextInputState] = useState<{ x: number; y: number } | null>(null);
   const textInputRef = useRef<HTMLInputElement>(null);
 
+  // Animation refs for click-indicator pulse effect
+  const animationTimeRef = useRef(0);
+  const animationFrameRef = useRef<number | null>(null);
+  // Store computed image bounds for use in text input positioning
+  const imageBoundsRef = useRef({ offsetX: 0, offsetY: 0, displayWidth: 1, displayHeight: 1, canvasWidth: 1, canvasHeight: 1 });
+
   const style = annotationStyle || {
     color: DEFAULT_ANNOTATION_STYLE.color,
     strokeWidth: DEFAULT_ANNOTATION_STYLE.strokeWidth,
@@ -56,31 +73,52 @@ export function AnnotationCanvas({
     textBackground: DEFAULT_ANNOTATION_STYLE.textBackground,
   };
 
-  // Get relative position (0-1) from mouse event
+  /** Compute the actual image bounds within the canvas (accounting for object-contain letterboxing) */
+  const computeCanvasImageBounds = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { offsetX: 0, offsetY: 0, displayWidth: 1, displayHeight: 1 };
+
+    const imgEl = containerRef.current?.querySelector('img') as HTMLImageElement | null;
+    if (!imgEl || !imgEl.complete || imgEl.naturalWidth === 0) {
+      return { offsetX: 0, offsetY: 0, displayWidth: canvas.width, displayHeight: canvas.height };
+    }
+
+    return getImageBounds(canvas.width, canvas.height, imgEl.naturalWidth, imgEl.naturalHeight);
+  }, [containerRef]);
+
+  // Get relative position (0-1) from mouse event, mapped to image space
   const getRelativePosition = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
       const canvas = canvasRef.current;
       if (!canvas) return null;
 
       const rect = canvas.getBoundingClientRect();
+      const bounds = computeCanvasImageBounds();
+
+      // Map mouse position to image-relative coordinates (0-1)
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const canvasX = (e.clientX - rect.left) * scaleX;
+      const canvasY = (e.clientY - rect.top) * scaleY;
+
       return {
-        x: (e.clientX - rect.left) / rect.width,
-        y: (e.clientY - rect.top) / rect.height,
+        x: (canvasX - bounds.offsetX) / bounds.displayWidth,
+        y: (canvasY - bounds.offsetY) / bounds.displayHeight,
       };
     },
-    []
+    [computeCanvasImageBounds]
   );
 
   // Draw selection indicator around an annotation
   const drawSelectionIndicator = useCallback(
-    (ctx: CanvasRenderingContext2D, annotation: Annotation, width: number, height: number) => {
+    (ctx: CanvasRenderingContext2D, annotation: Annotation, oX: number, oY: number, dw: number, dh: number) => {
       const bounds = getAnnotationBounds(annotation);
       const padding = 6;
 
-      const x = bounds.minX * width - padding;
-      const y = bounds.minY * height - padding;
-      const w = (bounds.maxX - bounds.minX) * width + padding * 2;
-      const h = (bounds.maxY - bounds.minY) * height + padding * 2;
+      const x = oX + bounds.minX * dw - padding;
+      const y = oY + bounds.minY * dh - padding;
+      const w = (bounds.maxX - bounds.minX) * dw + padding * 2;
+      const h = (bounds.maxY - bounds.minY) * dh + padding * 2;
 
       // Dashed selection border
       ctx.setLineDash([4, 4]);
@@ -99,13 +137,11 @@ export function AnnotationCanvas({
       ];
 
       corners.forEach(([cx, cy]) => {
-        // Shadow
         ctx.beginPath();
         ctx.arc(cx, cy, handleRadius + 1, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
         ctx.fill();
 
-        // Handle fill
         ctx.beginPath();
         ctx.arc(cx, cy, handleRadius, 0, Math.PI * 2);
         ctx.fillStyle = '#ffffff';
@@ -120,14 +156,14 @@ export function AnnotationCanvas({
 
   // Draw hover indicator
   const drawHoverIndicator = useCallback(
-    (ctx: CanvasRenderingContext2D, annotation: Annotation, width: number, height: number) => {
+    (ctx: CanvasRenderingContext2D, annotation: Annotation, oX: number, oY: number, dw: number, dh: number) => {
       const bounds = getAnnotationBounds(annotation);
       const padding = 4;
 
-      const x = bounds.minX * width - padding;
-      const y = bounds.minY * height - padding;
-      const w = (bounds.maxX - bounds.minX) * width + padding * 2;
-      const h = (bounds.maxY - bounds.minY) * height + padding * 2;
+      const x = oX + bounds.minX * dw - padding;
+      const y = oY + bounds.minY * dh - padding;
+      const w = (bounds.maxX - bounds.minX) * dw + padding * 2;
+      const h = (bounds.maxY - bounds.minY) * dh + padding * 2;
 
       ctx.setLineDash([3, 3]);
       ctx.strokeStyle = 'rgba(139, 92, 246, 0.4)';
@@ -148,12 +184,18 @@ export function AnnotationCanvas({
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const width = canvas.width;
-    const height = canvas.height;
+    // Compute image bounds to account for object-contain letterboxing
+    const bounds = computeCanvasImageBounds();
+    const { offsetX: oX, offsetY: oY, displayWidth: dw, displayHeight: dh } = bounds;
+
+    // Store for text input positioning
+    imageBoundsRef.current = { ...bounds, canvasWidth: canvas.width, canvasHeight: canvas.height };
+
+    const animTime = animationTimeRef.current;
 
     annotations.forEach((ann) => {
-      const x = ann.x * width;
-      const y = ann.y * height;
+      const x = oX + ann.x * dw;
+      const y = oY + ann.y * dh;
       const annColor = ann.color || DEFAULT_ANNOTATION_STYLE.color;
       const annStroke = getStrokePx(ann.strokeWidth);
       const annFontSize = ann.fontSize || DEFAULT_ANNOTATION_STYLE.fontSize;
@@ -162,12 +204,11 @@ export function AnnotationCanvas({
 
       switch (ann.type) {
         case 'circle': {
-          const w = (ann.width || 0.1) * width;
-          const h = (ann.height || 0.1) * height;
+          const w = (ann.width || 0.1) * dw;
+          const h = (ann.height || 0.1) * dh;
           const cx = x + w / 2;
           const cy = y + h / 2;
 
-          // Outer glow
           ctx.save();
           ctx.shadowColor = annColor;
           ctx.shadowBlur = 6;
@@ -184,8 +225,8 @@ export function AnnotationCanvas({
           break;
         }
         case 'arrow': {
-          const endX = (ann.endX || ann.x + 0.1) * width;
-          const endY = (ann.endY || ann.y) * height;
+          const endX = oX + (ann.endX || ann.x + 0.1) * dw;
+          const endY = oY + (ann.endY || ann.y) * dh;
           drawArrow(ctx, x, y, endX, endY, annColor, annStroke, false);
           break;
         }
@@ -204,7 +245,6 @@ export function AnnotationCanvas({
             const bgW = metrics.width + padX * 2;
             const bgH = textHeight + padY * 2;
 
-            // Background with rounded corners
             ctx.save();
             ctx.shadowColor = 'rgba(0, 0, 0, 0.12)';
             ctx.shadowBlur = 4;
@@ -220,11 +260,9 @@ export function AnnotationCanvas({
             ctx.fill();
             ctx.restore();
 
-            // White text on colored background
             ctx.fillStyle = '#ffffff';
             ctx.fillText(text, x, y - padY);
           } else {
-            // Colored text with subtle text shadow
             ctx.save();
             ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
             ctx.shadowBlur = 3;
@@ -240,27 +278,23 @@ export function AnnotationCanvas({
           const num = ann.calloutNumber || 1;
           const radius = Math.max((ann.fontSize || 16), 16);
 
-          // Shadow
           ctx.save();
           ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
           ctx.shadowBlur = 6;
           ctx.shadowOffsetY = 2;
 
-          // Filled circle
           ctx.beginPath();
           ctx.arc(x, y, radius, 0, Math.PI * 2);
           ctx.fillStyle = annColor;
           ctx.fill();
           ctx.restore();
 
-          // White border
           ctx.beginPath();
           ctx.arc(x, y, radius, 0, Math.PI * 2);
           ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
           ctx.lineWidth = 2;
           ctx.stroke();
 
-          // Number text
           const numStr = String(num);
           ctx.font = `700 ${radius}px Inter, system-ui, sans-serif`;
           ctx.textAlign = 'center';
@@ -272,65 +306,54 @@ export function AnnotationCanvas({
           break;
         }
         case 'highlight': {
-          const w = (ann.width || 0.1) * width;
-          const h = (ann.height || 0.05) * height;
+          const w = (ann.width || 0.1) * dw;
+          const h = (ann.height || 0.05) * dh;
 
-          // Parse the color and apply opacity
           ctx.save();
           ctx.globalAlpha = annOpacity;
-
-          // Rounded highlight rectangle
           ctx.fillStyle = annColor;
           ctx.beginPath();
           ctx.roundRect(x, y, w, h, 4);
           ctx.fill();
-
           ctx.restore();
           break;
         }
         case 'blur': {
-          const w = (ann.width || 0.1) * width;
-          const h = (ann.height || 0.1) * height;
+          const w = (ann.width || 0.1) * dw;
+          const h = (ann.height || 0.1) * dh;
 
-          // Pixelate effect: read underlying image, scale down then up
-          // Canvas is inside a wrapper div → go up to the container to find the <img>
           const imgEl = containerRef.current?.querySelector('img') as HTMLImageElement | null;
           if (imgEl && imgEl.complete && imgEl.naturalWidth > 0) {
             try {
               ctx.save();
-              // Clip to rounded rect
               ctx.beginPath();
               ctx.roundRect(x, y, w, h, 6);
               ctx.clip();
 
-              // Calculate how many pixel blocks fit
               const blockSize = PIXELATE_BLOCK_SIZE;
               const smallW = Math.max(1, Math.ceil(w / blockSize));
               const smallH = Math.max(1, Math.ceil(h / blockSize));
 
-              // Use offscreen canvas to pixelate
               const offscreen = document.createElement('canvas');
               offscreen.width = smallW;
               offscreen.height = smallH;
               const offCtx = offscreen.getContext('2d');
               if (offCtx) {
-                // Calculate source region from the image's natural dimensions
-                const scaleX = imgEl.naturalWidth / width;
-                const scaleY = imgEl.naturalHeight / height;
-                // Draw the source region scaled down (this averages the pixels)
-                offCtx.drawImage(
-                  imgEl,
-                  x * scaleX, y * scaleY, w * scaleX, h * scaleY,
-                  0, 0, smallW, smallH
-                );
-                // Draw it back at full size without smoothing → blocky pixels
+                // Map canvas pixel coords back to natural image coords
+                const scaleX = imgEl.naturalWidth / dw;
+                const scaleY = imgEl.naturalHeight / dh;
+                const srcX = (x - oX) * scaleX;
+                const srcY = (y - oY) * scaleY;
+                const srcW = w * scaleX;
+                const srcH = h * scaleY;
+
+                offCtx.drawImage(imgEl, srcX, srcY, srcW, srcH, 0, 0, smallW, smallH);
                 ctx.imageSmoothingEnabled = false;
                 ctx.drawImage(offscreen, 0, 0, smallW, smallH, x, y, w, h);
                 ctx.imageSmoothingEnabled = true;
               }
               ctx.restore();
             } catch {
-              // Fallback if image can't be read (CORS etc.)
               ctx.save();
               ctx.fillStyle = 'rgba(180, 180, 180, 0.9)';
               ctx.beginPath();
@@ -339,7 +362,6 @@ export function AnnotationCanvas({
               ctx.restore();
             }
           } else {
-            // Fallback: gray rectangle if image not loaded
             ctx.save();
             ctx.fillStyle = 'rgba(180, 180, 180, 0.9)';
             ctx.beginPath();
@@ -348,7 +370,6 @@ export function AnnotationCanvas({
             ctx.restore();
           }
 
-          // Subtle border
           ctx.strokeStyle = 'rgba(160, 160, 160, 0.3)';
           ctx.lineWidth = 1;
           ctx.beginPath();
@@ -357,42 +378,57 @@ export function AnnotationCanvas({
           break;
         }
         case 'click-indicator': {
-          const size = 30;
-          const scl = size / 24;
-          const tipOffset = scl * 3;
+          const color = annColor;
+          const { r, g, b } = hexToRgb(color);
 
-          // Outer pulse ring
+          // --- Animated ripple rings ---
+          const RIPPLE_DURATION = 2000;
+          const MAX_RADIUS = 28;
+          const NUM_RIPPLES = 3;
+
+          for (let i = 0; i < NUM_RIPPLES; i++) {
+            const phase = ((animTime + i * (RIPPLE_DURATION / NUM_RIPPLES)) % RIPPLE_DURATION) / RIPPLE_DURATION;
+            const radius = phase * MAX_RADIUS;
+            const opacity = Math.max(0, 0.45 * (1 - phase));
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+            ctx.lineWidth = 2 * (1 - phase * 0.5);
+            ctx.stroke();
+            ctx.restore();
+          }
+
+          // --- Outer glow (radial gradient) ---
           ctx.save();
+          const gradient = ctx.createRadialGradient(x, y, 0, x, y, 14);
+          gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.3)`);
+          gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+          ctx.fillStyle = gradient;
           ctx.beginPath();
-          ctx.arc(x, y, 18, 0, Math.PI * 2);
-          ctx.fillStyle = `${ann.color || '#8b5cf6'}20`;
+          ctx.arc(x, y, 14, 0, Math.PI * 2);
           ctx.fill();
-          ctx.strokeStyle = `${ann.color || '#8b5cf6'}40`;
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
           ctx.restore();
 
-          // Cursor shape
+          // --- Center dot with pulse ---
+          const dotPulse = 1 + 0.15 * Math.sin(animTime * 0.004);
+          const dotRadius = 5 * dotPulse;
+
           ctx.save();
-          ctx.translate(x - tipOffset, y - tipOffset);
-          ctx.scale(scl, scl);
+          ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.5)`;
+          ctx.shadowBlur = 10;
 
-          // Shadow
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
-          ctx.shadowBlur = 4;
-          ctx.shadowOffsetY = 2;
-
-          ctx.fillStyle = ann.color || '#8b5cf6';
-          ctx.strokeStyle = '#ffffff';
-          ctx.lineWidth = 1.5 / scl;
-          ctx.lineJoin = 'round';
           ctx.beginPath();
-          ctx.moveTo(3, 3);
-          ctx.lineTo(10.07, 19.97);
-          ctx.lineTo(12.58, 12.58);
-          ctx.lineTo(19.97, 10.07);
-          ctx.closePath();
+          ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
+          ctx.fillStyle = color;
           ctx.fill();
+
+          // White ring
+          ctx.beginPath();
+          ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+          ctx.lineWidth = 1.5;
           ctx.stroke();
           ctx.restore();
           break;
@@ -401,21 +437,21 @@ export function AnnotationCanvas({
 
       // Draw hover indicator (only if not readOnly)
       if (!readOnly && hoveredAnnotationId === ann.id && selectedAnnotationId !== ann.id) {
-        drawHoverIndicator(ctx, ann, width, height);
+        drawHoverIndicator(ctx, ann, oX, oY, dw, dh);
       }
 
       // Draw selection indicator (only if not readOnly)
       if (!readOnly && selectedAnnotationId === ann.id) {
-        drawSelectionIndicator(ctx, ann, width, height);
+        drawSelectionIndicator(ctx, ann, oX, oY, dw, dh);
       }
     });
 
     // Draw current drawing preview
     if (isDrawing && startPos && currentPos && activeTool) {
-      const startX = startPos.x * width;
-      const startY = startPos.y * height;
-      const currX = currentPos.x * width;
-      const currY = currentPos.y * height;
+      const startX = oX + startPos.x * dw;
+      const startY = oY + startPos.y * dh;
+      const currX = oX + currentPos.x * dw;
+      const currY = oY + currentPos.y * dh;
 
       ctx.setLineDash([5, 5]);
       ctx.strokeStyle = style.color;
@@ -450,7 +486,6 @@ export function AnnotationCanvas({
           break;
         }
         case 'numbered-callout': {
-          // Preview as circle at start position
           ctx.setLineDash([]);
           ctx.beginPath();
           ctx.arc(startX, startY, Math.max(style.fontSize, 16), 0, Math.PI * 2);
@@ -463,7 +498,11 @@ export function AnnotationCanvas({
 
       ctx.setLineDash([]);
     }
-  }, [annotations, isDrawing, startPos, currentPos, activeTool, selectedAnnotationId, hoveredAnnotationId, readOnly, drawHoverIndicator, drawSelectionIndicator, style.color, style.strokeWidth, style.fontSize]);
+  }, [annotations, isDrawing, startPos, currentPos, activeTool, selectedAnnotationId, hoveredAnnotationId, readOnly, drawHoverIndicator, drawSelectionIndicator, style.color, style.strokeWidth, style.fontSize, computeCanvasImageBounds, containerRef]);
+
+  // Keep a ref to the latest drawAnnotations for the rAF loop
+  const drawAnnotationsRef = useRef(drawAnnotations);
+  drawAnnotationsRef.current = drawAnnotations;
 
   // Resize canvas to match container and redraw
   useEffect(() => {
@@ -471,7 +510,6 @@ export function AnnotationCanvas({
     const container = containerRef.current;
     if (!canvas || !container) return;
 
-    // Initial size setup
     const rect = container.getBoundingClientRect();
     if (rect.width > 0 && rect.height > 0) {
       canvas.width = rect.width;
@@ -479,7 +517,6 @@ export function AnnotationCanvas({
       drawAnnotations();
     }
 
-    // Handle resize
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) {
@@ -501,20 +538,48 @@ export function AnnotationCanvas({
     drawAnnotations();
   }, [drawAnnotations]);
 
-  // Redraw when underlying image loads (needed for pixelate blur effect)
+  // Redraw when underlying image loads (needed for offset calculation + blur)
   useEffect(() => {
-    const hasBlur = annotations.some(a => a.type === 'blur');
-    if (!hasBlur) return;
-
     const imgEl = containerRef.current?.querySelector('img');
     if (!imgEl) return;
 
-    const onLoad = () => drawAnnotations();
+    const onLoad = () => drawAnnotationsRef.current();
     imgEl.addEventListener('load', onLoad);
-    // Also handle decode completion
-    if (imgEl.complete) drawAnnotations();
+    if (imgEl.complete) drawAnnotationsRef.current();
     return () => imgEl.removeEventListener('load', onLoad);
-  }, [annotations, containerRef, drawAnnotations]);
+  }, [containerRef]);
+
+  // Animation loop for click-indicator pulse effect
+  useEffect(() => {
+    const hasClickIndicators = annotations.some(a => a.type === 'click-indicator');
+
+    if (!hasClickIndicators) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      animationTimeRef.current = 0;
+      return;
+    }
+
+    let startTime: number | null = null;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      animationTimeRef.current = timestamp - startTime;
+      drawAnnotationsRef.current();
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
+  }, [annotations]);
 
   // Handle keyboard events for deletion
   useEffect(() => {
@@ -542,7 +607,6 @@ export function AnnotationCanvas({
     if (!pos) return;
 
     if (activeTool) {
-      // Check resize corners on selected annotation first (corners may be outside body hit area)
       if (selectedAnnotationId) {
         const selectedAnn = annotations.find(a => a.id === selectedAnnotationId);
         if (selectedAnn) {
@@ -556,11 +620,9 @@ export function AnnotationCanvas({
         }
       }
 
-      // Check if clicking on an existing annotation → select it instead of drawing
       const hitId = findAnnotationAtPoint(annotations, pos);
       if (hitId) {
         if (hitId === selectedAnnotationId) {
-          // Start dragging
           setIsDragging(true);
           setDragStartPos(pos);
           return;
@@ -575,7 +637,6 @@ export function AnnotationCanvas({
       }
 
       if (activeTool === 'numbered-callout') {
-        // Calculate next callout number based on existing callouts
         const existingCallouts = annotations.filter((a) => a.type === 'numbered-callout');
         const maxNum = existingCallouts.reduce((max, a) => Math.max(max, a.calloutNumber || 0), 0);
         nextCalloutNumber = maxNum + 1;
@@ -598,7 +659,6 @@ export function AnnotationCanvas({
       return;
     }
 
-    // Check resize corners on selected annotation first (corners may be outside body hit area)
     if (selectedAnnotationId) {
       const selectedAnn = annotations.find(a => a.id === selectedAnnotationId);
       if (selectedAnn) {
@@ -616,7 +676,6 @@ export function AnnotationCanvas({
 
     if (hitAnnotationId) {
       if (selectedAnnotationId === hitAnnotationId) {
-        // Start dragging
         setIsDragging(true);
         setDragStartPos(pos);
       } else {
@@ -695,7 +754,6 @@ export function AnnotationCanvas({
     const hitAnnotationId = findAnnotationAtPoint(annotations, pos);
     setHoveredAnnotationId(hitAnnotationId);
 
-    // Corner hover detection for resize cursor
     if (selectedAnnotationId) {
       const selectedAnn = annotations.find(a => a.id === selectedAnnotationId);
       if (selectedAnn) {
@@ -800,13 +858,24 @@ export function AnnotationCanvas({
   const getCursorStyle = () => {
     if (readOnly) return 'default';
     if (isResizing) return resizeCorner === 'nw' || resizeCorner === 'se' ? 'nwse-resize' : 'nesw-resize';
-    // Resize corners take priority over everything (including active tool)
     if (hoveredCorner) return hoveredCorner === 'nw' || hoveredCorner === 'se' ? 'nwse-resize' : 'nesw-resize';
     if (isDragging) return 'grabbing';
     if (activeTool) return hoveredAnnotationId ? 'pointer' : 'crosshair';
     if (hoveredAnnotationId) return 'pointer';
     if (selectedAnnotationId && hoveredAnnotationId === selectedAnnotationId) return 'grab';
     return 'default';
+  };
+
+  // Compute text input position in CSS %, mapped through image bounds
+  const getTextInputPosition = () => {
+    if (!textInputState) return { left: '0%', top: '0%' };
+    const { offsetX: oX, offsetY: oY, displayWidth: dw, displayHeight: dh, canvasWidth: cw, canvasHeight: ch } = imageBoundsRef.current;
+    const pxX = oX + textInputState.x * dw;
+    const pxY = oY + textInputState.y * dh;
+    return {
+      left: `${(pxX / cw) * 100}%`,
+      top: `${(pxY / ch) * 100}%`,
+    };
   };
 
   return (
@@ -828,8 +897,8 @@ export function AnnotationCanvas({
           placeholder="Type annotation text..."
           className="absolute z-10 rounded border border-primary bg-background/95 px-2 py-1 text-sm shadow-lg outline-none ring-2 ring-primary/30 backdrop-blur-sm"
           style={{
-            left: `${textInputState.x * 100}%`,
-            top: `${textInputState.y * 100}%`,
+            left: getTextInputPosition().left,
+            top: getTextInputPosition().top,
             transform: 'translateY(-50%)',
             minWidth: '150px',
             maxWidth: '300px',
@@ -857,14 +926,12 @@ function drawArrow(
   const headWidth = headLength * 0.6;
   const angle = Math.atan2(toY - fromY, toX - fromX);
 
-  // Line (draw up to where arrowhead starts)
   const lineEndX = toX - headLength * Math.cos(angle);
   const lineEndY = toY - headLength * Math.sin(angle);
 
   ctx.save();
 
   if (!dashed) {
-    // Subtle shadow for depth
     ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
     ctx.shadowBlur = 3;
     ctx.shadowOffsetY = 1;
@@ -880,7 +947,6 @@ function drawArrow(
     ctx.setLineDash([5, 5]);
   }
 
-  // Draw line
   ctx.beginPath();
   ctx.moveTo(fromX, fromY);
   ctx.lineTo(lineEndX, lineEndY);
@@ -890,7 +956,6 @@ function drawArrow(
     ctx.setLineDash([]);
   }
 
-  // Draw filled arrowhead (triangle)
   ctx.beginPath();
   ctx.moveTo(toX, toY);
   ctx.lineTo(
