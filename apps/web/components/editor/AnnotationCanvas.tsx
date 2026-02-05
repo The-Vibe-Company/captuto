@@ -32,8 +32,6 @@ export function AnnotationCanvas({
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPos, setStartPos] = useState<{ x: number; y: number } | null>(null);
   const [currentPos, setCurrentPos] = useState<{ x: number; y: number } | null>(null);
-
-  // Selection state
   const [selectedAnnotationId, setSelectedAnnotationId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartPos, setDragStartPos] = useState<{ x: number; y: number } | null>(null);
@@ -65,14 +63,12 @@ export function AnnotationCanvas({
       const w = (bounds.maxX - bounds.minX) * width + padding * 2;
       const h = (bounds.maxY - bounds.minY) * height + padding * 2;
 
-      // Draw dashed border
       ctx.setLineDash([4, 4]);
       ctx.strokeStyle = SELECTION_COLOR;
       ctx.lineWidth = 2;
       ctx.strokeRect(x, y, w, h);
       ctx.setLineDash([]);
 
-      // Draw handles at corners
       const handleSize = 8;
       ctx.fillStyle = SELECTION_COLOR;
       const corners = [
@@ -108,19 +104,17 @@ export function AnnotationCanvas({
     []
   );
 
-  // Draw all annotations
+  // Draw all annotations - reads directly from props/state
   const drawAnnotations = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
-    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const width = canvas.width;
     const height = canvas.height;
 
-    // Draw existing annotations
     annotations.forEach((ann) => {
       const x = ann.x * width;
       const y = ann.y * height;
@@ -165,25 +159,19 @@ export function AnnotationCanvas({
           break;
         }
         case 'click-indicator': {
-          // Draw the cursor icon (MousePointer2)
           const size = 28;
           ctx.save();
           ctx.translate(x - 4, y - 4);
           ctx.scale(size / 24, size / 24);
-
-          // MousePointer2 SVG path
           ctx.fillStyle = ann.color || '#8b5cf6';
           ctx.strokeStyle = 'white';
           ctx.lineWidth = 1.5 / (size / 24);
-
           ctx.beginPath();
-          // Path: M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z
           ctx.moveTo(3, 3);
           ctx.lineTo(10.07, 19.97);
           ctx.lineTo(12.58, 12.58);
           ctx.lineTo(19.97, 10.07);
           ctx.closePath();
-
           ctx.fill();
           ctx.stroke();
           ctx.restore();
@@ -191,12 +179,12 @@ export function AnnotationCanvas({
         }
       }
 
-      // Draw hover indicator (if hovered and not selected, not in readOnly)
+      // Draw hover indicator (only if not readOnly)
       if (!readOnly && hoveredAnnotationId === ann.id && selectedAnnotationId !== ann.id) {
         drawHoverIndicator(ctx, ann, width, height);
       }
 
-      // Draw selection indicator (not in readOnly)
+      // Draw selection indicator (only if not readOnly)
       if (!readOnly && selectedAnnotationId === ann.id) {
         drawSelectionIndicator(ctx, ann, width, height);
       }
@@ -242,31 +230,45 @@ export function AnnotationCanvas({
 
       ctx.setLineDash([]);
     }
-  }, [annotations, isDrawing, startPos, currentPos, activeTool, selectedAnnotationId, hoveredAnnotationId, drawSelectionIndicator, drawHoverIndicator, readOnly]);
+  }, [annotations, isDrawing, startPos, currentPos, activeTool, selectedAnnotationId, hoveredAnnotationId, readOnly, drawHoverIndicator, drawSelectionIndicator]);
 
-  // Resize canvas to match container
+  // Resize canvas to match container and redraw
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
 
-    const resizeObserver = new ResizeObserver(() => {
-      const rect = container.getBoundingClientRect();
+    // Initial size setup
+    const rect = container.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
       canvas.width = rect.width;
       canvas.height = rect.height;
       drawAnnotations();
+    }
+
+    // Handle resize
+    const resizeObserver = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          canvas.width = width;
+          canvas.height = height;
+          drawAnnotations();
+        }
+      }
     });
 
     resizeObserver.observe(container);
     return () => resizeObserver.disconnect();
   }, [containerRef, drawAnnotations]);
 
-  // Redraw when annotations change
+  // Redraw when annotations or state changes
   useEffect(() => {
     drawAnnotations();
   }, [drawAnnotations]);
 
-  // Handle keyboard events for deletion (disabled in readOnly mode)
+  // Handle keyboard events for deletion
   useEffect(() => {
     if (readOnly) return;
 
@@ -290,7 +292,6 @@ export function AnnotationCanvas({
     const pos = getRelativePosition(e);
     if (!pos) return;
 
-    // If there's an active tool, enter drawing mode
     if (activeTool) {
       if (activeTool === 'text') {
         const content = window.prompt('Texte de l\'annotation:');
@@ -313,21 +314,16 @@ export function AnnotationCanvas({
       return;
     }
 
-    // No active tool - handle selection/dragging
     const hitAnnotationId = findAnnotationAtPoint(annotations, pos);
 
     if (hitAnnotationId) {
-      // Clicked on an annotation
       if (selectedAnnotationId === hitAnnotationId) {
-        // Already selected - start dragging
         setIsDragging(true);
         setDragStartPos(pos);
       } else {
-        // Select this annotation
         setSelectedAnnotationId(hitAnnotationId);
       }
     } else {
-      // Clicked on empty space - deselect
       setSelectedAnnotationId(null);
     }
   };
@@ -337,13 +333,11 @@ export function AnnotationCanvas({
     const pos = getRelativePosition(e);
     if (!pos) return;
 
-    // Handle drawing preview
     if (isDrawing && activeTool) {
       setCurrentPos(pos);
       return;
     }
 
-    // Handle dragging
     if (isDragging && dragStartPos && selectedAnnotationId && onUpdateAnnotation) {
       const deltaX = pos.x - dragStartPos.x;
       const deltaY = pos.y - dragStartPos.y;
@@ -362,7 +356,6 @@ export function AnnotationCanvas({
       return;
     }
 
-    // Handle hover detection (only when no tool is active)
     if (!activeTool) {
       const hitAnnotationId = findAnnotationAtPoint(annotations, pos);
       setHoveredAnnotationId(hitAnnotationId);
@@ -370,7 +363,6 @@ export function AnnotationCanvas({
   };
 
   const handleMouseUp = () => {
-    // Handle drawing completion
     if (isDrawing && startPos && currentPos && activeTool) {
       const annotation: Annotation = {
         id: crypto.randomUUID(),
@@ -395,7 +387,6 @@ export function AnnotationCanvas({
           break;
       }
 
-      // Only add if it has some size
       const minSize = 0.01;
       if (
         activeTool === 'arrow' ||
@@ -418,7 +409,6 @@ export function AnnotationCanvas({
     setHoveredAnnotationId(null);
   };
 
-  // Determine cursor style
   const getCursorStyle = () => {
     if (readOnly) return 'default';
     if (activeTool) return 'crosshair';
@@ -442,7 +432,6 @@ export function AnnotationCanvas({
   );
 }
 
-// Helper to draw an arrow
 function drawArrow(
   ctx: CanvasRenderingContext2D,
   fromX: number,
@@ -463,7 +452,6 @@ function drawArrow(
     ctx.setLineDash([5, 5]);
   }
 
-  // Line
   ctx.beginPath();
   ctx.moveTo(fromX, fromY);
   ctx.lineTo(toX, toY);
@@ -473,7 +461,6 @@ function drawArrow(
     ctx.setLineDash([]);
   }
 
-  // Arrowhead
   ctx.beginPath();
   ctx.moveTo(toX, toY);
   ctx.lineTo(
