@@ -43,15 +43,15 @@ export function Header({ userEmail }: HeaderProps) {
     .toUpperCase();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-stone-100 bg-white/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+    <header className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
         {/* Logo */}
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-violet-600 shadow-sm">
-            <Play className="h-4 w-4 fill-white text-white" />
+        <Link href="/dashboard" className="flex items-center gap-2.5 group">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary shadow-sm transition-transform group-hover:scale-105">
+            <Play className="h-4 w-4 fill-primary-foreground text-primary-foreground" />
           </div>
-          <span className="text-lg font-semibold tracking-tight text-stone-900">Vibe Tuto</span>
-          <span className="ml-1 rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-600">
+          <span className="text-base font-semibold tracking-tight text-foreground">Vibe Tuto</span>
+          <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
             Beta
           </span>
         </Link>
@@ -59,19 +59,19 @@ export function Header({ userEmail }: HeaderProps) {
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-              <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-violet-100 text-violet-600">
+            <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+              <Avatar className="h-9 w-9">
+                <AvatarFallback className="bg-muted text-muted-foreground text-sm font-medium">
                   {initials}
                 </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64">
+          <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium text-stone-900">Mon compte</p>
-                <p className="text-xs text-stone-500 truncate">{userEmail}</p>
+                <p className="text-sm font-medium text-foreground">Mon compte</p>
+                <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -96,14 +96,14 @@ export function Header({ userEmail }: HeaderProps) {
                 className="flex items-center"
               >
                 <HelpCircle className="mr-2 h-4 w-4" />
-                Centre d'aide
-                <ExternalLink className="ml-auto h-3 w-3 text-stone-400" />
+                Centre d&apos;aide
+                <ExternalLink className="ml-auto h-3 w-3 text-muted-foreground" />
               </a>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={handleLogout}
-              className="text-red-600 focus:text-red-600"
+              className="text-destructive focus:text-destructive"
             >
               <LogOut className="mr-2 h-4 w-4" />
               Se deconnecter

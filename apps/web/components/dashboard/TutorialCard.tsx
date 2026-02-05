@@ -2,9 +2,8 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { MoreVertical, Pencil, Share2, Trash2, Loader2, Play, ImageIcon, Globe, GlobeLock } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { MoreHorizontal, Pencil, Share2, Trash2, Loader2, Play, ImageIcon, Globe, GlobeLock, Clock, Layers } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -41,12 +40,14 @@ export interface TutorialCardProps {
 const publishedConfig = {
   published: {
     label: 'Publié',
-    className: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    dotClass: 'bg-emerald-500',
+    textClass: 'text-emerald-600',
     icon: Globe,
   },
   notPublished: {
-    label: 'Non publié',
-    className: 'bg-stone-100 text-stone-600 border-stone-200',
+    label: 'Brouillon',
+    dotClass: 'bg-muted-foreground/50',
+    textClass: 'text-muted-foreground',
     icon: GlobeLock,
   },
 };
@@ -102,46 +103,39 @@ export function TutorialCard({
 
   return (
     <>
-      <Card className="group overflow-hidden transition-all hover:shadow-lg cursor-pointer" onClick={onEdit}>
+      <Card 
+        className="group relative overflow-hidden border border-border/60 bg-card transition-all duration-200 hover:border-border hover:shadow-md cursor-pointer" 
+        onClick={onEdit}
+      >
         {/* Thumbnail */}
-        <div className="relative aspect-video bg-gradient-to-br from-stone-50 to-stone-100">
+        <div className="relative aspect-[16/10] bg-muted/50">
           {thumbnailUrl ? (
             <Image
               src={thumbnailUrl}
               alt={title}
               fill
-              className="object-contain"
+              className="object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
-            <div className="flex h-full flex-col items-center justify-center text-stone-300">
-              <div className="rounded-xl bg-stone-200/50 p-4">
-                <ImageIcon className="h-10 w-10" />
+            <div className="flex h-full flex-col items-center justify-center">
+              <div className="rounded-xl bg-muted p-4">
+                <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
               </div>
-              <span className="mt-2 text-xs text-stone-400">Aucun aperçu</span>
             </div>
           )}
-
-          {/* Published Status Badge */}
-          <Badge
-            variant="outline"
-            className={`absolute left-2 top-2 gap-1.5 border px-2 py-1 text-xs font-medium shadow-sm ${publishInfo.className}`}
-          >
-            <PublishIcon className="h-3 w-3" />
-            {publishInfo.label}
-          </Badge>
 
           {/* Process Button - Only show for processing status */}
           {status === 'processing' && onProcess && (
             <div
-              className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100"
+              className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm opacity-0 transition-opacity group-hover:opacity-100"
               onClick={(e) => e.stopPropagation()}
             >
               <Button
                 onClick={handleProcess}
                 disabled={isProcessing}
-                className="gap-2 bg-white text-stone-900 hover:bg-stone-100"
                 size="sm"
+                className="gap-2"
               >
                 {isProcessing ? (
                   <>
@@ -168,12 +162,12 @@ export function TutorialCard({
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="h-8 w-8 bg-white/90 hover:bg-white"
+                  className="h-8 w-8 bg-background/90 backdrop-blur-sm hover:bg-background shadow-sm"
                 >
-                  <MoreVertical className="h-4 w-4" />
+                  <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="w-44">
                 <DropdownMenuItem onClick={onEdit}>
                   <Pencil className="mr-2 h-4 w-4" />
                   Modifier
@@ -185,7 +179,7 @@ export function TutorialCard({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => setDeleteDialogOpen(true)}
-                  className="text-red-600 focus:text-red-600"
+                  className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   Supprimer
@@ -196,13 +190,33 @@ export function TutorialCard({
         </div>
 
         {/* Content */}
-        <CardContent className="p-4">
-          <h3 className="truncate font-medium text-stone-900">{title}</h3>
-          <div className="mt-2 flex items-center justify-between text-sm text-stone-500">
-            <span>{stepsCount} etape{stepsCount !== 1 ? 's' : ''}</span>
-            <span>{formattedDate}</span>
+        <div className="p-4 space-y-3">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="font-medium text-foreground leading-tight line-clamp-2">{title}</h3>
           </div>
-        </CardContent>
+          
+          <div className="flex items-center justify-between">
+            {/* Status indicator */}
+            <div className="flex items-center gap-1.5">
+              <span className={`h-2 w-2 rounded-full ${publishInfo.dotClass}`} />
+              <span className={`text-xs font-medium ${publishInfo.textClass}`}>
+                {publishInfo.label}
+              </span>
+            </div>
+            
+            {/* Meta info */}
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Layers className="h-3 w-3" />
+                {stepsCount}
+              </span>
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                {formattedDate}
+              </span>
+            </div>
+          </div>
+        </div>
       </Card>
 
       {/* Delete Confirmation Dialog */}

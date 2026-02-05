@@ -17,9 +17,9 @@ export default async function DashboardLayout({
   const userEmail = session?.user?.email || '';
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <Header userEmail={userEmail} />
-      <main>
+      <main className="pb-12">
         {children}
       </main>
     </div>

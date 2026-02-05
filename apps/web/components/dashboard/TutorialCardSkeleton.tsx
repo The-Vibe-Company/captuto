@@ -1,20 +1,26 @@
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export function TutorialCardSkeleton() {
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden border border-border/60">
       {/* Thumbnail */}
-      <Skeleton className="aspect-video w-full" />
+      <Skeleton className="aspect-[16/10] w-full rounded-none" />
 
       {/* Content */}
-      <CardContent className="p-4">
-        <Skeleton className="h-5 w-3/4" />
-        <div className="mt-2 flex items-center justify-between">
-          <Skeleton className="h-4 w-16" />
-          <Skeleton className="h-4 w-20" />
+      <div className="p-4 space-y-3">
+        <Skeleton className="h-5 w-4/5" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Skeleton className="h-2 w-2 rounded-full" />
+            <Skeleton className="h-3 w-16" />
+          </div>
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-3 w-8" />
+            <Skeleton className="h-3 w-16" />
+          </div>
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 }
