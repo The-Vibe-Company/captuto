@@ -502,22 +502,31 @@ export function EditorClient({
         }
       }
 
-      // Build updates for steps that have generated content
-      const stepUpdates = generated.steps
-        .map((genStep) => {
-          // Find the step that has this source_id
-          const existingStep = steps.find((s) => s.source_id === genStep.sourceId);
-          if (!existingStep) return null;
+      // Build updates for existing steps and identify sources needing new steps
+      const stepUpdates: { id: string; text_content: string }[] = [];
+      const sourcesToCreate: { sourceId: string; textContent: string }[] = [];
 
-          return {
+      for (const genStep of generated.steps) {
+        // Find existing step with this source_id
+        const existingStep = steps.find((s) => s.source_id === genStep.sourceId);
+
+        if (existingStep) {
+          // Update existing step
+          stepUpdates.push({
             id: existingStep.id,
             text_content: genStep.textContent,
-          };
-        })
-        .filter((update): update is { id: string; text_content: string } => update !== null);
+          });
+        } else {
+          // Need to create a new step from this source
+          sourcesToCreate.push({
+            sourceId: genStep.sourceId,
+            textContent: genStep.textContent,
+          });
+        }
+      }
 
+      // Update existing steps via batch API
       if (stepUpdates.length > 0) {
-        // Use batch update API
         const response = await fetch('/api/steps/batch', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -528,7 +537,6 @@ export function EditorClient({
         });
 
         if (response.ok) {
-          // Update local state with new text content
           setSteps((prev) =>
             prev.map((step) => {
               const update = stepUpdates.find((u) => u.id === step.id);
@@ -541,6 +549,51 @@ export function EditorClient({
         }
       }
 
+      // Create new steps from sources
+      for (const toCreate of sourcesToCreate) {
+        const source = sources.find((s) => s.id === toCreate.sourceId);
+        if (source) {
+          // Create step via API
+          const response = await fetch('/api/steps', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tutorial_id: tutorial.id,
+              source_id: source.id,
+              step_type: 'image',
+              text_content: toCreate.textContent,
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+
+            // Add the new step to local state
+            setSteps((prev) => [
+              ...prev,
+              {
+                id: data.step.id,
+                tutorial_id: tutorial.id,
+                source_id: source.id,
+                order_index: prev.length,
+                text_content: toCreate.textContent,
+                step_type: 'image' as const,
+                annotations: data.step.annotations,
+                created_at: data.step.created_at,
+                signedScreenshotUrl: source.signedScreenshotUrl,
+                source: source,
+                click_x: source.click_x,
+                click_y: source.click_y,
+                viewport_width: source.viewport_width,
+                viewport_height: source.viewport_height,
+                element_info: source.element_info,
+                url: source.url,
+              },
+            ]);
+          }
+        }
+      }
+
       setSaveStatus('saved');
     } catch (error) {
       console.error('Failed to apply generated content:', error);
@@ -549,7 +602,7 @@ export function EditorClient({
     } finally {
       setIsGenerating(false);
     }
-  }, [tutorial, steps, handleTitleChange]);
+  }, [tutorial, steps, sources, handleTitleChange]);
 
   // Auto-save with debounce (1 second delay)
   useEffect(() => {

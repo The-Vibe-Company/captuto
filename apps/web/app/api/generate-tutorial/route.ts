@@ -9,6 +9,7 @@ import {
   type GenerateTutorialErrorResponse,
 } from '@/lib/types/generation';
 import type { ElementInfo } from '@/lib/types/editor';
+import { alignStepsWithTranscription, type TranscriptionSegment } from '@/lib/alignment';
 
 interface GenerateRequest {
   tutorialId: string;
@@ -148,7 +149,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 6. Build a map of source_id -> step text_content (for transcription context)
+    // 6. Build a map of source_id -> step text_content (fallback for transcription)
     const stepTextBySourceId = new Map<string, string>();
     for (const step of steps) {
       if (step.source_id && step.text_content) {
@@ -156,7 +157,47 @@ export async function POST(request: Request) {
       }
     }
 
-    // 7. Generate signed URLs for all screenshots
+    // 7. Get transcription from Deepgram (if audio exists)
+    const transcriptionBySourceId = new Map<string, string>();
+
+    try {
+      const transcribeResponse = await fetch(new URL('/api/transcribe', request.url), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: request.headers.get('cookie') || '',
+        },
+        body: JSON.stringify({ tutorialId: body.tutorialId }),
+      });
+
+      if (transcribeResponse.ok) {
+        const transcribeData = await transcribeResponse.json();
+        const segments: TranscriptionSegment[] = transcribeData.segments || [];
+
+        // Align transcription with sources based on timestamps
+        const sourcesWithTimestamp = sources.filter(
+          (s): s is SourceData & { timestamp_start: number } => s.timestamp_start !== null
+        );
+
+        if (sourcesWithTimestamp.length > 0 && segments.length > 0) {
+          const aligned = alignStepsWithTranscription(
+            sourcesWithTimestamp.map((s) => ({ id: s.id, timestamp_start: s.timestamp_start })),
+            segments
+          );
+
+          for (const a of aligned) {
+            if (a.textContent) {
+              transcriptionBySourceId.set(a.stepId, a.textContent);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.log('Transcription not available:', error);
+      // Continue without transcription - it's optional context
+    }
+
+    // 8. Generate signed URLs for all screenshots
     const screenshotPaths = sources
       .filter((s) => s.screenshot_url)
       .map((s) => s.screenshot_url as string);
@@ -197,7 +238,7 @@ export async function POST(request: Request) {
           ...source,
           base64Image,
           element_info: elementInfo,
-          transcription: stepTextBySourceId.get(source.id) || null,
+          transcription: transcriptionBySourceId.get(source.id) || stepTextBySourceId.get(source.id) || null,
         };
       })
     );
