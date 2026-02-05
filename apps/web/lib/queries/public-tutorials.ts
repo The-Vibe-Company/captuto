@@ -66,12 +66,17 @@ async function processSteps(
         annotations,
         created_at: step.created_at,
         signedScreenshotUrl,
+        source: source ? {
+          ...source,
+          signedScreenshotUrl,
+          element_info: elementInfo,
+        } : null,
         click_x: source?.click_x ?? null,
         click_y: source?.click_y ?? null,
         viewport_width: source?.viewport_width ?? null,
         viewport_height: source?.viewport_height ?? null,
         element_info: elementInfo ?? null,
-        url: source?.url ?? null,
+        url: step.url ?? source?.url ?? null,
       };
     })
   );
