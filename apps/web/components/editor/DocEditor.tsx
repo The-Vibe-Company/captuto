@@ -51,6 +51,9 @@ interface DocEditorProps {
   onCreateStepFromSource: (source: SourceWithSignedUrl) => void;
   onRemoveStepImage: (stepId: string) => void;
   onSetStepImage: (stepId: string, source: SourceWithSignedUrl) => void;
+  // AI Generation props
+  onGenerateClick?: () => void;
+  isGenerating?: boolean;
 }
 
 export function DocEditor({
@@ -68,6 +71,8 @@ export function DocEditor({
   onCreateStepFromSource,
   onRemoveStepImage,
   onSetStepImage,
+  onGenerateClick,
+  isGenerating,
 }: DocEditorProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -105,6 +110,9 @@ export function DocEditor({
           tutorialId={tutorial.id}
           tutorialTitle={tutorial.title}
           tutorialSlug={tutorial.slug}
+          onGenerateClick={onGenerateClick}
+          isGenerating={isGenerating}
+          hasSourcesForGeneration={sources.length > 0}
         />
 
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
