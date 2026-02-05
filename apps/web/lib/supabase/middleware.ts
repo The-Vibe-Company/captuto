@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { supabaseConfig } from "./config";
 
 // Protected routes that require authentication
 const PROTECTED_ROUTES = ['/dashboard', '/editor'];
@@ -9,9 +10,14 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
+  console.log('[v0] Supabase config in middleware:', {
+    hasUrl: !!supabaseConfig.url,
+    hasKey: !!supabaseConfig.anonKey,
+  });
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseConfig.url,
+    supabaseConfig.anonKey,
     {
       cookies: {
         getAll() {
