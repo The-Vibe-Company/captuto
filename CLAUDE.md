@@ -68,3 +68,11 @@ When planning, always create a graph of tasks and dependencies between them.
 ## Vercel
 
 never deploy to vercel manually, let the CI/CD do it. 
+
+
+## Running the front
+
+Always run the frontend locally on port 3678.
+Always check if the frontend is running locally on port 3678 before doing anything.
+If the frontend is not running locally on port 3678, run it in the background.
+Don't hesitate to kill the process if it is not running well.

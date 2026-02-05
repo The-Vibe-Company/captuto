@@ -17,12 +17,20 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
+     * Match only pages that need auth check:
+     * - /dashboard and subroutes
+     * - /editor and subroutes  
+     * - /settings and subroutes
+     * - /api routes that need auth
+     * 
+     * Excludes:
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
+     * - All static assets (favicon, images, fonts, etc.)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    '/dashboard/:path*',
+    '/editor/:path*',
+    '/settings/:path*',
+    '/api/:path*',
   ],
 };

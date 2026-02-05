@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import Image from 'next/image';
 import { MoreVertical, Pencil, Share2, Trash2, Loader2, ImageIcon, Globe, GlobeLock } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -49,7 +49,7 @@ const publishedConfig = {
   },
 };
 
-export function TutorialCard({
+function TutorialCardComponent({
   id,
   title,
   slug,
@@ -98,6 +98,8 @@ export function TutorialCard({
               fill
               className="object-contain"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              loading="lazy"
+              decoding="async"
             />
           ) : (
             <div className="flex h-full flex-col items-center justify-center text-stone-300">
@@ -225,3 +227,16 @@ export function TutorialCard({
     </>
   );
 }
+
+// Memoize to prevent unnecessary re-renders
+export const TutorialCard = memo(TutorialCardComponent, (prev, next) => {
+  return (
+    prev.id === next.id &&
+    prev.title === next.title &&
+    prev.status === next.status &&
+    prev.visibility === next.visibility &&
+    prev.stepsCount === next.stepsCount &&
+    prev.thumbnailUrl === next.thumbnailUrl &&
+    prev.createdAt === next.createdAt
+  );
+});

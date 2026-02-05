@@ -129,7 +129,8 @@ export function StepScreenshot({
                 fill
                 className="object-contain"
                 sizes="(max-width: 768px) 100vw, 800px"
-                priority
+                loading="lazy"
+                decoding="async"
               />
 
               {/* Annotation canvas (always visible, editable when annotating) */}

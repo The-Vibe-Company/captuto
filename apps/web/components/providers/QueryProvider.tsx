@@ -1,10 +1,10 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo } from 'react';
 
 export function QueryProvider({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(
+  const queryClient = useMemo(
     () =>
       new QueryClient({
         defaultOptions: {
@@ -15,9 +15,14 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
             gcTime: 5 * 60 * 1000,
             // Don't refetch on window focus for better UX
             refetchOnWindowFocus: false,
+            // Retry failed requests only once
+            retry: 1,
+            // Don't refetch on reconnect to avoid unnecessary requests
+            refetchOnReconnect: false,
           },
         },
-      })
+      }),
+    []
   );
 
   return (
