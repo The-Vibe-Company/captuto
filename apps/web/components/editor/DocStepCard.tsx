@@ -57,7 +57,9 @@ function DocStepCardComponent({
   const [isHovered, setIsHovered] = useState(false);
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [isEditingUrl, setIsEditingUrl] = useState(false);
-  const [editedUrl, setEditedUrl] = useState(step.url || '');
+  // Compute URL with fallback to source URL for existing steps
+  const displayUrl = step.url || step.source?.url || null;
+  const [editedUrl, setEditedUrl] = useState(displayUrl || '');
   const annotations = step.annotations || [];
 
   // Filter sources that have screenshots
@@ -328,7 +330,7 @@ function DocStepCardComponent({
           </div>
 
           {/* URL for navigation/tab_change steps */}
-          {step.url && (
+          {displayUrl && (
             <div className="px-4 pt-2">
               {isEditingUrl && !readOnly ? (
                 <div className="flex items-center gap-2">
@@ -342,7 +344,7 @@ function DocStepCardComponent({
                         onUrlChange?.(editedUrl);
                         setIsEditingUrl(false);
                       } else if (e.key === 'Escape') {
-                        setEditedUrl(step.url || '');
+                        setEditedUrl(displayUrl || '');
                         setIsEditingUrl(false);
                       }
                     }}
@@ -364,7 +366,7 @@ function DocStepCardComponent({
                     variant="ghost"
                     size="icon"
                     onClick={() => {
-                      setEditedUrl(step.url || '');
+                      setEditedUrl(displayUrl || '');
                       setIsEditingUrl(false);
                     }}
                     className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
@@ -376,19 +378,19 @@ function DocStepCardComponent({
                 <div className="group/url flex items-center gap-2">
                   <ExternalLink className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
                   <a
-                    href={step.url}
+                    href={displayUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-muted-foreground hover:text-primary hover:underline truncate"
                   >
-                    {formatSourceUrl(step.url)}
+                    {formatSourceUrl(displayUrl)}
                   </a>
                   {!readOnly && (
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => {
-                        setEditedUrl(step.url || '');
+                        setEditedUrl(displayUrl || '');
                         setIsEditingUrl(true);
                       }}
                       className="h-6 w-6 opacity-0 group-hover/url:opacity-100 text-muted-foreground hover:text-primary transition-opacity"
