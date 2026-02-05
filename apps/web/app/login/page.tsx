@@ -17,12 +17,17 @@ export default function LoginPage() {
   // Check if user is already logged in
   useEffect(() => {
     const checkAuth = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
 
-      if (user) {
-        router.push('/dashboard');
-      } else {
+        if (user) {
+          router.push('/dashboard');
+        } else {
+          setCheckingAuth(false);
+        }
+      } catch (err) {
+        console.error('[v0] Auth check failed:', err);
         setCheckingAuth(false);
       }
     };
@@ -69,8 +74,12 @@ export default function LoginPage() {
         router.push('/dashboard');
       }
     } catch (err) {
-      setError('Une erreur est survenue. Veuillez réessayer.');
-      console.error('Login error:', err);
+      console.error('[v0] Login error:', err);
+      if (err instanceof Error && err.message.includes('Supabase credentials missing')) {
+        setError('Configuration Supabase manquante. Veuillez configurer les variables d\'environnement.');
+      } else {
+        setError('Une erreur est survenue. Veuillez réessayer.');
+      }
     } finally {
       setLoading(false);
     }
