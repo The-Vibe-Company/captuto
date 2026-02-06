@@ -13,6 +13,11 @@ import {
   Copy,
   Check,
   Clock,
+  Keyboard,
+  Command,
+  AppWindow,
+  Flag,
+  Monitor,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { SourceWithSignedUrl, SourceActionType } from '@/lib/types/editor';
@@ -80,6 +85,58 @@ const ACTION_CONFIG = {
     cardHoverBorder: 'hover:border-amber-300 dark:hover:border-amber-700/60',
     cardBg: 'bg-amber-50/30 dark:bg-amber-950/20',
     addBtnBg: 'bg-amber-500 hover:bg-amber-600',
+  },
+  type: {
+    icon: Keyboard,
+    label: 'Typing',
+    dotColor: 'bg-emerald-500',
+    dotGlow: 'shadow-emerald-500/40',
+    badgeBg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
+    badgeText: 'text-emerald-600 dark:text-emerald-400',
+    badgeBorder: 'border-emerald-200/60 dark:border-emerald-500/30',
+    cardBorder: 'border-emerald-100 dark:border-emerald-900/40',
+    cardHoverBorder: 'hover:border-emerald-300 dark:hover:border-emerald-700/60',
+    cardBg: 'bg-emerald-50/30 dark:bg-emerald-950/20',
+    addBtnBg: 'bg-emerald-500 hover:bg-emerald-600',
+  },
+  keyboard_shortcut: {
+    icon: Command,
+    label: 'Shortcut',
+    dotColor: 'bg-orange-500',
+    dotGlow: 'shadow-orange-500/40',
+    badgeBg: 'bg-orange-500/10 dark:bg-orange-500/20',
+    badgeText: 'text-orange-600 dark:text-orange-400',
+    badgeBorder: 'border-orange-200/60 dark:border-orange-500/30',
+    cardBorder: 'border-orange-100 dark:border-orange-900/40',
+    cardHoverBorder: 'hover:border-orange-300 dark:hover:border-orange-700/60',
+    cardBg: 'bg-orange-50/30 dark:bg-orange-950/20',
+    addBtnBg: 'bg-orange-500 hover:bg-orange-600',
+  },
+  app_switch: {
+    icon: AppWindow,
+    label: 'App Switch',
+    dotColor: 'bg-blue-500',
+    dotGlow: 'shadow-blue-500/40',
+    badgeBg: 'bg-blue-500/10 dark:bg-blue-500/20',
+    badgeText: 'text-blue-600 dark:text-blue-400',
+    badgeBorder: 'border-blue-200/60 dark:border-blue-500/30',
+    cardBorder: 'border-blue-100 dark:border-blue-900/40',
+    cardHoverBorder: 'hover:border-blue-300 dark:hover:border-blue-700/60',
+    cardBg: 'bg-blue-50/30 dark:bg-blue-950/20',
+    addBtnBg: 'bg-blue-500 hover:bg-blue-600',
+  },
+  manual_marker: {
+    icon: Flag,
+    label: 'Marker',
+    dotColor: 'bg-rose-500',
+    dotGlow: 'shadow-rose-500/40',
+    badgeBg: 'bg-rose-500/10 dark:bg-rose-500/20',
+    badgeText: 'text-rose-600 dark:text-rose-400',
+    badgeBorder: 'border-rose-200/60 dark:border-rose-500/30',
+    cardBorder: 'border-rose-100 dark:border-rose-900/40',
+    cardHoverBorder: 'hover:border-rose-300 dark:hover:border-rose-700/60',
+    cardBg: 'bg-rose-50/30 dark:bg-rose-950/20',
+    addBtnBg: 'bg-rose-500 hover:bg-rose-600',
   },
 } as const;
 
@@ -213,18 +270,47 @@ function TimelineItemComponent({
 
         {/* Info section */}
         <div className="space-y-1 px-3 pb-2">
-          {/* Element text for clicks */}
-          {actionType === 'click' && elementInfo?.text && (
+          {/* Auto caption for desktop sources */}
+          {source.auto_caption && (
+            <p className="truncate text-xs font-medium text-foreground/80">
+              {source.auto_caption}
+            </p>
+          )}
+
+          {/* Element text for clicks (extension sources without auto_caption) */}
+          {!source.auto_caption && actionType === 'click' && elementInfo?.text && (
             <p className="truncate text-xs font-medium text-foreground/80">
               {elementInfo.text}
             </p>
           )}
 
           {/* Tab title for tab changes */}
-          {actionType === 'tab_change' && elementInfo?.tabTitle && (
+          {!source.auto_caption && actionType === 'tab_change' && elementInfo?.tabTitle && (
             <p className="truncate text-xs font-medium text-foreground/80">
               {elementInfo.tabTitle}
             </p>
+          )}
+
+          {/* App context for desktop sources */}
+          {source.app_name && (
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/70">
+              <Monitor className="h-3 w-3 flex-shrink-0" />
+              <span className="truncate">{source.app_name}</span>
+            </div>
+          )}
+
+          {/* Window title for desktop sources */}
+          {source.window_title && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="truncate text-[11px] text-muted-foreground/50">
+                  {source.window_title}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent side="left" className="max-w-xs text-xs">
+                {source.window_title}
+              </TooltipContent>
+            </Tooltip>
           )}
 
           {/* URL */}

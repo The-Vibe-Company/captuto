@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleExecutable</key>
+    <string>VibeTuto</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.vibetuto.recorder</string>
+    <key>CFBundleName</key>
+    <string>Vibe Tuto Recorder</string>
+    <key>CFBundleDisplayName</key>
+    <string>Vibe Tuto Recorder</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Vibe Tuto needs microphone access to record audio narration for your tutorials.</string>
+    <key>NSScreenCaptureUsageDescription</key>
+    <string>Vibe Tuto needs screen recording access to capture screenshots of your workflow.</string>
+    <key>NSSupportsAutomaticTermination</key>
+    <false/>
+    <key>NSSupportsSuddenTermination</key>
+    <false/>
+</dict>
+</plist>

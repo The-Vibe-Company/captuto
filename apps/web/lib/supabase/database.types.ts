@@ -41,13 +41,18 @@ export type Database = {
     Tables: {
       sources: {
         Row: {
+          action_type: string | null
           annotations: Json | null
+          app_bundle_id: string | null
+          app_name: string | null
+          auto_caption: string | null
           click_type: string | null
           click_x: number | null
           click_y: number | null
           created_at: string | null
           id: string
           order_index: number
+          recording_id: string | null
           screenshot_url: string | null
           text_content: string | null
           timestamp_end: number | null
@@ -56,15 +61,21 @@ export type Database = {
           url: string | null
           viewport_height: number | null
           viewport_width: number | null
+          window_title: string | null
         }
         Insert: {
+          action_type?: string | null
           annotations?: Json | null
+          app_bundle_id?: string | null
+          app_name?: string | null
+          auto_caption?: string | null
           click_type?: string | null
           click_x?: number | null
           click_y?: number | null
           created_at?: string | null
           id?: string
           order_index: number
+          recording_id?: string | null
           screenshot_url?: string | null
           text_content?: string | null
           timestamp_end?: number | null
@@ -73,15 +84,21 @@ export type Database = {
           url?: string | null
           viewport_height?: number | null
           viewport_width?: number | null
+          window_title?: string | null
         }
         Update: {
+          action_type?: string | null
           annotations?: Json | null
+          app_bundle_id?: string | null
+          app_name?: string | null
+          auto_caption?: string | null
           click_type?: string | null
           click_x?: number | null
           click_y?: number | null
           created_at?: string | null
           id?: string
           order_index?: number
+          recording_id?: string | null
           screenshot_url?: string | null
           text_content?: string | null
           timestamp_end?: number | null
@@ -90,6 +107,7 @@ export type Database = {
           url?: string | null
           viewport_height?: number | null
           viewport_width?: number | null
+          window_title?: string | null
         }
         Relationships: [
           {

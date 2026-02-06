@@ -4,7 +4,7 @@ import { useState, useCallback, memo } from 'react';
 import Image from 'next/image';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Trash2, ImageOff, ImagePlus, ExternalLink, Pencil, Check, X, FileText, Globe, ArrowRightLeft } from 'lucide-react';
+import { GripVertical, Trash2, ImageOff, ImagePlus, ExternalLink, Pencil, Check, X, FileText, Globe, ArrowRightLeft, Monitor } from 'lucide-react';
 import type { StepWithSignedUrl, SourceWithSignedUrl, Annotation } from '@/lib/types/editor';
 import { formatSourceUrl, getSourceActionType } from '@/lib/types/editor';
 import { InlineCaption } from './InlineCaption';
@@ -356,6 +356,21 @@ function DocStepCardComponent({
                   )}
                 </div>
               )}
+
+              {/* App context badge for desktop sources */}
+              {step.source?.app_name && (
+                <div className="flex items-center gap-1.5 pb-1">
+                  <Badge variant="outline" className="gap-1.5 font-normal text-muted-foreground border-border/60 bg-muted/30">
+                    <Monitor className="h-3 w-3" />
+                    <span className="text-xs">{step.source.app_name}</span>
+                  </Badge>
+                  {step.source.window_title && (
+                    <span className="truncate text-xs text-muted-foreground/60 max-w-[200px]">
+                      {step.source.window_title}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Action buttons */}
@@ -514,6 +529,8 @@ export const DocStepCard = memo(DocStepCardComponent, (prev, next) => {
     prev.step.signedScreenshotUrl === next.step.signedScreenshotUrl &&
     prev.step.step_type === next.step.step_type &&
     prev.step.url === next.step.url &&
+    prev.step.source?.app_name === next.step.source?.app_name &&
+    prev.step.source?.window_title === next.step.source?.window_title &&
     prev.stepNumber === next.stepNumber &&
     prev.readOnly === next.readOnly &&
     JSON.stringify(prev.step.annotations) === JSON.stringify(next.step.annotations) &&

@@ -9,6 +9,89 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      sources: {
+        Row: {
+          id: string;
+          tutorial_id: string | null;
+          order_index: number;
+          screenshot_url: string | null;
+          text_content: string | null;
+          click_x: number | null;
+          click_y: number | null;
+          viewport_width: number | null;
+          viewport_height: number | null;
+          click_type: string | null;
+          url: string | null;
+          timestamp_start: number | null;
+          timestamp_end: number | null;
+          annotations: Json | null;
+          element_info: Json | null;
+          app_bundle_id: string | null;
+          app_name: string | null;
+          window_title: string | null;
+          action_type: string | null;
+          auto_caption: string | null;
+          recording_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tutorial_id?: string | null;
+          order_index: number;
+          screenshot_url?: string | null;
+          text_content?: string | null;
+          click_x?: number | null;
+          click_y?: number | null;
+          viewport_width?: number | null;
+          viewport_height?: number | null;
+          click_type?: string | null;
+          url?: string | null;
+          timestamp_start?: number | null;
+          timestamp_end?: number | null;
+          annotations?: Json | null;
+          element_info?: Json | null;
+          app_bundle_id?: string | null;
+          app_name?: string | null;
+          window_title?: string | null;
+          action_type?: string | null;
+          auto_caption?: string | null;
+          recording_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          tutorial_id?: string | null;
+          order_index?: number;
+          screenshot_url?: string | null;
+          text_content?: string | null;
+          click_x?: number | null;
+          click_y?: number | null;
+          viewport_width?: number | null;
+          viewport_height?: number | null;
+          click_type?: string | null;
+          url?: string | null;
+          timestamp_start?: number | null;
+          timestamp_end?: number | null;
+          annotations?: Json | null;
+          element_info?: Json | null;
+          app_bundle_id?: string | null;
+          app_name?: string | null;
+          window_title?: string | null;
+          action_type?: string | null;
+          auto_caption?: string | null;
+          recording_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "steps_tutorial_id_fkey";
+            columns: ["tutorial_id"];
+            isOneToOne: false;
+            referencedRelation: "tutorials";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       tutorials: {
         Row: {
           id: string;
