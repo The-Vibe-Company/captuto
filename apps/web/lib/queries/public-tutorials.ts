@@ -133,7 +133,12 @@ export async function getPublicTutorialByToken(
           viewport_height,
           click_type,
           url,
-          element_info
+          element_info,
+          app_name,
+          app_bundle_id,
+          window_title,
+          action_type,
+          auto_caption
         )
       `
       )
@@ -213,7 +218,12 @@ export async function getPublicTutorialBySlug(
           viewport_height,
           click_type,
           url,
-          element_info
+          element_info,
+          app_name,
+          app_bundle_id,
+          window_title,
+          action_type,
+          auto_caption
         )
       `
       )

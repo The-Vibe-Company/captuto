@@ -2,11 +2,50 @@ import type { Tables } from '@/lib/supabase/types';
 
 export type Tutorial = Tables<'tutorials'>;
 
-// Source action type for timeline display
-export type SourceActionType = 'click' | 'navigation' | 'tab_change';
+// Source action type for timeline display (includes desktop types)
+export type SourceActionType =
+  | 'click'
+  | 'navigation'
+  | 'tab_change'
+  | 'type'
+  | 'keyboard_shortcut'
+  | 'app_switch'
+  | 'manual_marker';
+
+// Desktop action types from the macOS step detector
+export type DesktopActionType =
+  | 'click'
+  | 'type'
+  | 'keyboard_shortcut'
+  | 'app_switch'
+  | 'url_navigation'
+  | 'menu_selection'
+  | 'drag'
+  | 'scroll'
+  | 'dialog_interaction'
+  | 'manual_marker';
+
+// Map desktop action_type to display action type
+const DESKTOP_ACTION_MAP: Record<string, SourceActionType> = {
+  click: 'click',
+  type: 'type',
+  keyboard_shortcut: 'keyboard_shortcut',
+  app_switch: 'app_switch',
+  url_navigation: 'navigation',
+  menu_selection: 'click',
+  drag: 'click',
+  scroll: 'navigation',
+  dialog_interaction: 'click',
+  manual_marker: 'manual_marker',
+};
 
 // Helper to determine the action type of a source
 export function getSourceActionType(source: Source | SourceWithSignedUrl): SourceActionType {
+  // Desktop sources have action_type set directly
+  if (source.action_type && source.action_type in DESKTOP_ACTION_MAP) {
+    return DESKTOP_ACTION_MAP[source.action_type];
+  }
+  // Extension sources use click_type
   if (source.click_type === 'tab_change') return 'tab_change';
   if (source.click_type === 'navigation') return 'navigation';
   if (source.click_x != null && source.click_y != null) return 'click';
@@ -53,6 +92,13 @@ export interface Source {
   timestamp_start: number | null;
   element_info: ElementInfo | null;
   created_at: string;
+  // Desktop recording fields
+  app_bundle_id?: string | null;
+  app_name?: string | null;
+  window_title?: string | null;
+  action_type?: string | null;
+  auto_caption?: string | null;
+  recording_id?: string | null;
 }
 
 // Source with signed URL for display

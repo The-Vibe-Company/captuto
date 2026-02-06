@@ -1,0 +1,40 @@
+name: VibeTuto
+options:
+  bundleIdPrefix: com.vibetuto
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "16.0"
+  createIntermediateGroups: true
+
+targets:
+  VibeTuto:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources/VibeTuto
+        type: group
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.vibetuto.recorder
+        INFOPLIST_FILE: Resources/Info.plist
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "Apple Development"
+        DEVELOPMENT_TEAM: K28B69CWQ7
+        CODE_SIGN_ENTITLEMENTS: VibeTuto.entitlements
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        LD_RUNPATH_SEARCH_PATHS: "@executable_path/../Frameworks"
+        SWIFT_VERSION: "5.9"
+        GENERATE_INFOPLIST_FILE: false
+    dependencies:
+      - framework: ScreenCaptureKit.framework
+        embed: false
+      - framework: AVFoundation.framework
+        embed: false
+      - framework: CoreGraphics.framework
+        embed: false
+      - framework: CoreMedia.framework
+        embed: false
+      - framework: Cocoa.framework
+        embed: false
+      - sdk: ApplicationServices.framework
+      - sdk: Carbon.framework

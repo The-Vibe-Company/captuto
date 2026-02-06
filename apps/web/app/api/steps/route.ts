@@ -191,6 +191,11 @@ export async function POST(request: Request) {
           }
         }
       }
+
+      // Fall back to auto_caption from desktop sources
+      if (!insertData.text_content && source.auto_caption) {
+        insertData.text_content = source.auto_caption;
+      }
     }
 
     // Copy URL from source for navigation/tab_change events

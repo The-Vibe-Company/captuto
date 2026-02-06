@@ -39,8 +39,13 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
 
+  // API routes with Bearer token handle their own auth - don't redirect
+  const hasBearerToken = request.headers.get('Authorization')?.startsWith('Bearer ');
+  const isApiRoute = pathname.startsWith('/api/');
+
   // Redirect to login if accessing protected route without auth
-  if (isProtectedRoute && !user) {
+  // But skip redirect for API routes with Bearer tokens (desktop app uses API tokens)
+  if (isProtectedRoute && !user && !(isApiRoute && hasBearerToken)) {
     const loginUrl = new URL('/login', request.url);
     return NextResponse.redirect(loginUrl);
   }
