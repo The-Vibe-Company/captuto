@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Protected routes that require authentication
-const PROTECTED_ROUTES = ['/dashboard', '/editor'];
+const PROTECTED_ROUTES = ['/dashboard', '/editor', '/settings'];
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({

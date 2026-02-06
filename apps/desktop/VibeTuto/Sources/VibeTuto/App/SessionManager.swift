@@ -113,11 +113,21 @@ final class SessionManager: ObservableObject {
         // Start screen capture
         Task {
             do {
-                try await captureEngine.startCapture(mode: currentMode, appBundleID: nil)
+                let bundleID: String? = currentMode == .singleApp
+                    ? NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+                    : nil
+                try await captureEngine.startCapture(mode: currentMode, appBundleID: bundleID)
             } catch {
                 state = .error("Failed to start capture: \(error.localizedDescription)")
                 return
             }
+        }
+
+        // Start audio capture if mic is enabled (independent of action detection)
+        if micEnabled {
+            let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("VibeTuto/\(sessionID?.uuidString ?? UUID().uuidString)")
+            try? FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+            try? audioRecorder.start(outputDirectory: tempDir)
         }
 
         // Wire up the step detection pipeline:
@@ -144,13 +154,6 @@ final class SessionManager: ObservableObject {
         eventMonitor.start(sessionStart: sessionStart) { [weak self] action in
             self?.actionBuffer.addAction(action)
         }
-
-        // Start audio capture if mic is enabled
-        if micEnabled {
-            let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("VibeTuto/\(sessionID?.uuidString ?? UUID().uuidString)")
-            try? FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-            try? audioRecorder.start(outputDirectory: tempDir)
-        }
     }
 
     /// Pause the recording.
@@ -159,6 +162,8 @@ final class SessionManager: ObservableObject {
         state = .paused
         timer?.invalidate()
         timer = nil
+        eventMonitor.stop()
+        audioRecorder.pause()
     }
 
     /// Resume a paused recording.
@@ -171,6 +176,12 @@ final class SessionManager: ObservableObject {
                 self.elapsedTime = Date().timeIntervalSince(start)
             }
         }
+        if actionDetectionEnabled {
+            eventMonitor.start(sessionStart: recordingStartTime ?? Date()) { [weak self] action in
+                self?.actionBuffer.addAction(action)
+            }
+        }
+        audioRecorder.resume()
     }
 
     /// Add a manual marker step.
@@ -215,7 +226,7 @@ final class SessionManager: ObservableObject {
                     duration: elapsedTime,
                     macosVersion: ProcessInfo.processInfo.operatingSystemVersionString,
                     screenResolution: "\(Int(screenSize.width))x\(Int(screenSize.height))",
-                    appsUsed: contextTracker.allAppsUsed,
+                    appsUsed: Array(appsUsed),
                     steps: detectedSteps,
                     audioKey: self.audioURL != nil ? "narration.m4a" : nil
                 )
@@ -340,6 +351,14 @@ final class SessionManager: ObservableObject {
         } catch {
             logger.error("Upload failed: \(error.localizedDescription)")
             state = .error("Upload failed: \(error.localizedDescription)")
+        }
+    }
+
+    /// Retry a failed upload without re-recording.
+    func retryUpload() {
+        guard case .error = state else { return }
+        Task {
+            await beginUpload()
         }
     }
 

@@ -95,6 +95,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid recording duration' }, { status: 400 });
     }
 
+    // Limit steps count to prevent abuse (500 steps ≈ ~8 min recording at 1 step/sec)
+    if (body.steps.length > 500) {
+      return NextResponse.json({ error: 'Too many steps (max 500)' }, { status: 413 });
+    }
+
     // 4. Generate a recording_id to group all sources from this session
     const recordingId = crypto.randomUUID();
 
@@ -191,30 +196,40 @@ export async function POST(request: Request) {
       // Don't fail the whole request - tutorial is created
     }
 
-    // 7. If audio was uploaded, trigger transcription
+    // 7. If audio was uploaded to storage, trigger transcription.
+    // Note: Desktop app sets audio_key but doesn't yet upload audio data to storage,
+    // so we verify the file exists before triggering transcription.
     if (body.audio_key) {
-      try {
-        const transcribeHeaders: Record<string, string> = {
-          'Content-Type': 'application/json',
-          Cookie: request.headers.get('cookie') || '',
-        };
-        const authHeader = request.headers.get('authorization');
-        if (authHeader) {
-          transcribeHeaders['Authorization'] = authHeader;
-        }
-        const transcribeResponse = await fetch(new URL('/api/transcribe', request.url), {
-          method: 'POST',
-          headers: transcribeHeaders,
-          body: JSON.stringify({ tutorialId: tutorial.id }),
-        });
+      const audioPath = `${userId}/${tutorial.id}.webm`;
+      const { data: audioCheck } = await supabase.storage
+        .from('recordings')
+        .createSignedUrl(audioPath, 10);
+      if (!audioCheck?.signedUrl) {
+        console.warn('Audio key provided but file not found in storage, skipping transcription');
+      } else {
+        try {
+          const transcribeHeaders: Record<string, string> = {
+            'Content-Type': 'application/json',
+            Cookie: request.headers.get('cookie') || '',
+          };
+          const authHeader = request.headers.get('authorization');
+          if (authHeader) {
+            transcribeHeaders['Authorization'] = authHeader;
+          }
+          const transcribeResponse = await fetch(new URL('/api/transcribe', request.url), {
+            method: 'POST',
+            headers: transcribeHeaders,
+            body: JSON.stringify({ tutorialId: tutorial.id }),
+          });
 
-        if (!transcribeResponse.ok) {
-          console.error('Transcription trigger failed:', await transcribeResponse.text());
+          if (!transcribeResponse.ok) {
+            console.error('Transcription trigger failed:', await transcribeResponse.text());
+            // Don't fail - transcription is optional
+          }
+        } catch (err) {
+          console.error('Failed to trigger transcription:', err);
           // Don't fail - transcription is optional
         }
-      } catch (err) {
-        console.error('Failed to trigger transcription:', err);
-        // Don't fail - transcription is optional
       }
     }
 

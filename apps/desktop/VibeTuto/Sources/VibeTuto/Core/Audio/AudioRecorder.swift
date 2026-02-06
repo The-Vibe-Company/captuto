@@ -60,6 +60,18 @@ final class AudioRecorder: @unchecked Sendable {
         isRecording = true
     }
 
+    /// Pause audio recording.
+    func pause() {
+        guard isRecording else { return }
+        audioEngine?.pause()
+    }
+
+    /// Resume audio recording.
+    func resume() {
+        guard isRecording else { return }
+        try? audioEngine?.start()
+    }
+
     /// Stop recording and return the audio file URL.
     func stop() -> URL? {
         guard isRecording else { return nil }

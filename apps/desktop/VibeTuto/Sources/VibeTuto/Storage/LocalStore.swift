@@ -23,9 +23,12 @@ final class LocalStore: @unchecked Sendable {
         let metadataData = try encoder.encode(session)
         try metadataData.write(to: sessionDir.appendingPathComponent("session.json"))
 
-        // Save screenshots
+        // Save screenshots (keys may contain '/' so create parent dirs)
         for (key, data) in screenshots {
-            try data.write(to: sessionDir.appendingPathComponent(key))
+            let fileURL = sessionDir.appendingPathComponent(key)
+            let parentDir = fileURL.deletingLastPathComponent()
+            try fileManager.createDirectory(at: parentDir, withIntermediateDirectories: true)
+            try data.write(to: fileURL)
         }
 
         return sessionDir

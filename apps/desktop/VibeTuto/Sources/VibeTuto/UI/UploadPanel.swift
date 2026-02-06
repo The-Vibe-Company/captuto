@@ -143,8 +143,7 @@ struct ErrorPanelView: View {
 
             HStack(spacing: 12) {
                 Button("Retry") {
-                    // Re-trigger upload
-                    session.stopRecording()
+                    session.retryUpload()
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.regular)
