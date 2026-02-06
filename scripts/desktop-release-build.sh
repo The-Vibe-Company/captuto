@@ -58,14 +58,20 @@ mkdir -p "$BUILD_DIR"
 if [ "$SIGN" = true ]; then
   CERT_ID="${DEVELOPER_ID_APPLICATION:-}"
   if [ -z "$CERT_ID" ]; then
+    # Try Developer ID Application first, then any codesigning identity
     CERT_ID=$(security find-identity -v -p codesigning | \
       grep "Developer ID Application" | head -1 | awk '{print $2}')
   fi
   if [ -z "$CERT_ID" ]; then
-    echo "ERROR: No Developer ID Application certificate found"
-    echo "For CI, set DEVELOPER_ID_APPLICATION env var"
+    CERT_ID=$(security find-identity -v -p codesigning | \
+      grep -v "CSSMERR" | head -1 | awk '{print $2}')
+  fi
+  if [ -z "$CERT_ID" ]; then
+    echo "ERROR: No codesigning certificate found"
+    echo "For CI, set DEVELOPER_ID_APPLICATION env var or import a certificate"
     exit 1
   fi
+  echo "Using certificate: $CERT_ID"
 
   xcodebuild \
     -project "$APP_NAME.xcodeproj" \
