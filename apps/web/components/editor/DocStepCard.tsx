@@ -4,7 +4,7 @@ import { useState, useCallback, memo } from 'react';
 import Image from 'next/image';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Trash2, ImageOff, ImagePlus, ExternalLink, Pencil, Check, X, FileText, Globe, ArrowRightLeft, Monitor, ChevronRight } from 'lucide-react';
+import { GripVertical, Trash2, ImageOff, ImagePlus, ExternalLink, Pencil, Check, X, FileText, Globe, ArrowRightLeft, Monitor, ChevronRight, Eye, EyeOff } from 'lucide-react';
 import type { StepWithSignedUrl, SourceWithSignedUrl, Annotation } from '@/lib/types/editor';
 import { formatSourceUrl, getSourceActionType } from '@/lib/types/editor';
 import { InlineCaption } from './InlineCaption';
@@ -35,6 +35,7 @@ interface DocStepCardProps {
   onCaptionChange?: (caption: string) => void;
   onDescriptionChange?: (description: string) => void;
   onUrlChange?: (url: string) => void;
+  onShowUrlChange?: (showUrl: boolean) => void;
   onAnnotationsChange?: (annotations: Annotation[]) => void;
   onDelete?: () => void;
   onRemoveImage?: () => void;
@@ -50,6 +51,7 @@ function DocStepCardComponent({
   onCaptionChange,
   onDescriptionChange,
   onUrlChange,
+  onShowUrlChange,
   onAnnotationsChange,
   onDelete,
   onRemoveImage,
@@ -283,8 +285,8 @@ function DocStepCardComponent({
                 />
               </div>
 
-              {/* URL chip - completely hidden when redundant in read-only mode, collapsible toggle in editor */}
-              {displayUrl && !(isUrlRedundant && readOnly) && (
+              {/* URL chip - hidden in read-only mode when redundant or show_url is false */}
+              {displayUrl && !(readOnly && (isUrlRedundant || step.show_url === false)) && (
                 <div className="pb-1">
                   {isUrlRedundant && !urlExpanded && !isEditingUrl ? (
                     <button
@@ -347,12 +349,23 @@ function DocStepCardComponent({
                         href={displayUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-full bg-muted/70 px-2.5 py-1 text-xs text-muted-foreground hover:text-primary hover:bg-muted transition-colors max-w-[300px]"
+                        className={cn(
+                          "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs transition-all duration-200 max-w-[300px]",
+                          step.show_url === false
+                            ? "bg-destructive/5 text-muted-foreground/30 line-through decoration-destructive/40"
+                            : "bg-muted/70 text-muted-foreground hover:text-primary hover:bg-muted"
+                        )}
                       >
                         <Globe className="h-3 w-3 flex-shrink-0" />
                         <span className="truncate">{formatSourceUrl(displayUrl)}</span>
                         <ExternalLink className="h-2.5 w-2.5 flex-shrink-0 opacity-50" />
                       </a>
+                      {step.show_url === false && !readOnly && (
+                        <Badge variant="outline" className="gap-1 font-normal text-destructive/60 border-destructive/20 bg-destructive/5 text-[10px] px-1.5 py-0">
+                          <EyeOff className="h-2.5 w-2.5" />
+                          Hidden
+                        </Badge>
+                      )}
                       {isUrlRedundant && urlExpanded && (
                         <Button
                           variant="ghost"
@@ -362,6 +375,32 @@ function DocStepCardComponent({
                         >
                           <X className="h-3 w-3" />
                         </Button>
+                      )}
+                      {!readOnly && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onShowUrlChange?.(step.show_url === false ? true : false)}
+                              className={cn(
+                                "h-6 w-6 transition-all",
+                                step.show_url === false
+                                  ? "text-destructive/60 hover:text-primary"
+                                  : "opacity-0 group-hover/url:opacity-100 text-muted-foreground hover:text-primary"
+                              )}
+                            >
+                              {step.show_url === false ? (
+                                <EyeOff className="h-3 w-3" />
+                              ) : (
+                                <Eye className="h-3 w-3" />
+                              )}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="text-xs">
+                            {step.show_url === false ? 'Show URL publicly' : 'Hide URL publicly'}
+                          </TooltipContent>
+                        </Tooltip>
                       )}
                       {!readOnly && (
                         <Button
@@ -553,6 +592,7 @@ export const DocStepCard = memo(DocStepCardComponent, (prev, next) => {
     prev.step.signedScreenshotUrl === next.step.signedScreenshotUrl &&
     prev.step.step_type === next.step.step_type &&
     prev.step.url === next.step.url &&
+    prev.step.show_url === next.step.show_url &&
     prev.step.source?.app_name === next.step.source?.app_name &&
     prev.step.source?.window_title === next.step.source?.window_title &&
     prev.stepNumber === next.stepNumber &&

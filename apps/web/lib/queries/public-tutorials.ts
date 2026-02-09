@@ -78,6 +78,7 @@ async function processSteps(
         viewport_height: source?.viewport_height ?? null,
         element_info: elementInfo ?? null,
         url: step.url ?? source?.url ?? null,
+        show_url: step.show_url ?? true,
       };
     })
   );
@@ -124,6 +125,7 @@ export async function getPublicTutorialByToken(
         annotations,
         created_at,
         url,
+        show_url,
         sources (
           id,
           screenshot_url,
@@ -209,6 +211,7 @@ export async function getPublicTutorialBySlug(
         annotations,
         created_at,
         url,
+        show_url,
         sources (
           id,
           screenshot_url,

@@ -142,6 +142,7 @@ export default async function EditorPage({ params }: EditorPageProps) {
       annotations,
       created_at: step.created_at,
       url: step.url || null,
+      show_url: step.show_url ?? true,
       // From joined source
       signedScreenshotUrl: source?.signedScreenshotUrl || null,
       source: source || null,

@@ -30,6 +30,7 @@ export function EditorClient({
   const [pendingDescriptions, setPendingDescriptions] = useState<Record<string, string>>({});
   const [pendingAnnotations, setPendingAnnotations] = useState<Record<string, Annotation[]>>({});
   const [pendingUrls, setPendingUrls] = useState<Record<string, string>>({});
+  const [pendingShowUrls, setPendingShowUrls] = useState<Record<string, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved');
   const [isReordering, setIsReordering] = useState(false);
@@ -39,7 +40,7 @@ export function EditorClient({
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
 
-  const hasChanges = Object.keys(pendingChanges).length > 0 || Object.keys(pendingDescriptions).length > 0 || Object.keys(pendingAnnotations).length > 0 || Object.keys(pendingUrls).length > 0;
+  const hasChanges = Object.keys(pendingChanges).length > 0 || Object.keys(pendingDescriptions).length > 0 || Object.keys(pendingAnnotations).length > 0 || Object.keys(pendingUrls).length > 0 || Object.keys(pendingShowUrls).length > 0;
 
   const handleSelectStep = useCallback((stepId: string) => {
     setSelectedStepId(stepId);
@@ -133,6 +134,22 @@ export function EditorClient({
     setSaveStatus('unsaved');
   }, []);
 
+  // Handle show_url toggle for any step
+  const handleStepShowUrlChange = useCallback((stepId: string, showUrl: boolean) => {
+    setSteps((prev) =>
+      prev.map((step) =>
+        step.id === stepId ? { ...step, show_url: showUrl } : step
+      )
+    );
+
+    setPendingShowUrls((prev) => ({
+      ...prev,
+      [stepId]: showUrl,
+    }));
+
+    setSaveStatus('unsaved');
+  }, []);
+
   const handleSave = useCallback(async () => {
     if (!hasChanges) return;
 
@@ -145,10 +162,11 @@ export function EditorClient({
         ...Object.keys(pendingDescriptions),
         ...Object.keys(pendingAnnotations),
         ...Object.keys(pendingUrls),
+        ...Object.keys(pendingShowUrls),
       ]);
 
       const savePromises = Array.from(stepIdsToSave).map(async (stepId) => {
-        const payload: { text_content?: string; description?: string; annotations?: Annotation[]; url?: string } = {};
+        const payload: { text_content?: string; description?: string; annotations?: Annotation[]; url?: string; show_url?: boolean } = {};
 
         if (pendingChanges[stepId] !== undefined) {
           payload.text_content = pendingChanges[stepId];
@@ -164,6 +182,10 @@ export function EditorClient({
 
         if (pendingUrls[stepId] !== undefined) {
           payload.url = pendingUrls[stepId];
+        }
+
+        if (pendingShowUrls[stepId] !== undefined) {
+          payload.show_url = pendingShowUrls[stepId];
         }
 
         const response = await fetch(`/api/steps/${stepId}`, {
@@ -188,6 +210,7 @@ export function EditorClient({
       setPendingDescriptions({});
       setPendingAnnotations({});
       setPendingUrls({});
+      setPendingShowUrls({});
       setSaveStatus('saved');
     } catch (error) {
       console.error('Failed to save:', error);
@@ -195,7 +218,7 @@ export function EditorClient({
     } finally {
       setIsSaving(false);
     }
-  }, [pendingChanges, pendingDescriptions, pendingAnnotations, pendingUrls, hasChanges]);
+  }, [pendingChanges, pendingDescriptions, pendingAnnotations, pendingUrls, pendingShowUrls, hasChanges]);
 
   // Handle step reordering via drag & drop
   const handleReorderSteps = useCallback(async (newSteps: StepWithSignedUrl[]) => {
@@ -253,6 +276,11 @@ export function EditorClient({
     });
 
     setPendingUrls((prev) => {
+      const { [stepId]: _, ...rest } = prev;
+      return rest;
+    });
+
+    setPendingShowUrls((prev) => {
       const { [stepId]: _, ...rest } = prev;
       return rest;
     });
@@ -655,7 +683,7 @@ export function EditorClient({
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [pendingChanges, pendingDescriptions, pendingAnnotations, pendingUrls, hasChanges, handleSave]);
+  }, [pendingChanges, pendingDescriptions, pendingAnnotations, pendingUrls, pendingShowUrls, hasChanges, handleSave]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -683,6 +711,7 @@ export function EditorClient({
         onStepDescriptionChange={handleStepDescriptionChange}
         onStepAnnotationsChange={handleStepAnnotationsChange}
         onStepUrlChange={handleStepUrlChange}
+        onStepShowUrlChange={handleStepShowUrlChange}
         onDeleteStep={handleDeleteStep}
         onReorderSteps={handleReorderSteps}
         onAddStep={handleAddStep}

@@ -135,6 +135,7 @@ export interface StepWithSignedUrl {
   viewport_height?: number | null;
   element_info?: ElementInfo | null;
   url?: string | null;
+  show_url?: boolean | null;
 }
 
 // Annotation types for screenshot markup
