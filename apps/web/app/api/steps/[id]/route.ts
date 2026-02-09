@@ -38,11 +38,11 @@ export async function PATCH(
 
     // 4. Parse request body
     const body = await request.json();
-    const { text_content, description, annotations, source_id, url } = body;
+    const { text_content, description, annotations, source_id, url, show_url } = body;
 
     // Build update object with only provided fields
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateData: { text_content?: string; description?: string | null; annotations?: any; source_id?: string | null; url?: string | null } = {};
+    const updateData: { text_content?: string; description?: string | null; annotations?: any; source_id?: string | null; url?: string | null; show_url?: boolean } = {};
 
     if (text_content !== undefined) {
       if (typeof text_content !== 'string') {
@@ -83,6 +83,14 @@ export async function PATCH(
         return NextResponse.json({ error: 'Invalid url' }, { status: 400 });
       }
       updateData.url = url;
+    }
+
+    // Handle show_url toggle
+    if (show_url !== undefined) {
+      if (typeof show_url !== 'boolean') {
+        return NextResponse.json({ error: 'Invalid show_url' }, { status: 400 });
+      }
+      updateData.show_url = show_url;
     }
 
     if (Object.keys(updateData).length === 0) {

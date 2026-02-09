@@ -7,7 +7,6 @@ import {
   Check,
   ChevronDown,
   Sparkles,
-  ExternalLink,
   Globe,
   ArrowRight,
   Layers,
@@ -449,10 +448,19 @@ export function PublicTutorialViewer({
                         </div>
                       )}
 
-                      {/* Step card with decorative number */}
+                      {/* Decorative step number (to the left of the timeline) */}
+                      {isCountedStep && (
+                        <div className="absolute left-0 top-1 z-0 hidden select-none pointer-events-none sm:block" style={{ transform: 'translateX(-100%)' }}>
+                          <span className="text-4xl font-black text-violet-200/80 pr-4 lg:text-5xl">
+                            {String(currentStepNum).padStart(2, '0')}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Step card */}
                       <div className="sm:pl-16">
-                        {/* Navigation/Tab change badge above card - hidden when URL is same as previous */}
-                        {stepUrl && (isNavigation || isTabChange) && !isUrlRedundant && (
+                        {/* Navigation/Tab change badge above card - hidden when URL is same as previous or show_url is false */}
+                        {stepUrl && (isNavigation || isTabChange) && !isUrlRedundant && step.show_url !== false && (
                           <motion.div
                             initial={{ opacity: 0, x: -10 }}
                             whileInView={{ opacity: 1, x: 0 }}
@@ -482,34 +490,8 @@ export function PublicTutorialViewer({
 
                         {/* Card wrapper */}
                         <div className="group relative">
-                          {/* Decorative step number (large, behind the card) */}
-                          {isCountedStep && (
-                            <div className="absolute -left-2 -top-4 z-0 select-none pointer-events-none sm:-left-4 sm:-top-6">
-                              <span className="text-6xl font-black text-violet-100/60 sm:text-7xl lg:text-8xl">
-                                {String(currentStepNum).padStart(2, '0')}
-                              </span>
-                            </div>
-                          )}
-
                           {/* The actual card */}
                           <div className="relative z-10 overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-sm shadow-stone-200/50 transition-all duration-300 hover:border-stone-300/80 hover:shadow-lg hover:shadow-stone-200/60">
-                            {/* URL chip inside card (for non-navigation steps that have a URL) - hidden when redundant */}
-                            {stepUrl && !isNavigation && !isTabChange && !isUrlRedundant && (
-                              <div className="border-b border-stone-100 bg-stone-50/50 px-4 py-2">
-                                <a
-                                  href={stepUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 rounded-md text-xs text-stone-500 transition-colors hover:text-violet-600"
-                                >
-                                  <ExternalLink className="h-3 w-3" />
-                                  <span className="max-w-[300px] truncate">
-                                    {formatSourceUrl(stepUrl)}
-                                  </span>
-                                </a>
-                              </div>
-                            )}
-
                             <DocStepCard
                               step={step}
                               stepNumber={isCountedStep ? currentStepNum : 0}
