@@ -10,6 +10,7 @@ final class MenuBarController: NSObject {
     private var recordingToolbarController: RecordingToolbarController?
     private var recordingBorderController: RecordingBorderController?
     private var regionSelectorController: RegionSelectorController?
+    private var countdownOverlayController: CountdownOverlayController?
     private var cancellables = Set<AnyCancellable>()
 
     override init() {
@@ -31,7 +32,7 @@ final class MenuBarController: NSObject {
 
     private func setupPopover() {
         let popover = NSPopover()
-        popover.contentSize = NSSize(width: 280, height: 360)
+        popover.contentSize = NSSize(width: DT.Size.dropdownWidth, height: DT.Size.dropdownHeight)
         popover.behavior = .transient
         popover.animates = true
         popover.contentViewController = NSHostingController(rootView: MenuBarDropdownView())
@@ -113,7 +114,12 @@ final class MenuBarController: NSObject {
             popover?.performClose(nil)
             showRegionSelector()
 
+        case .countdown:
+            popover?.performClose(nil)
+            showCountdownOverlay()
+
         case .recording:
+            hideCountdownOverlay()
             popover?.performClose(nil)
             showRecordingToolbar()
             showRecordingBorder()
@@ -126,6 +132,7 @@ final class MenuBarController: NSObject {
             break // Toolbar stays visible — shows completion/error panel
 
         case .idle:
+            hideCountdownOverlay()
             hideRecordingToolbar()
             hideRecordingBorder()
 
@@ -173,6 +180,18 @@ final class MenuBarController: NSObject {
             let region = SessionManager.shared.selectedRegion
             recordingBorderController?.show(region: region)
         }
+    }
+
+    private func showCountdownOverlay() {
+        if countdownOverlayController == nil {
+            countdownOverlayController = CountdownOverlayController()
+        }
+        countdownOverlayController?.show()
+    }
+
+    private func hideCountdownOverlay() {
+        countdownOverlayController?.hide()
+        countdownOverlayController = nil
     }
 
     private func hideRecordingBorder() {
