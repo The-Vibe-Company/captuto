@@ -1,12 +1,14 @@
 #!/bin/bash
-# Build VibeTuto using Xcode for proper code signing
+# Build CapTuto using Xcode for proper code signing
 # Uses a custom designated requirement so TCC permissions persist across rebuilds
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
-APP_NAME="VibeTuto"
+PROJECT_NAME="VibeTuto"
+SCHEME_NAME="VibeTuto"
+APP_NAME="CapTuto"
 BUILD_DIR=".build/debug"
 DERIVED_DATA="$SCRIPT_DIR/.build/DerivedData"
 TEAM_ID="K28B69CWQ7"
@@ -24,8 +26,8 @@ echo "Building $APP_NAME with Xcode..."
 if [ -n "$CERT_HASH" ]; then
     echo "Signing with certificate: $CERT_HASH"
     xcodebuild \
-        -project "$APP_NAME.xcodeproj" \
-        -scheme "$APP_NAME" \
+        -project "$PROJECT_NAME.xcodeproj" \
+        -scheme "$SCHEME_NAME" \
         -configuration Debug \
         -derivedDataPath "$DERIVED_DATA" \
         CODE_SIGN_STYLE=Manual \
@@ -38,8 +40,8 @@ else
     echo "Permissions won't persist across rebuilds."
     echo "To fix: Open Xcode > Settings > Accounts > Add Apple ID"
     xcodebuild \
-        -project "$APP_NAME.xcodeproj" \
-        -scheme "$APP_NAME" \
+        -project "$PROJECT_NAME.xcodeproj" \
+        -scheme "$SCHEME_NAME" \
         -configuration Debug \
         -derivedDataPath "$DERIVED_DATA" \
         build 2>&1 | tail -5
@@ -72,4 +74,4 @@ echo ""
 echo "App bundle created at: $BUILD_DIR/$APP_NAME.app"
 echo ""
 echo "To run: open $BUILD_DIR/$APP_NAME.app"
-echo "To kill: pkill -f VibeTuto.app"
+echo "To kill: pkill -f CapTuto.app"

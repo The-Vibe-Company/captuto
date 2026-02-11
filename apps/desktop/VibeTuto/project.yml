@@ -13,8 +13,11 @@ targets:
     sources:
       - path: Sources/VibeTuto
         type: group
+      - path: Resources/Assets.xcassets
+        buildPhase: resources
     settings:
       base:
+        PRODUCT_NAME: CapTuto
         PRODUCT_BUNDLE_IDENTIFIER: com.vibetuto.recorder
         INFOPLIST_FILE: Resources/Info.plist
         CODE_SIGN_STYLE: Manual

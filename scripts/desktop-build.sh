@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # =============================================================================
-# desktop-build.sh — Build, run, and manage the VibeTuto desktop app
+# desktop-build.sh — Build, run, and manage the CapTuto desktop app
 #
 # Usage: ./scripts/desktop-build.sh              Build & launch the app
 #        ./scripts/desktop-build.sh --stop       Kill running instance
@@ -17,7 +17,9 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 DESKTOP_DIR="$ROOT_DIR/apps/desktop/VibeTuto"
 BUILD_DIR="$DESKTOP_DIR/.build/debug"
 DERIVED_DATA="$DESKTOP_DIR/.build/DerivedData"
-APP_NAME="VibeTuto"
+PROJECT_NAME="VibeTuto"
+SCHEME_NAME="VibeTuto"
+APP_NAME="CapTuto"
 BUNDLE_ID="com.vibetuto.recorder"
 TEAM_ID="K28B69CWQ7"
 LOG_FILE="$ROOT_DIR/.desktop-build.log"
@@ -84,8 +86,8 @@ do_build() {
   step "Building $APP_NAME..."
   if [ -n "$cert_hash" ]; then
     xcodebuild \
-      -project "$APP_NAME.xcodeproj" \
-      -scheme "$APP_NAME" \
+      -project "$PROJECT_NAME.xcodeproj" \
+      -scheme "$SCHEME_NAME" \
       -configuration Debug \
       -derivedDataPath "$DERIVED_DATA" \
       CODE_SIGN_STYLE=Manual \
@@ -96,8 +98,8 @@ do_build() {
   else
     warn "No Apple Development certificate found — permissions won't persist across rebuilds"
     xcodebuild \
-      -project "$APP_NAME.xcodeproj" \
-      -scheme "$APP_NAME" \
+      -project "$PROJECT_NAME.xcodeproj" \
+      -scheme "$SCHEME_NAME" \
       -configuration Debug \
       -derivedDataPath "$DERIVED_DATA" \
       build > "$LOG_FILE" 2>&1
