@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.10](https://github.com/The-Vibe-Company/captuto/compare/v0.1.9...v0.1.10) (2026-02-11)
+
+
+### Features
+
+* **desktop:** rename macOS app to CapTuto and sync icon ([#79](https://github.com/The-Vibe-Company/captuto/issues/79)) ([80cb564](https://github.com/The-Vibe-Company/captuto/commit/80cb564d2fcbd578a4bef5d6b2532cbac93b3575))
+
 ## [0.1.9](https://github.com/The-Vibe-Company/captuto/compare/v0.1.8...v0.1.9) (2026-02-09)
 
 
