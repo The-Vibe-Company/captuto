@@ -41,6 +41,7 @@
 		A304AB0BE50F698E066758E8 /* FigmaPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E5FC7E3C37BDC56BBB4BCE /* FigmaPlugin.swift */; };
 		AF8278E316F2686A4E0AADF0 /* CountdownOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B8F1C20AE4C8B3F9C1196C /* CountdownOverlayView.swift */; };
 		B51C94D050E70B00B66C5C31 /* RecordingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3189217557EE184AF096ECB /* RecordingState.swift */; };
+		B5EE2689E85C64E6625DAD17 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D56D5D6382BA892D3C7CEC33 /* Assets.xcassets */; };
 		B6BCBF861769E7729AEDBB49 /* MenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB00C77C9420CEC726679D5 /* MenuBarController.swift */; };
 		BA68068591559D696EAA9CB7 /* RecordingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B90039699C96F31D00B5C45 /* RecordingSession.swift */; };
 		BD30DFD11690BA0F84C7D114 /* VibeTutoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82F9108F1506416ADC0B3268 /* VibeTutoApp.swift */; };
@@ -97,6 +98,7 @@
 		C4E5FC7E3C37BDC56BBB4BCE /* FigmaPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FigmaPlugin.swift; sourceTree = "<group>"; };
 		C56E7B267124BF67AD7E8749 /* EventMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventMonitor.swift; sourceTree = "<group>"; };
 		CC555A1D940B6D5AE00DE77F /* MenuBarDropdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarDropdownView.swift; sourceTree = "<group>"; };
+		D56D5D6382BA892D3C7CEC33 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D8FF6C94368A1235CC96036A /* ScreenCaptureKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ScreenCaptureKit.framework; sourceTree = "<group>"; };
 		DB02579639E6EA731AEA0C34 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DC555B299D3BDF3D34F00CFD /* CaptureEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureEngine.swift; sourceTree = "<group>"; };
@@ -213,6 +215,7 @@
 		7227F31BCA4C8F6C8F8D0961 = {
 			isa = PBXGroup;
 			children = (
+				DE20F9A1B4582E2AFE320D83 /* Resources */,
 				6CAF16149523045EE1E624F1 /* Sources */,
 				2E78B7672B7EE622806D635D /* Frameworks */,
 				54A3E377878C055D6E517272 /* Products */,
@@ -284,6 +287,14 @@
 			path = App;
 			sourceTree = "<group>";
 		};
+		DE20F9A1B4582E2AFE320D83 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				D56D5D6382BA892D3C7CEC33 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		E58CD2D10F3103F192AED7BE /* Storage */ = {
 			isa = PBXGroup;
 			children = (
@@ -310,6 +321,7 @@
 			buildConfigurationList = C0F606BAC71BB2F8AFA036DB /* Build configuration list for PBXNativeTarget "VibeTuto" */;
 			buildPhases = (
 				D606A9A3A8697A24A8A4C105 /* Sources */,
+				C7B1479E30793D9FC48132CC /* Resources */,
 				5DC5A68CC2E7CA345A8A61DE /* Frameworks */,
 			);
 			buildRules = (
@@ -356,6 +368,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C7B1479E30793D9FC48132CC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B5EE2689E85C64E6625DAD17 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		D606A9A3A8697A24A8A4C105 /* Sources */ = {
@@ -428,6 +451,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vibetuto.recorder;
+				PRODUCT_NAME = CapTuto;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.9;
 			};
@@ -571,6 +595,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vibetuto.recorder;
+				PRODUCT_NAME = CapTuto;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.9;
 			};
