@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.12](https://github.com/The-Vibe-Company/captuto/compare/v0.1.11...v0.1.12) (2026-02-17)
+
+
+### Performance Improvements
+
+* **dashboard:** reduce API calls from N+2 to 2 for tutorial listing ([#84](https://github.com/The-Vibe-Company/captuto/issues/84)) ([ff0bac0](https://github.com/The-Vibe-Company/captuto/commit/ff0bac068e214e75c82052393c6613a88c1b42f8))
+
 ## [0.1.11](https://github.com/The-Vibe-Company/captuto/compare/v0.1.10...v0.1.11) (2026-02-11)
 
 
