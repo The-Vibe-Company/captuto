@@ -20,35 +20,28 @@ struct AppPickerView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DT.Spacing.sm) {
-            SectionHeader(title: "Application")
-
-            // Custom dark search field
             HStack(spacing: DT.Spacing.sm) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 11))
-                    .foregroundStyle(DT.Colors.textTertiary)
-                TextField("Search apps...", text: $searchText)
+                    .foregroundStyle(Color(nsColor: .secondaryLabelColor))
+                TextField("Search apps", text: $searchText)
                     .textFieldStyle(.plain)
-                    .font(DT.Typography.caption)
-                    .foregroundStyle(DT.Colors.textPrimary)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.white)
                 if !searchText.isEmpty {
                     Button(action: { searchText = "" }) {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 10))
-                            .foregroundStyle(DT.Colors.textTertiary)
+                            .foregroundStyle(Color(nsColor: .secondaryLabelColor))
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, DT.Spacing.sm)
-            .padding(.vertical, DT.Spacing.xs + 1)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
             .background(
-                RoundedRectangle(cornerRadius: DT.Radius.sm)
-                    .fill(DT.Colors.card)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: DT.Radius.sm)
-                    .strokeBorder(DT.Colors.border, lineWidth: 1)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color.white.opacity(0.035))
             )
 
             if isLoading {
@@ -68,14 +61,13 @@ struct AppPickerView: View {
                     .padding(.vertical, DT.Spacing.sm)
             } else {
                 ScrollView {
-                    LazyVStack(spacing: DT.Spacing.xxs) {
+                    LazyVStack(spacing: 6) {
                         ForEach(filteredApps) { app in
                             AppRow(app: app, isSelected: session.selectedAppBundleID == app.id)
                                 .onTapGesture {
-                                    withAnimation(DT.Anim.springSnappy) {
+                                    withAnimation(.easeOut(duration: 0.16)) {
                                         session.selectedAppBundleID = app.id
                                     }
-                                    // Bring selected app to foreground
                                     NSRunningApplication.runningApplications(withBundleIdentifier: app.id)
                                         .first?
                                         .activate()
@@ -138,28 +130,28 @@ struct AppRow: View {
                     .foregroundStyle(DT.Colors.textTertiary)
             }
             Text(app.name)
-                .font(DT.Typography.body)
-                .foregroundStyle(DT.Colors.textPrimary)
+                .font(.system(size: 13))
+                .foregroundStyle(.white)
                 .lineLimit(1)
             Spacer()
             if isSelected {
                 Image(systemName: "checkmark")
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(DT.Colors.accentRed)
+                    .foregroundStyle(.white)
             }
         }
-        .padding(.horizontal, DT.Spacing.sm + 2)
-        .padding(.vertical, DT.Spacing.xs + 2)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
         .background(
-            RoundedRectangle(cornerRadius: DT.Radius.sm)
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(
-                    isSelected ? DT.Colors.accentRed.opacity(0.12) :
-                    isHovering ? DT.Colors.elevated : .clear
+                    isSelected ? Color.white.opacity(0.10) :
+                    isHovering ? Color.white.opacity(0.05) : .clear
                 )
         )
         .contentShape(Rectangle())
         .onHover { hovering in
-            withAnimation(DT.Anim.fadeQuick) { isHovering = hovering }
+            withAnimation(.easeOut(duration: 0.15)) { isHovering = hovering }
         }
     }
 }

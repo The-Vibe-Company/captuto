@@ -136,6 +136,8 @@ enum DT {
     enum Size {
         static let dropdownWidth: CGFloat = 320
         static let dropdownHeight: CGFloat = 400
+        static let floatingPanelWidth: CGFloat = 408
+        static let floatingPanelHeight: CGFloat = 404
         static let toolbarExpandedWidth: CGFloat = 280
         static let toolbarCollapsedWidth: CGFloat = 110
         static let toolbarHeight: CGFloat = 44

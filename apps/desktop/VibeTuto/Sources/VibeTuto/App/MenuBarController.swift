@@ -35,7 +35,7 @@ final class MenuBarController: NSObject {
         popover.contentSize = NSSize(width: DT.Size.dropdownWidth, height: DT.Size.dropdownHeight)
         popover.behavior = .transient
         popover.animates = true
-        popover.contentViewController = NSHostingController(rootView: MenuBarDropdownView())
+        popover.contentViewController = NSHostingController(rootView: FloatingPanelView())
         self.popover = popover
     }
 

@@ -260,19 +260,26 @@ final class RecordingToolbarController {
             newPanel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
             newPanel.contentView = hostingView
 
-            if let screen = NSScreen.main {
-                let screenFrame = screen.visibleFrame
-                let x = screenFrame.midX - 170
-                let y = screenFrame.minY + 32
-                newPanel.setFrameOrigin(NSPoint(x: x, y: y))
-            }
-
             self.panel = newPanel
         }
+        reposition()
         panel?.orderFrontRegardless()
     }
 
     func hide() {
         panel?.orderOut(nil)
+    }
+
+    private func reposition() {
+        guard let panel else { return }
+        let candidateScreen = NSScreen.screens.first { screen in
+            screen.frame.contains(NSEvent.mouseLocation)
+        } ?? NSScreen.main
+
+        guard let screen = candidateScreen else { return }
+        let screenFrame = screen.visibleFrame
+        let x = screenFrame.midX - panel.frame.width / 2
+        let y = screenFrame.maxY - panel.frame.height - 24
+        panel.setFrameOrigin(NSPoint(x: x, y: y))
     }
 }

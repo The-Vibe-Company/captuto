@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		00680066758D2EDD9D2AC70E /* UploadPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19270F229B64F8CF54C76EA6 /* UploadPanel.swift */; };
+		0AAB6D37D8323ADFC00FEE57 /* FloatingPanelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8084879BB347284D368584A /* FloatingPanelController.swift */; };
 		0E665B17D736A26D33DA6882 /* OnboardingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFDD41FD69978B945959514 /* OnboardingWindow.swift */; };
 		0FB12DCAF4878F26B6D34A53 /* MenuBarDropdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC555A1D940B6D5AE00DE77F /* MenuBarDropdownView.swift */; };
 		13F880DB19CB80F2B0AEEEDF /* AppSwitchTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBA7A180234AC59814B1633D /* AppSwitchTracker.swift */; };
@@ -99,6 +100,7 @@
 		C56E7B267124BF67AD7E8749 /* EventMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventMonitor.swift; sourceTree = "<group>"; };
 		CC555A1D940B6D5AE00DE77F /* MenuBarDropdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarDropdownView.swift; sourceTree = "<group>"; };
 		D56D5D6382BA892D3C7CEC33 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D8084879BB347284D368584A /* FloatingPanelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingPanelController.swift; sourceTree = "<group>"; };
 		D8FF6C94368A1235CC96036A /* ScreenCaptureKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ScreenCaptureKit.framework; sourceTree = "<group>"; };
 		DB02579639E6EA731AEA0C34 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DC555B299D3BDF3D34F00CFD /* CaptureEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureEngine.swift; sourceTree = "<group>"; };
@@ -278,6 +280,7 @@
 			isa = PBXGroup;
 			children = (
 				DB02579639E6EA731AEA0C34 /* AppDelegate.swift */,
+				D8084879BB347284D368584A /* FloatingPanelController.swift */,
 				7AB00C77C9420CEC726679D5 /* MenuBarController.swift */,
 				CC555A1D940B6D5AE00DE77F /* MenuBarDropdownView.swift */,
 				DFE016EF78211B2C266AEC9A /* PermissionChecker.swift */,
@@ -402,6 +405,7 @@
 				9C561F93AB713D76D0580899 /* ElementInfo.swift in Sources */,
 				214093E66CB254378F64955A /* EventMonitor.swift in Sources */,
 				A304AB0BE50F698E066758E8 /* FigmaPlugin.swift in Sources */,
+				0AAB6D37D8323ADFC00FEE57 /* FloatingPanelController.swift in Sources */,
 				9FC16C2AC0E1A22FB60A92FD /* FrameProcessor.swift in Sources */,
 				F797BCE0A349FA34BCCA91BA /* LocalStore.swift in Sources */,
 				B6BCBF861769E7729AEDBB49 /* MenuBarController.swift in Sources */,

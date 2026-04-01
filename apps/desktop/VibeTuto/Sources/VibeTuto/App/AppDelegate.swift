@@ -2,19 +2,28 @@ import Cocoa
 import ServiceManagement
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    private var menuBarController: MenuBarController?
+    private var floatingPanelController: FloatingPanelController?
+    private var onboardingWindowController: OnboardingWindowController?
     private let permissionChecker = PermissionChecker()
+    private var userDefaultsObserver: NSObjectProtocol?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Hide dock icon - menu bar only
-        NSApp.setActivationPolicy(.accessory)
-
-        // Prevent macOS from auto-terminating the app when no windows are visible
-        ProcessInfo.processInfo.disableAutomaticTermination("Menu bar app must stay alive")
+        NSApp.setActivationPolicy(.regular)
+        ProcessInfo.processInfo.disableAutomaticTermination("CapTuto stays alive while capture UI is hidden")
         ProcessInfo.processInfo.disableSuddenTermination()
 
-        // Setup menu bar
-        menuBarController = MenuBarController()
+        floatingPanelController = FloatingPanelController()
+        floatingPanelController?.showWindow(nil)
+        NSApp.activate(ignoringOtherApps: true)
+
+        syncLaunchAtLoginPreference()
+        userDefaultsObserver = NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.syncLaunchAtLoginPreference()
+        }
 
         // Check permissions on launch (silent - no system dialog)
         let screenPerm = permissionChecker.checkScreenRecordingSilent()
@@ -36,6 +45,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return false
     }
 
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            floatingPanelController?.showWindow(nil)
+            NSApp.activate(ignoringOtherApps: true)
+        }
+        return true
+    }
+
     @objc private func appDidActivate(_ notification: Notification) {
         // Track app switches for the recording session
         guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else {
@@ -52,8 +69,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func showOnboarding() {
-        let onboarding = OnboardingWindowController()
-        onboarding.showWindow(nil)
+        if onboardingWindowController == nil {
+            onboardingWindowController = OnboardingWindowController()
+        }
+        onboardingWindowController?.showWindow(nil)
+        onboardingWindowController?.window?.makeKeyAndOrderFront(nil)
     }
 
     /// Register the app as a login item.
@@ -68,6 +88,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             } catch {
                 print("[AppDelegate] Failed to update login item: \(error)")
             }
+        }
+    }
+
+    private func syncLaunchAtLoginPreference() {
+        let enabled = UserDefaults.standard.bool(forKey: "launchAtLogin")
+        setLaunchAtLogin(enabled)
+    }
+
+    deinit {
+        if let userDefaultsObserver {
+            NotificationCenter.default.removeObserver(userDefaultsObserver)
         }
     }
 }
