@@ -32,23 +32,26 @@ struct FloatingPanelView: View {
     @State private var selectedTab: PanelTab = .capture
 
     var body: some View {
-        VStack(spacing: 0) {
-            tabBar
-            Divider()
-                .overlay(DT.Colors.border)
+        ZStack {
+            NativePanelBackground()
 
-            selectedTabContent
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            VStack(spacing: 0) {
+                tabBar
+                Divider()
+                    .overlay(Color.white.opacity(0.08))
+
+                selectedTabContent
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            }
         }
         .frame(width: DT.Size.mainPanelWidth, height: 520)
-        .background(DT.Colors.surface)
         .preferredColorScheme(.dark)
     }
 
     // MARK: - Tab Bar
 
     private var tabBar: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 0) {
             ForEach(PanelTab.allCases, id: \.self) { tab in
                 Button {
                     withAnimation(DT.Anim.fadeStandard) {
@@ -59,25 +62,20 @@ struct FloatingPanelView: View {
                         Image(systemName: selectedTab == tab ? tab.icon + ".fill" : tab.icon)
                             .font(.system(size: 14))
                             .foregroundStyle(selectedTab == tab ? DT.Colors.accentRed : DT.Colors.textTertiary)
-                            .frame(width: 28, height: 28)
 
                         Text(tab.label)
                             .font(.system(size: 9, weight: .medium))
                             .foregroundStyle(selectedTab == tab ? DT.Colors.textPrimary : DT.Colors.textTertiary)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 6)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(selectedTab == tab ? DT.Colors.elevated : .clear)
-                    )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, DT.Spacing.sm)
-        .padding(.vertical, DT.Spacing.xs)
-        .background(DT.Colors.card)
+        .frame(height: 52)
+        .padding(.horizontal, DT.Spacing.xs)
+        .background(Color.white.opacity(0.03))
     }
 
     // MARK: - Tab Content
@@ -367,4 +365,18 @@ struct CaptureTabView: View {
         session.currentMode = RecordingMode(rawValue: lastMode) ?? .fullScreen
         session.startRecording()
     }
+}
+
+// MARK: - Native Vibrancy Background
+
+private struct NativePanelBackground: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = .hudWindow
+        view.state = .active
+        view.blendingMode = .behindWindow
+        return view
+    }
+
+    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {}
 }
