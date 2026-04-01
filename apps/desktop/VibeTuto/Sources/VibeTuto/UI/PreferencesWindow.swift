@@ -1,36 +1,6 @@
 import SwiftUI
 import AVFoundation
 
-/// SwiftUI view for the dark studio Preferences window with 4 tabs.
-struct PreferencesView: View {
-    var body: some View {
-        TabView {
-            GeneralPreferencesView()
-                .tabItem {
-                    Label("General", systemImage: "gearshape")
-                }
-
-            ShortcutsPreferencesView()
-                .tabItem {
-                    Label("Shortcuts", systemImage: "keyboard")
-                }
-
-            AudioPreferencesView()
-                .tabItem {
-                    Label("Audio", systemImage: "mic")
-                }
-
-            AdvancedPreferencesView()
-                .tabItem {
-                    Label("Advanced", systemImage: "wrench.and.screwdriver")
-                }
-        }
-        .padding(DT.Spacing.xl)
-        .background(DT.Colors.surface)
-        .preferredColorScheme(.dark)
-    }
-}
-
 // MARK: - General Tab
 
 struct GeneralPreferencesView: View {

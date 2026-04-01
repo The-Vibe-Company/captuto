@@ -135,7 +135,6 @@ enum DT {
 
     enum Size {
         static let mainPanelWidth: CGFloat = 460
-        static let tabBarHeight: CGFloat = 40
         static let toolbarExpandedWidth: CGFloat = 280
         static let toolbarCollapsedWidth: CGFloat = 110
         static let toolbarHeight: CGFloat = 44
