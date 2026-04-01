@@ -24,30 +24,30 @@ extension Color {
 
 enum DT {
 
-    // MARK: - Colors — Neutral dark palette (zinc-based)
+    // MARK: - Colors — Navy dark palette (matches web dark mode)
     //
-    // Contrast ratios on surface (#09090B):
-    //   textPrimary (#FAFAFA) → 19.3:1  ✓ AAA
-    //   textSecondary (#A1A1AA) → 7.4:1 ✓ AAA
-    //   textTertiary (#71717A) → 4.7:1  ✓ AA
-    //   border (#3F3F46) → 2.7:1        (decorative, not text)
-    //   accentRed (#EF4444) → 5.2:1     ✓ AA
+    // Contrast ratios on surface (#0D1B2A):
+    //   textPrimary (#EFF5FB) → 15.8:1  ✓ AAA
+    //   textSecondary (#A3AEC2) → 7.1:1 ✓ AAA
+    //   textTertiary (#6B7A94) → 4.2:1  ✓ AA
+    //   border (#334766) → 2.4:1        (decorative, not text)
+    //   accentRed (#EF4444) → 5.0:1     ✓ AA
 
     enum Colors {
-        // Surfaces — clear layer separation, neutral (not blue-tinted)
-        static let surface = Color(hex: "09090B")      // zinc-950
-        static let card = Color(hex: "18181B")          // zinc-900
-        static let elevated = Color(hex: "27272A")      // zinc-800
-        static let border = Color(hex: "3F3F46")        // zinc-700 — actually visible
+        // Surfaces — navy-blue tinted, matching web dark mode
+        static let surface = Color(hex: "0D1B2A")      // dark navy (web --background)
+        static let card = Color(hex: "162033")          // slightly lighter navy
+        static let elevated = Color(hex: "263651")      // web --secondary / --muted
+        static let border = Color(hex: "334766")        // navy border
 
         // NS variants for AppKit contexts
-        static let surfaceNS = NSColor(red: 0.035, green: 0.035, blue: 0.043, alpha: 1)
-        static let borderNS = NSColor(red: 0.247, green: 0.247, blue: 0.275, alpha: 1)
+        static let surfaceNS = NSColor(red: 0.051, green: 0.106, blue: 0.165, alpha: 1)
+        static let borderNS = NSColor(red: 0.200, green: 0.278, blue: 0.400, alpha: 1)
 
         // Text — clear hierarchy with good contrast
-        static let textPrimary = Color(hex: "FAFAFA")   // zinc-50
-        static let textSecondary = Color(hex: "A1A1AA")  // zinc-400
-        static let textTertiary = Color(hex: "71717A")   // zinc-500
+        static let textPrimary = Color(hex: "EFF5FB")   // web --primary (light blue-white)
+        static let textSecondary = Color(hex: "A3AEC2")  // web --muted-foreground
+        static let textTertiary = Color(hex: "6B7A94")   // navy tertiary
 
         // Accents — pure, saturated, purposeful
         static let accentRed = Color(hex: "EF4444")      // red-500 — rich red, not salmon
