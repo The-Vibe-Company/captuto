@@ -44,9 +44,9 @@ struct FloatingPanelView: View {
                         LinearGradient(
                             colors: [
                                 .clear,
-                                Color.white.opacity(0.08),
-                                Color.white.opacity(0.12),
-                                Color.white.opacity(0.08),
+                                DT.Colors.dividerSubtle,
+                                DT.Colors.dividerMedium,
+                                DT.Colors.dividerSubtle,
                                 .clear,
                             ],
                             startPoint: .leading,

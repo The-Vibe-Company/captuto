@@ -63,6 +63,10 @@ enum DT {
         static let glowTeal = Color(hex: "10B981").opacity(0.3)
         static let glowAmber = Color(hex: "F59E0B").opacity(0.3)
 
+        // Dividers — subtle glowing separator
+        static let dividerSubtle = Color(hex: "FFFFFF").opacity(0.08)
+        static let dividerMedium = Color(hex: "FFFFFF").opacity(0.12)
+
         // Gradients
         static let warmGradient = LinearGradient(
             colors: [Color(hex: "EF4444"), Color(hex: "F59E0B")],
