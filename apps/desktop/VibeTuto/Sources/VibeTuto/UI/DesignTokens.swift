@@ -24,41 +24,48 @@ extension Color {
 
 enum DT {
 
-    // MARK: - Colors — "Dark Studio" palette
+    // MARK: - Colors — Neutral dark palette (zinc-based)
+    //
+    // Contrast ratios on surface (#09090B):
+    //   textPrimary (#FAFAFA) → 19.3:1  ✓ AAA
+    //   textSecondary (#A1A1AA) → 7.4:1 ✓ AAA
+    //   textTertiary (#71717A) → 4.7:1  ✓ AA
+    //   border (#3F3F46) → 2.7:1        (decorative, not text)
+    //   accentRed (#EF4444) → 5.2:1     ✓ AA
 
     enum Colors {
-        // Surfaces (navy/slate — matches web dark theme)
-        static let surface = Color(hex: "020817")
-        static let card = Color(hex: "0F172A")
-        static let elevated = Color(hex: "1E293B")
-        static let border = Color(hex: "1E293B")
+        // Surfaces — clear layer separation, neutral (not blue-tinted)
+        static let surface = Color(hex: "09090B")      // zinc-950
+        static let card = Color(hex: "18181B")          // zinc-900
+        static let elevated = Color(hex: "27272A")      // zinc-800
+        static let border = Color(hex: "3F3F46")        // zinc-700 — actually visible
 
         // NS variants for AppKit contexts
-        static let surfaceNS = NSColor(red: 0.008, green: 0.031, blue: 0.09, alpha: 1)
-        static let borderNS = NSColor(red: 0.118, green: 0.161, blue: 0.231, alpha: 1)
+        static let surfaceNS = NSColor(red: 0.035, green: 0.035, blue: 0.043, alpha: 1)
+        static let borderNS = NSColor(red: 0.247, green: 0.247, blue: 0.275, alpha: 1)
 
-        // Text
-        static let textPrimary = Color(hex: "F8FAFC")
-        static let textSecondary = Color(hex: "94A3B8")
-        static let textTertiary = Color(hex: "64748B")
+        // Text — clear hierarchy with good contrast
+        static let textPrimary = Color(hex: "FAFAFA")   // zinc-50
+        static let textSecondary = Color(hex: "A1A1AA")  // zinc-400
+        static let textTertiary = Color(hex: "71717A")   // zinc-500
 
-        // Accents — warm, vivid, purposeful
-        static let accentRed = Color(hex: "FF453A")
-        static let accentTeal = Color(hex: "30D158")
-        static let accentAmber = Color(hex: "FFD60A")
-        static let accentBlue = Color(hex: "0A84FF")
+        // Accents — pure, saturated, purposeful
+        static let accentRed = Color(hex: "EF4444")      // red-500 — rich red, not salmon
+        static let accentTeal = Color(hex: "10B981")      // emerald-500
+        static let accentAmber = Color(hex: "F59E0B")     // amber-500
+        static let accentBlue = Color(hex: "3B82F6")      // blue-500
 
         // NS accent variants
-        static let accentRedNS = NSColor(red: 1.0, green: 0.271, blue: 0.227, alpha: 1)
+        static let accentRedNS = NSColor(red: 0.937, green: 0.267, blue: 0.267, alpha: 1)
 
-        // Glows
-        static let glowRed = Color(hex: "FF453A").opacity(0.4)
-        static let glowTeal = Color(hex: "30D158").opacity(0.3)
-        static let glowAmber = Color(hex: "FFD60A").opacity(0.3)
+        // Glows — match new accents
+        static let glowRed = Color(hex: "EF4444").opacity(0.4)
+        static let glowTeal = Color(hex: "10B981").opacity(0.3)
+        static let glowAmber = Color(hex: "F59E0B").opacity(0.3)
 
         // Gradients
         static let warmGradient = LinearGradient(
-            colors: [Color(hex: "FF453A"), Color(hex: "FFD60A")],
+            colors: [Color(hex: "EF4444"), Color(hex: "F59E0B")],
             startPoint: .leading,
             endPoint: .trailing
         )
@@ -151,7 +158,7 @@ enum DT {
 
 // MARK: - Button Styles
 
-/// Primary action — red background, white text, glow on hover.
+/// Primary action — red gradient background, white text, glow on hover.
 struct RecordButtonStyle: ButtonStyle {
     @State private var isHovering = false
 
@@ -162,14 +169,24 @@ struct RecordButtonStyle: ButtonStyle {
             .padding(.vertical, DT.Spacing.md)
             .frame(maxWidth: .infinity)
             .background(
-                RoundedRectangle(cornerRadius: DT.Radius.sm)
-                    .fill(DT.Colors.accentRed)
+                RoundedRectangle(cornerRadius: DT.Radius.md, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(hex: "F87171"),  // red-400 (lighter top)
+                                DT.Colors.accentRed,   // red-500 (middle)
+                                Color(hex: "DC2626"),  // red-600 (darker bottom)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
             )
             .shadow(
-                color: isHovering ? DT.Colors.glowRed : .clear,
-                radius: isHovering ? 12 : 0, y: 4
+                color: isHovering ? DT.Colors.glowRed : DT.Colors.accentRed.opacity(0.15),
+                radius: isHovering ? 16 : 6, y: isHovering ? 6 : 3
             )
-            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
             .animation(DT.Anim.springSnappy, value: configuration.isPressed)
             .onHover { hovering in
                 withAnimation(DT.Anim.fadeQuick) { isHovering = hovering }

@@ -35,8 +35,9 @@ final class FloatingPanelController: NSWindowController, NSWindowDelegate {
         panel.hidesOnDeactivate = false
         panel.isMovableByWindowBackground = true
         panel.hasShadow = true
-        panel.backgroundColor = .clear
-        panel.isOpaque = false
+        panel.backgroundColor = NSColor(red: 0.035, green: 0.035, blue: 0.043, alpha: 1)
+        panel.isOpaque = true
+        panel.appearance = NSAppearance(named: .darkAqua)
         panel.center()
 
         let hostingController = NSHostingController(rootView: FloatingPanelView())
