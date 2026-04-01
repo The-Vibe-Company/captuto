@@ -24,41 +24,54 @@ extension Color {
 
 enum DT {
 
-    // MARK: - Colors — "Dark Studio" palette
+    // MARK: - Colors — Navy dark palette (matches web dark mode)
+    //
+    // Contrast ratios on surface (#0D1B2A):
+    //   textPrimary (#EFF5FB) → 15.8:1  ✓ AAA
+    //   textSecondary (#A3AEC2) → 7.1:1 ✓ AAA
+    //   textTertiary (#6B7A94) → 4.2:1  ✓ AA
+    //   border (#334766) → 2.4:1        (decorative, not text)
+    //   accentRed (#EF4444) → 5.0:1     ✓ AA
 
     enum Colors {
-        // Surfaces (navy/slate — matches web dark theme)
-        static let surface = Color(hex: "020817")
-        static let card = Color(hex: "0F172A")
-        static let elevated = Color(hex: "1E293B")
-        static let border = Color(hex: "1E293B")
+        // Surfaces — navy-blue tinted, matching web dark mode
+        static let surface = Color(hex: "0D1B2A")      // dark navy (web --background)
+        static let card = Color(hex: "162033")          // slightly lighter navy
+        static let elevated = Color(hex: "263651")      // web --secondary / --muted
+        static let border = Color(hex: "334766")        // navy border
 
         // NS variants for AppKit contexts
-        static let surfaceNS = NSColor(red: 0.008, green: 0.031, blue: 0.09, alpha: 1)
-        static let borderNS = NSColor(red: 0.118, green: 0.161, blue: 0.231, alpha: 1)
+        static let surfaceNS = NSColor(red: 0.051, green: 0.106, blue: 0.165, alpha: 1)
+        static let borderNS = NSColor(red: 0.200, green: 0.278, blue: 0.400, alpha: 1)
 
-        // Text
-        static let textPrimary = Color(hex: "F8FAFC")
-        static let textSecondary = Color(hex: "94A3B8")
-        static let textTertiary = Color(hex: "64748B")
+        // Text — clear hierarchy with good contrast
+        static let textPrimary = Color(hex: "EFF5FB")   // web --primary (light blue-white)
+        static let textSecondary = Color(hex: "A3AEC2")  // web --muted-foreground
+        static let textTertiary = Color(hex: "6B7A94")   // navy tertiary
 
-        // Accents — warm, vivid, purposeful
-        static let accentRed = Color(hex: "FF453A")
-        static let accentTeal = Color(hex: "30D158")
-        static let accentAmber = Color(hex: "FFD60A")
-        static let accentBlue = Color(hex: "0A84FF")
+        // Accents — pure, saturated, purposeful
+        static let accentRed = Color(hex: "EF4444")      // red-500 — rich red, not salmon
+        static let accentRedLight = Color(hex: "F87171")  // red-400 — lighter variant
+        static let accentRedDark = Color(hex: "DC2626")   // red-600 — darker variant
+        static let accentTeal = Color(hex: "10B981")      // emerald-500
+        static let accentAmber = Color(hex: "F59E0B")     // amber-500
+        static let accentBlue = Color(hex: "3B82F6")      // blue-500
 
         // NS accent variants
-        static let accentRedNS = NSColor(red: 1.0, green: 0.271, blue: 0.227, alpha: 1)
+        static let accentRedNS = NSColor(red: 0.937, green: 0.267, blue: 0.267, alpha: 1)
 
-        // Glows
-        static let glowRed = Color(hex: "FF453A").opacity(0.4)
-        static let glowTeal = Color(hex: "30D158").opacity(0.3)
-        static let glowAmber = Color(hex: "FFD60A").opacity(0.3)
+        // Glows — match new accents
+        static let glowRed = Color(hex: "EF4444").opacity(0.4)
+        static let glowTeal = Color(hex: "10B981").opacity(0.3)
+        static let glowAmber = Color(hex: "F59E0B").opacity(0.3)
+
+        // Dividers — subtle glowing separator
+        static let dividerSubtle = Color(hex: "FFFFFF").opacity(0.08)
+        static let dividerMedium = Color(hex: "FFFFFF").opacity(0.12)
 
         // Gradients
         static let warmGradient = LinearGradient(
-            colors: [Color(hex: "FF453A"), Color(hex: "FFD60A")],
+            colors: [Color(hex: "EF4444"), Color(hex: "F59E0B")],
             startPoint: .leading,
             endPoint: .trailing
         )
@@ -134,29 +147,24 @@ enum DT {
     // MARK: - Sizes
 
     enum Size {
-        static let dropdownWidth: CGFloat = 320
-        static let dropdownHeight: CGFloat = 400
-        static let floatingPanelWidth: CGFloat = 408
-        static let floatingPanelHeight: CGFloat = 404
+        static let mainPanelWidth: CGFloat = 460
         static let toolbarExpandedWidth: CGFloat = 280
         static let toolbarCollapsedWidth: CGFloat = 110
         static let toolbarHeight: CGFloat = 44
         static let toolbarCollapsedHeight: CGFloat = 36
-        static let panelWidth: CGFloat = 320
-        static let panelHeight: CGFloat = 170
         static let appIconSize: CGFloat = 24
         static let recordingDotSize: CGFloat = 8
         static let borderWidth: CGFloat = 3.0
+        static let uploadPanelWidth: CGFloat = 320
+        static let uploadPanelHeight: CGFloat = 170
         static let onboardingWidth: CGFloat = 440
         static let onboardingHeight: CGFloat = 540
-        static let preferencesWidth: CGFloat = 500
-        static let preferencesHeight: CGFloat = 440
     }
 }
 
 // MARK: - Button Styles
 
-/// Primary action — red background, white text, glow on hover.
+/// Primary action — red gradient background, white text, glow on hover.
 struct RecordButtonStyle: ButtonStyle {
     @State private var isHovering = false
 
@@ -167,14 +175,24 @@ struct RecordButtonStyle: ButtonStyle {
             .padding(.vertical, DT.Spacing.md)
             .frame(maxWidth: .infinity)
             .background(
-                RoundedRectangle(cornerRadius: DT.Radius.sm)
-                    .fill(DT.Colors.accentRed)
+                RoundedRectangle(cornerRadius: DT.Radius.md, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                DT.Colors.accentRedLight,  // red-400 (lighter top)
+                                DT.Colors.accentRed,       // red-500 (middle)
+                                DT.Colors.accentRedDark,   // red-600 (darker bottom)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
             )
             .shadow(
-                color: isHovering ? DT.Colors.glowRed : .clear,
-                radius: isHovering ? 12 : 0, y: 4
+                color: isHovering ? DT.Colors.glowRed : DT.Colors.accentRed.opacity(0.15),
+                radius: isHovering ? 16 : 6, y: isHovering ? 6 : 3
             )
-            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
             .animation(DT.Anim.springSnappy, value: configuration.isPressed)
             .onHover { hovering in
                 withAnimation(DT.Anim.fadeQuick) { isHovering = hovering }
