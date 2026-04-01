@@ -40,6 +40,7 @@ struct FloatingPanelView: View {
             selectedTabContent
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
+        .frame(width: DT.Size.mainPanelWidth, height: 520)
         .background(DT.Colors.surface)
         .preferredColorScheme(.dark)
     }

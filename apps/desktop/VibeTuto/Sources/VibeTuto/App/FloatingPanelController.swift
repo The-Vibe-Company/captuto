@@ -40,7 +40,7 @@ final class FloatingPanelController: NSWindowController, NSWindowDelegate {
         panel.center()
 
         let hostingController = NSHostingController(rootView: FloatingPanelView())
-        hostingController.sizingOptions = [.preferredContentSize]
+        hostingController.sizingOptions = []
         panel.contentViewController = hostingController
 
         self.init(window: panel)
