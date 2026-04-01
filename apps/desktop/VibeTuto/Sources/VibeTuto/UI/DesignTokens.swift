@@ -51,6 +51,8 @@ enum DT {
 
         // Accents — pure, saturated, purposeful
         static let accentRed = Color(hex: "EF4444")      // red-500 — rich red, not salmon
+        static let accentRedLight = Color(hex: "F87171")  // red-400 — lighter variant
+        static let accentRedDark = Color(hex: "DC2626")   // red-600 — darker variant
         static let accentTeal = Color(hex: "10B981")      // emerald-500
         static let accentAmber = Color(hex: "F59E0B")     // amber-500
         static let accentBlue = Color(hex: "3B82F6")      // blue-500
@@ -177,9 +179,9 @@ struct RecordButtonStyle: ButtonStyle {
                     .fill(
                         LinearGradient(
                             colors: [
-                                Color(hex: "F87171"),  // red-400 (lighter top)
-                                DT.Colors.accentRed,   // red-500 (middle)
-                                Color(hex: "DC2626"),  // red-600 (darker bottom)
+                                DT.Colors.accentRedLight,  // red-400 (lighter top)
+                                DT.Colors.accentRed,       // red-500 (middle)
+                                DT.Colors.accentRedDark,   // red-600 (darker bottom)
                             ],
                             startPoint: .top,
                             endPoint: .bottom
