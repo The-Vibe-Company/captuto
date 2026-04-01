@@ -1,5 +1,10 @@
 import Cocoa
 
+private final class RegionSelectorWindow: NSWindow {
+    override var canBecomeKey: Bool { true }
+    override var canBecomeMain: Bool { true }
+}
+
 /// Controller for the fullscreen region selection overlay.
 final class RegionSelectorController {
     private var window: NSWindow?
@@ -12,7 +17,7 @@ final class RegionSelectorController {
 
         guard let screen = NSScreen.main else { return }
 
-        let selectorWindow = NSWindow(
+        let selectorWindow = RegionSelectorWindow(
             contentRect: screen.frame,
             styleMask: .borderless,
             backing: .buffered,
@@ -72,9 +77,9 @@ final class RegionSelectorView: NSView {
 
     private var dragStart: NSPoint?
     private var currentRect: CGRect?
-    private let overlayColor = NSColor.black.withAlphaComponent(0.3)
-    private let selectionBorderColor = NSColor(red: 0.6, green: 0.3, blue: 1.0, alpha: 1.0)
-    private let selectionBorderWidth: CGFloat = 2.0
+    private let overlayColor = NSColor.black.withAlphaComponent(0.18)
+    private let selectionBorderColor = NSColor.white.withAlphaComponent(0.95)
+    private let selectionBorderWidth: CGFloat = 1.5
 
     override var acceptsFirstResponder: Bool { true }
 
@@ -134,6 +139,10 @@ final class RegionSelectorView: NSView {
             context.setLineWidth(selectionBorderWidth)
             context.stroke(rect.insetBy(dx: -1, dy: -1))
 
+            let handleRect = CGRect(x: rect.maxX - 6, y: rect.minY - 6, width: 12, height: 12)
+            context.setFillColor(NSColor.white.cgColor)
+            context.fillEllipse(in: handleRect)
+
             // Draw dimension label
             drawDimensionLabel(for: rect)
         } else {
@@ -147,7 +156,7 @@ final class RegionSelectorView: NSView {
         let attributes: [NSAttributedString.Key: Any] = [
             .font: NSFont.monospacedSystemFont(ofSize: 12, weight: .medium),
             .foregroundColor: NSColor.white,
-            .backgroundColor: NSColor.black.withAlphaComponent(0.7)
+            .backgroundColor: NSColor.black.withAlphaComponent(0.55)
         ]
         let attrString = NSAttributedString(string: " \(text) ", attributes: attributes)
         let labelSize = attrString.size()
@@ -159,9 +168,9 @@ final class RegionSelectorView: NSView {
     }
 
     private func drawInstructionText() {
-        let text = "Drag to select a region. Press Escape to cancel."
+        let text = "Drag to choose an area. Press Escape to cancel."
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: 16, weight: .medium),
+            .font: NSFont.systemFont(ofSize: 15, weight: .medium),
             .foregroundColor: NSColor.white
         ]
         let attrString = NSAttributedString(string: text, attributes: attributes)

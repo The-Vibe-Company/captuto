@@ -36,7 +36,6 @@ struct PreferencesView: View {
 struct GeneralPreferencesView: View {
     @AppStorage("apiToken") private var apiToken = ""
     @AppStorage("launchAtLogin") private var launchAtLogin = false
-    @AppStorage("showDockIcon") private var showDockIcon = false
     @AppStorage("showCountdown") private var showCountdown = true
     @AppStorage("countdownDuration") private var countdownDuration = 3
     @AppStorage("autoOpenEditor") private var autoOpenEditor = false
@@ -47,8 +46,9 @@ struct GeneralPreferencesView: View {
             Section("Startup") {
                 Toggle("Launch at login", isOn: $launchAtLogin)
                     .tint(DT.Colors.accentRed)
-                Toggle("Show Dock icon", isOn: $showDockIcon)
-                    .tint(DT.Colors.accentRed)
+                Text("CapTuto now opens as a floating desktop panel instead of living in the menu bar.")
+                    .font(DT.Typography.caption)
+                    .foregroundStyle(DT.Colors.textTertiary)
             }
 
             Section("Recording") {
