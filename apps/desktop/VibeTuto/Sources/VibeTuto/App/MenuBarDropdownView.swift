@@ -1,6 +1,106 @@
 import SwiftUI
 
+// MARK: - Tab Enum
+
+enum PanelTab: String, CaseIterable {
+    case capture, audio, shortcuts, general, advanced
+
+    var icon: String {
+        switch self {
+        case .capture: return "record.circle"
+        case .audio: return "mic"
+        case .shortcuts: return "keyboard"
+        case .general: return "gearshape"
+        case .advanced: return "wrench.and.screwdriver"
+        }
+    }
+
+    var label: String {
+        switch self {
+        case .capture: return "Capture"
+        case .audio: return "Audio"
+        case .shortcuts: return "Shortcuts"
+        case .general: return "General"
+        case .advanced: return "Advanced"
+        }
+    }
+}
+
+// MARK: - Main Panel View
+
 struct FloatingPanelView: View {
+    @State private var selectedTab: PanelTab = .capture
+
+    var body: some View {
+        VStack(spacing: 0) {
+            tabBar
+            Divider()
+                .overlay(DT.Colors.border)
+
+            selectedTabContent
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        }
+        .background(DT.Colors.surface)
+        .preferredColorScheme(.dark)
+    }
+
+    // MARK: - Tab Bar
+
+    private var tabBar: some View {
+        HStack(spacing: 2) {
+            ForEach(PanelTab.allCases, id: \.self) { tab in
+                Button {
+                    withAnimation(DT.Anim.fadeStandard) {
+                        selectedTab = tab
+                    }
+                } label: {
+                    VStack(spacing: 4) {
+                        Image(systemName: selectedTab == tab ? tab.icon + ".fill" : tab.icon)
+                            .font(.system(size: 14))
+                            .foregroundStyle(selectedTab == tab ? DT.Colors.accentRed : DT.Colors.textTertiary)
+                            .frame(width: 28, height: 28)
+
+                        Text(tab.label)
+                            .font(.system(size: 9, weight: .medium))
+                            .foregroundStyle(selectedTab == tab ? DT.Colors.textPrimary : DT.Colors.textTertiary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(selectedTab == tab ? DT.Colors.elevated : .clear)
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, DT.Spacing.sm)
+        .padding(.vertical, DT.Spacing.xs)
+        .background(DT.Colors.card)
+    }
+
+    // MARK: - Tab Content
+
+    @ViewBuilder
+    private var selectedTabContent: some View {
+        switch selectedTab {
+        case .capture:
+            CaptureTabView()
+        case .audio:
+            AudioPreferencesView()
+        case .shortcuts:
+            ShortcutsPreferencesView()
+        case .general:
+            GeneralPreferencesView()
+        case .advanced:
+            AdvancedPreferencesView()
+        }
+    }
+}
+
+// MARK: - Capture Tab
+
+struct CaptureTabView: View {
     @ObservedObject private var session = SessionManager.shared
     @AppStorage("lastRecordingMode") private var lastMode: String = RecordingMode.fullScreen.rawValue
 
@@ -11,95 +111,75 @@ struct FloatingPanelView: View {
     ]
 
     var body: some View {
-        ZStack {
-            NativePanelBackground()
-                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.08, green: 0.11, blue: 0.14).opacity(0.96),
-                            Color(red: 0.08, green: 0.18, blue: 0.24).opacity(0.94)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
-                        .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
-                )
-
-            VStack(alignment: .leading, spacing: 12) {
-                captureCard
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(alignment: .leading, spacing: DT.Spacing.md) {
+                statusHeader
+                statsRow
+                controls
                 modeSelector
                 if lastMode == RecordingMode.singleApp.rawValue {
                     AppPickerView()
+                        .transition(.opacity.combined(with: .move(edge: .top)))
                 }
-                quickOptions
-                footer
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 16)
-            .padding(.top, 42)
+            .padding(DT.Spacing.lg)
+            .animation(.easeInOut(duration: 0.25), value: lastMode)
         }
-        .frame(width: DT.Size.floatingPanelWidth, height: DT.Size.floatingPanelHeight)
-        .preferredColorScheme(.dark)
     }
 
-    private var captureCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top) {
-                HStack(alignment: .top, spacing: 12) {
-                    Image(nsImage: NSApp.applicationIconImage)
-                        .resizable()
-                        .frame(width: 34, height: 34)
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+    // MARK: - Status Header
 
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("CapTuto")
-                            .font(.system(size: 24, weight: .bold))
-                            .foregroundStyle(.white)
-                        Text(statusDescription)
-                            .font(.system(size: 11))
-                            .foregroundStyle(Color.white.opacity(0.72))
-                            .lineLimit(2)
-                    }
-                }
-
-                Spacer()
-
-                Text(statusBadge)
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(statusTint)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule(style: .continuous)
-                            .fill(Color.white.opacity(0.08))
-                    )
-            }
-
-            HStack(spacing: 10) {
-                compactInfo(label: "Duration", value: formattedElapsedTime)
-                compactInfo(label: "Steps", value: "\(session.stepCount)")
-            }
-
-            controls
-        }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [Color.white.opacity(0.09), Color.white.opacity(0.03)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
+    private var statusHeader: some View {
+        HStack {
+            Text(statusDescription)
+                .font(DT.Typography.caption)
+                .foregroundStyle(DT.Colors.textSecondary)
+                .lineLimit(2)
+            Spacer()
+            Text(statusBadge)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(statusTint)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    Capsule(style: .continuous)
+                        .fill(DT.Colors.elevated)
                 )
+        }
+    }
+
+    // MARK: - Stats
+
+    private var statsRow: some View {
+        HStack(spacing: DT.Spacing.sm) {
+            statCard(label: "Duration", value: formattedElapsedTime)
+            statCard(label: "Steps", value: "\(session.stepCount)")
+        }
+    }
+
+    private func statCard(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: DT.Spacing.xs) {
+            Text(value)
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .foregroundStyle(DT.Colors.textPrimary)
+            Text(label)
+                .font(.system(size: 10))
+                .foregroundStyle(DT.Colors.textTertiary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, DT.Spacing.md)
+        .padding(.vertical, DT.Spacing.sm)
+        .background(
+            RoundedRectangle(cornerRadius: DT.Radius.md, style: .continuous)
+                .fill(DT.Colors.card)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DT.Radius.md, style: .continuous)
+                .strokeBorder(DT.Colors.border, lineWidth: 1)
         )
     }
+
+    // MARK: - Controls
 
     @ViewBuilder
     private var controls: some View {
@@ -112,23 +192,23 @@ struct FloatingPanelView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            .buttonStyle(PrimaryCaptureButtonStyle())
+            .buttonStyle(RecordButtonStyle())
             .disabled(lastMode == RecordingMode.singleApp.rawValue && session.selectedAppBundleID == nil)
 
         case .recording:
-            HStack(spacing: 10) {
+            HStack(spacing: DT.Spacing.sm) {
                 Button("Pause", action: session.pauseRecording)
-                    .buttonStyle(SecondaryCaptureButtonStyle())
+                    .buttonStyle(StudioButtonStyle())
                 Button("Stop", action: session.stopRecording)
-                    .buttonStyle(SecondaryCaptureButtonStyle())
+                    .buttonStyle(StudioButtonStyle(accentBorder: DT.Colors.accentRed))
             }
 
         case .paused:
-            HStack(spacing: 10) {
+            HStack(spacing: DT.Spacing.sm) {
                 Button("Resume", action: session.resumeRecording)
-                    .buttonStyle(PrimaryCaptureButtonStyle())
+                    .buttonStyle(RecordButtonStyle())
                 Button("Stop", action: session.stopRecording)
-                    .buttonStyle(SecondaryCaptureButtonStyle())
+                    .buttonStyle(StudioButtonStyle(accentBorder: DT.Colors.accentRed))
             }
 
         case .countdown(let remaining):
@@ -141,28 +221,33 @@ struct FloatingPanelView: View {
             inlineNotice(title: "Finishing", text: "Saving the recording.")
 
         case .uploading(let progress):
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: DT.Spacing.sm) {
                 HStack {
                     Text("Uploading")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(.white)
+                        .font(DT.Typography.body)
+                        .foregroundStyle(DT.Colors.textPrimary)
                     Spacer()
                     Text("\(Int(progress * 100))%")
-                        .font(.system(size: 12, weight: .medium, design: .monospaced))
-                        .foregroundStyle(Color(nsColor: .secondaryLabelColor))
+                        .font(DT.Typography.monoSmall)
+                        .foregroundStyle(DT.Colors.textSecondary)
                 }
                 ProgressView(value: progress)
                     .progressViewStyle(.linear)
-                    .tint(.white)
+                    .tint(DT.Colors.accentRed)
             }
         }
     }
 
-    private var modeSelector: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            sectionLabel("Capture Mode")
+    // MARK: - Mode Selector
 
-            HStack(spacing: 8) {
+    private var modeSelector: some View {
+        VStack(alignment: .leading, spacing: DT.Spacing.sm) {
+            Text("CAPTURE MODE")
+                .font(DT.Typography.sectionLabel)
+                .tracking(1.5)
+                .foregroundStyle(DT.Colors.textTertiary)
+
+            HStack(spacing: DT.Spacing.sm) {
                 ForEach(modes, id: \.mode) { item in
                     Button {
                         lastMode = item.mode.rawValue
@@ -171,14 +256,21 @@ struct FloatingPanelView: View {
                             Image(systemName: item.icon)
                                 .font(.system(size: 11, weight: .semibold))
                             Text(item.label)
-                                .font(.system(size: 13, weight: .medium))
+                                .font(DT.Typography.body)
                         }
-                        .foregroundStyle(lastMode == item.mode.rawValue ? .black : .white.opacity(0.85))
+                        .foregroundStyle(lastMode == item.mode.rawValue ? DT.Colors.surface : DT.Colors.textPrimary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 9)
                         .background(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .fill(lastMode == item.mode.rawValue ? Color.white : Color.white.opacity(0.05))
+                            RoundedRectangle(cornerRadius: DT.Radius.sm, style: .continuous)
+                                .fill(lastMode == item.mode.rawValue ? DT.Colors.textPrimary : DT.Colors.card)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: DT.Radius.sm, style: .continuous)
+                                .strokeBorder(
+                                    lastMode == item.mode.rawValue ? .clear : DT.Colors.border,
+                                    lineWidth: 1
+                                )
                         )
                     }
                     .buttonStyle(.plain)
@@ -195,112 +287,39 @@ struct FloatingPanelView: View {
 
             if lastMode == RecordingMode.region.rawValue {
                 Text("The app hides itself so you can draw the capture area.")
-                    .font(.system(size: 10))
-                    .foregroundStyle(Color(nsColor: .secondaryLabelColor))
+                    .font(DT.Typography.caption)
+                    .foregroundStyle(DT.Colors.textTertiary)
             }
         }
     }
 
-    private var quickOptions: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            sectionLabel("Quick Options")
-
-            compactToggle(title: "Microphone", isOn: $session.micEnabled)
-            compactToggle(title: "Action detection", isOn: $session.actionDetectionEnabled)
-        }
-    }
-
-    private var footer: some View {
-        HStack {
-            Button("Preferences", action: showPreferences)
-                .buttonStyle(FooterLinkButtonStyle())
-            Spacer()
-            Button("Quit") {
-                NSApplication.shared.terminate(nil)
-            }
-                .buttonStyle(FooterLinkButtonStyle())
-        }
-    }
-
-    private func compactInfo(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(value)
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white)
-            Text(label)
-                .font(.system(size: 10))
-                .foregroundStyle(Color.white.opacity(0.65))
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color.white.opacity(0.06))
-        )
-    }
+    // MARK: - Helpers
 
     private func inlineNotice(title: String, text: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: DT.Spacing.xs) {
             Text(title)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(.white)
+                .font(DT.Typography.subheading)
+                .foregroundStyle(DT.Colors.textPrimary)
             Text(text)
-                .font(.system(size: 11))
-                .foregroundStyle(Color(nsColor: .secondaryLabelColor))
+                .font(DT.Typography.caption)
+                .foregroundStyle(DT.Colors.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color.white.opacity(0.05))
-        )
-    }
-
-    private func compactToggle(title: String, isOn: Binding<Bool>) -> some View {
-        HStack {
-            Text(title)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(.white)
-            Spacer()
-            Toggle("", isOn: isOn)
-                .labelsHidden()
-                .toggleStyle(.switch)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 9)
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color.white.opacity(0.05))
-        )
-    }
-
-    private func sectionLabel(_ title: String) -> some View {
-        Text(title)
-            .font(.system(size: 11, weight: .medium))
-            .foregroundStyle(Color(nsColor: .secondaryLabelColor))
+        .padding(DT.Spacing.md)
+        .studioCard()
     }
 
     private var statusDescription: String {
         switch session.state {
-        case .idle:
-            return "Record the screen, one app, or a selected area."
-        case .selectingRegion:
-            return "Draw the exact area you want to capture."
-        case .countdown:
-            return "Getting out of the way before recording starts."
-        case .recording:
-            return "Use the floating controls to pause or stop."
-        case .paused:
-            return "Resume when you are ready."
-        case .stopping:
-            return "Wrapping up the capture."
-        case .uploading:
-            return "Sending the recording to your workspace."
-        case .completed:
-            return "Your recording finished successfully."
-        case .error:
-            return "The recording flow was interrupted."
+        case .idle: return "Record the screen, one app, or a selected area."
+        case .selectingRegion: return "Draw the exact area you want to capture."
+        case .countdown: return "Getting out of the way before recording starts."
+        case .recording: return "Use the floating controls to pause or stop."
+        case .paused: return "Resume when you are ready."
+        case .stopping: return "Wrapping up the capture."
+        case .uploading: return "Sending the recording to your workspace."
+        case .completed: return "Your recording finished successfully."
+        case .error: return "The recording flow was interrupted."
         }
     }
 
@@ -320,11 +339,11 @@ struct FloatingPanelView: View {
 
     private var statusTint: Color {
         switch session.state {
-        case .recording: return .red
-        case .paused: return .yellow
-        case .completed: return .green
+        case .recording: return DT.Colors.accentRed
+        case .paused: return DT.Colors.accentAmber
+        case .completed: return DT.Colors.accentTeal
         case .error: return .orange
-        default: return Color(nsColor: .secondaryLabelColor)
+        default: return DT.Colors.textSecondary
         }
     }
 
@@ -346,61 +365,5 @@ struct FloatingPanelView: View {
     private func startRecording() {
         session.currentMode = RecordingMode(rawValue: lastMode) ?? .fullScreen
         session.startRecording()
-    }
-
-    private func showPreferences() {
-        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-    }
-}
-
-private struct NativePanelBackground: NSViewRepresentable {
-    func makeNSView(context: Context) -> NSVisualEffectView {
-        let view = NSVisualEffectView()
-        view.material = .hudWindow
-        view.state = .active
-        view.blendingMode = .behindWindow
-        return view
-    }
-
-    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {}
-}
-
-private struct PrimaryCaptureButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.system(size: 14, weight: .semibold))
-            .foregroundStyle(.black)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 13)
-            .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Color.white)
-            )
-            .opacity(configuration.isPressed ? 0.88 : 1)
-            .scaleEffect(configuration.isPressed ? 0.99 : 1)
-    }
-}
-
-private struct SecondaryCaptureButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.system(size: 12, weight: .medium))
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 11)
-            .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Color.white.opacity(0.08))
-            )
-            .opacity(configuration.isPressed ? 0.85 : 1)
-    }
-}
-
-private struct FooterLinkButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.system(size: 12, weight: .medium))
-            .foregroundStyle(Color(nsColor: .secondaryLabelColor))
-            .opacity(configuration.isPressed ? 0.7 : 1)
     }
 }

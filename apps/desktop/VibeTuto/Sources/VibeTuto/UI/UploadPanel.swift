@@ -50,7 +50,7 @@ struct UploadPanelView: View {
             .buttonStyle(GhostButtonStyle())
         }
         .padding(DT.Spacing.xl)
-        .frame(width: DT.Size.panelWidth, height: DT.Size.panelHeight)
+        .frame(width: DT.Size.uploadPanelWidth, height: DT.Size.uploadPanelHeight)
         .background(
             RoundedRectangle(cornerRadius: DT.Radius.lg)
                 .fill(DT.Colors.card)
@@ -102,7 +102,7 @@ struct CompletionPanelView: View {
             }
         }
         .padding(DT.Spacing.xl)
-        .frame(width: DT.Size.panelWidth, height: DT.Size.panelHeight)
+        .frame(width: DT.Size.uploadPanelWidth, height: DT.Size.uploadPanelHeight)
         .background(
             RoundedRectangle(cornerRadius: DT.Radius.lg)
                 .fill(DT.Colors.card)
@@ -161,7 +161,7 @@ struct ErrorPanelView: View {
             }
         }
         .padding(DT.Spacing.xl)
-        .frame(width: DT.Size.panelWidth, height: 190)
+        .frame(width: DT.Size.uploadPanelWidth, height: 190)
         .background(
             RoundedRectangle(cornerRadius: DT.Radius.lg)
                 .fill(DT.Colors.card)

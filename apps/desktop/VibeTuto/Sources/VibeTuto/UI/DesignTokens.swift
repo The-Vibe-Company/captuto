@@ -134,23 +134,19 @@ enum DT {
     // MARK: - Sizes
 
     enum Size {
-        static let dropdownWidth: CGFloat = 320
-        static let dropdownHeight: CGFloat = 400
-        static let floatingPanelWidth: CGFloat = 408
-        static let floatingPanelHeight: CGFloat = 404
+        static let mainPanelWidth: CGFloat = 460
+        static let tabBarHeight: CGFloat = 40
         static let toolbarExpandedWidth: CGFloat = 280
         static let toolbarCollapsedWidth: CGFloat = 110
         static let toolbarHeight: CGFloat = 44
         static let toolbarCollapsedHeight: CGFloat = 36
-        static let panelWidth: CGFloat = 320
-        static let panelHeight: CGFloat = 170
         static let appIconSize: CGFloat = 24
         static let recordingDotSize: CGFloat = 8
         static let borderWidth: CGFloat = 3.0
+        static let uploadPanelWidth: CGFloat = 320
+        static let uploadPanelHeight: CGFloat = 170
         static let onboardingWidth: CGFloat = 440
         static let onboardingHeight: CGFloat = 540
-        static let preferencesWidth: CGFloat = 500
-        static let preferencesHeight: CGFloat = 440
     }
 }
 

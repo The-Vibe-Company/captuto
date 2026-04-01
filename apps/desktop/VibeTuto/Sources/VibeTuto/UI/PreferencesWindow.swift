@@ -164,12 +164,18 @@ struct ShortcutsPreferencesView: View {
 // MARK: - Audio Tab
 
 struct AudioPreferencesView: View {
+    @ObservedObject private var session = SessionManager.shared
     @AppStorage("noiseReduction") private var noiseReduction = true
     @State private var selectedDevice = "Default"
     @State private var audioLevel: Float = 0.0
 
     var body: some View {
         Form {
+            Section("Recording") {
+                Toggle("Microphone enabled", isOn: $session.micEnabled)
+                    .tint(DT.Colors.accentRed)
+            }
+
             Section("Input Device") {
                 Picker("Microphone", selection: $selectedDevice) {
                     Text("Default").tag("Default")
@@ -215,6 +221,7 @@ struct AudioPreferencesView: View {
 // MARK: - Advanced Tab
 
 struct AdvancedPreferencesView: View {
+    @ObservedObject private var session = SessionManager.shared
     @AppStorage("detectionSensitivity") private var sensitivity = 1 // 0=Low, 1=Medium, 2=High
     @AppStorage("groupingDelay") private var groupingDelay = 500.0
     @AppStorage("apiBaseURL") private var apiBaseURL = "https://captuto.com"
@@ -222,6 +229,9 @@ struct AdvancedPreferencesView: View {
     var body: some View {
         Form {
             Section("Action Detection") {
+                Toggle("Action detection", isOn: $session.actionDetectionEnabled)
+                    .tint(DT.Colors.accentRed)
+
                 Picker("Sensitivity", selection: $sensitivity) {
                     Text("Low").tag(0)
                     Text("Medium").tag(1)
@@ -271,6 +281,13 @@ struct AdvancedPreferencesView: View {
                     RoundedRectangle(cornerRadius: DT.Radius.sm)
                         .fill(DT.Colors.accentRed.opacity(0.1))
                 )
+            }
+
+            Section {
+                Button("Quit CapTuto") {
+                    NSApplication.shared.terminate(nil)
+                }
+                .buttonStyle(GhostButtonStyle())
             }
         }
         .formStyle(.grouped)
