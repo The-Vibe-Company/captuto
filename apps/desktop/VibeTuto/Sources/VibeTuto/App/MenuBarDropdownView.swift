@@ -281,20 +281,6 @@ struct FloatingPanelView: View {
             .foregroundStyle(Color(nsColor: .secondaryLabelColor))
     }
 
-    private var statusTitle: String {
-        switch session.state {
-        case .idle: return "CapTuto"
-        case .selectingRegion: return "Selecting area"
-        case .countdown: return "Preparing"
-        case .recording: return "Recording"
-        case .paused: return "Paused"
-        case .stopping: return "Finishing"
-        case .uploading: return "Uploading"
-        case .completed: return "Done"
-        case .error: return "Needs attention"
-        }
-    }
-
     private var statusDescription: String {
         switch session.state {
         case .idle:

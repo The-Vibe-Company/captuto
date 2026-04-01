@@ -7,6 +7,7 @@ private final class FloatingPanelWindow: NSWindow {
     override var canBecomeMain: Bool { true }
 }
 
+@MainActor
 final class FloatingPanelController: NSWindowController, NSWindowDelegate {
     private var recordingToolbarController: RecordingToolbarController?
     private var recordingBorderController: RecordingBorderController?
@@ -66,14 +67,11 @@ final class FloatingPanelController: NSWindowController, NSWindowDelegate {
     }
 
     private func observeSessionState() {
-        Task { @MainActor in
-            SessionManager.shared.$state
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] state in
-                    self?.handleStateTransition(state)
-                }
-                .store(in: &cancellables)
-        }
+        SessionManager.shared.$state
+            .sink { [weak self] state in
+                self?.handleStateTransition(state)
+            }
+            .store(in: &cancellables)
     }
 
     private func handleStateTransition(_ state: RecordingState) {
@@ -114,10 +112,8 @@ final class FloatingPanelController: NSWindowController, NSWindowDelegate {
             hideCountdownOverlay()
             hideRecordingToolbar()
             hideRecordingBorder()
-            if regionSelectorController != nil {
-                regionSelectorController?.dismiss()
-                regionSelectorController = nil
-            }
+            regionSelectorController?.dismiss()
+            regionSelectorController = nil
             showPanel(makeKey: false)
         }
     }

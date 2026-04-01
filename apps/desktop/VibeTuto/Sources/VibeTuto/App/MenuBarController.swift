@@ -3,6 +3,7 @@ import SwiftUI
 import Combine
 
 /// Manages the NSStatusItem and its popover dropdown panel.
+@MainActor
 final class MenuBarController: NSObject {
     private var statusItem: NSStatusItem?
     private var popover: NSPopover?
@@ -32,7 +33,7 @@ final class MenuBarController: NSObject {
 
     private func setupPopover() {
         let popover = NSPopover()
-        popover.contentSize = NSSize(width: DT.Size.dropdownWidth, height: DT.Size.dropdownHeight)
+        popover.contentSize = NSSize(width: DT.Size.floatingPanelWidth, height: DT.Size.floatingPanelHeight)
         popover.behavior = .transient
         popover.animates = true
         popover.contentViewController = NSHostingController(rootView: FloatingPanelView())
@@ -48,15 +49,12 @@ final class MenuBarController: NSObject {
     }
 
     private func observeSessionState() {
-        Task { @MainActor in
-            SessionManager.shared.$state
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] state in
-                    self?.updateMenuBarIcon(for: state)
-                    self?.handleStateTransition(state)
-                }
-                .store(in: &cancellables)
-        }
+        SessionManager.shared.$state
+            .sink { [weak self] state in
+                self?.updateMenuBarIcon(for: state)
+                self?.handleStateTransition(state)
+            }
+            .store(in: &cancellables)
     }
 
     @objc private func togglePopover(_ sender: AnyObject?) {
