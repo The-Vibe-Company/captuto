@@ -1,0 +1,21 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "e994777eb4dd2e71a833bc27ef30d6cf72577d97",
+  "prompts": {
+    "4180f36f85e5410a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019df3f4-f51e-73a0-bc88-7bc0df52010a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "StanGirard",
+      "messages": [],
+      "total_additions": 629,
+      "total_deletions": 0,
+      "accepted_lines": 705,
+      "overriden_lines": 0
+    }
+  }
+}
