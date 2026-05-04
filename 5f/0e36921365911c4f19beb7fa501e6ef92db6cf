@@ -1,0 +1,49 @@
+apps/web/components/editor/studio/StudioEditor.tsx
+  5c96df91e019b3bf 1-152
+apps/web/components/editor/studio/studio.css
+  5c96df91e019b3bf 1-235
+apps/web/app/layout.tsx
+  5c96df91e019b3bf 2,20-34,47
+apps/web/components/editor/studio/Timeline.tsx
+  5c96df91e019b3bf 1-509
+apps/web/components/editor/studio/StudioTopBar.tsx
+  5c96df91e019b3bf 1-277
+apps/web/components/editor/studio/Inspector.tsx
+  5c96df91e019b3bf 1-835
+apps/web/components/editor/studio/Artboard.tsx
+  5c96df91e019b3bf 1-265
+apps/web/app/editor/layout.tsx
+  5c96df91e019b3bf 1,6-9
+apps/web/components/editor/studio/icons.tsx
+  5c96df91e019b3bf 1-77
+apps/web/components/editor/studio/Canvas.tsx
+  5c96df91e019b3bf 1-620
+apps/web/components/editor/EditorClient.tsx
+  5c96df91e019b3bf 4-5,705,710-711
+apps/web/components/editor/studio/FocusMode.tsx
+  5c96df91e019b3bf 1-265
+apps/web/components/editor/studio/helpers.ts
+  5c96df91e019b3bf 1-73
+apps/web/components/editor/AnnotationCanvas.tsx
+  5c96df91e019b3bf 19-21,49-50,56-67,618
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "5f0e36921365911c4f19beb7fa501e6ef92db6cf",
+  "prompts": {
+    "5c96df91e019b3bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "51bf27a0-4e67-44d2-b8f0-cc9a26cf6edb",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "StanGirard",
+      "messages": [],
+      "total_additions": 8023,
+      "total_deletions": 5146,
+      "accepted_lines": 8002,
+      "overriden_lines": 0
+    }
+  }
+}
