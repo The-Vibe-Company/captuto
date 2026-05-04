@@ -1,0 +1,25 @@
+apps/web/components/public/PublicTutorialViewer.tsx
+  55ab0e6d527d45e2 39,46,56,63-65
+apps/web/components/editor/studio/StudioEditor.tsx
+  55ab0e6d527d45e2 3,67,163,184
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "4af5480d61ef4f0c2551a66f7de1529c8271148f",
+  "prompts": {
+    "55ab0e6d527d45e2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7b8df0d6-7fa3-4471-a8fd-4250b586a555",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "StanGirard",
+      "messages": [],
+      "total_additions": 998,
+      "total_deletions": 2,
+      "accepted_lines": 196,
+      "overriden_lines": 1
+    }
+  }
+}
