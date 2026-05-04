@@ -43,6 +43,7 @@ export function EmbedTutorialViewer({
                   step={step}
                   stepNumber={isCountedStep ? stepCounter : 0}
                   readOnly
+                  flattened
                 />
               );
             })}

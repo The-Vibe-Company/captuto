@@ -41,6 +41,12 @@ interface DocStepCardProps {
   onRemoveImage?: () => void;
   onSetImage?: (source: SourceWithSignedUrl) => void;
   readOnly?: boolean;
+  /**
+   * Public / embed views receive screenshots that already have annotations
+   * baked in by the server. Forward this so StepScreenshot skips the
+   * client-side annotation canvas (otherwise we'd double-draw).
+   */
+  flattened?: boolean;
 }
 
 function DocStepCardComponent({
@@ -57,6 +63,7 @@ function DocStepCardComponent({
   onRemoveImage,
   onSetImage,
   readOnly = false,
+  flattened = false,
 }: DocStepCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [showImagePicker, setShowImagePicker] = useState(false);
@@ -491,6 +498,7 @@ function DocStepCardComponent({
                 onUpdateAnnotation={handleUpdateAnnotation}
                 onDeleteAnnotation={handleDeleteAnnotation}
                 readOnly={readOnly}
+                flattened={flattened}
               />
             </div>
           ) : !readOnly ? (
@@ -598,6 +606,7 @@ export const DocStepCard = memo(DocStepCardComponent, (prev, next) => {
     prev.stepNumber === next.stepNumber &&
     prev.previousStepUrl === next.previousStepUrl &&
     prev.readOnly === next.readOnly &&
+    prev.flattened === next.flattened &&
     JSON.stringify(prev.step.annotations) === JSON.stringify(next.step.annotations) &&
     (prev.sources?.length ?? 0) === (next.sources?.length ?? 0)
   );

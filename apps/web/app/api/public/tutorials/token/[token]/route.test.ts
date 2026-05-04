@@ -4,19 +4,23 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(),
 }));
 
+vi.mock('@/lib/flatten/cache', () => ({
+  getFlattenedSignedUrl: vi.fn(),
+}));
+
 import { createClient } from '@/lib/supabase/server';
+import { getFlattenedSignedUrl } from '@/lib/flatten/cache';
 import { GET } from './route';
 
 const mockCreateClient = createClient as ReturnType<typeof vi.fn>;
+const mockGetFlattenedSignedUrl = getFlattenedSignedUrl as ReturnType<typeof vi.fn>;
 
 function createMockClient({
   tutorialResult = { data: null, error: null },
   stepsResult = { data: null, error: null },
-  signedUrl = { data: { signedUrl: 'https://signed.url/img.png' }, error: null },
 }: {
   tutorialResult?: { data: unknown; error: unknown };
   stepsResult?: { data: unknown; error: unknown };
-  signedUrl?: { data: unknown; error: unknown };
 } = {}) {
   let fromCallCount = 0;
   return {
@@ -39,11 +43,6 @@ function createMockClient({
         }),
       };
     }),
-    storage: {
-      from: vi.fn().mockReturnValue({
-        createSignedUrl: vi.fn().mockResolvedValue(signedUrl),
-      }),
-    },
   };
 }
 
@@ -85,6 +84,7 @@ const mockStep = {
 describe('GET /api/public/tutorials/token/[token]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetFlattenedSignedUrl.mockResolvedValue('https://signed.url/flat.png');
   });
 
   it('returns 404 when tutorial is not found', async () => {
@@ -157,24 +157,49 @@ describe('GET /api/public/tutorials/token/[token]', () => {
     expect(data.steps).toHaveLength(1);
   });
 
-  it('generates signed URLs for screenshots', async () => {
-    const mockClient = createMockClient({
-      tutorialResult: { data: mockTutorial, error: null },
-      stepsResult: { data: [mockStep], error: null },
-      signedUrl: { data: { signedUrl: 'https://signed.url/img.png' }, error: null },
-    });
-    mockCreateClient.mockResolvedValue(mockClient);
+  it('serves flattened screenshot URLs (never raw)', async () => {
+    mockCreateClient.mockResolvedValue(
+      createMockClient({
+        tutorialResult: { data: mockTutorial, error: null },
+        stepsResult: { data: [mockStep], error: null },
+      })
+    );
 
     const request = new Request('http://localhost/api/public/tutorials/token/token-abc');
     const response = await GET(request as any, { params: Promise.resolve({ token: 'token-abc' }) });
     const data = await response.json();
 
-    expect(data.steps[0].signedScreenshotUrl).toBe('https://signed.url/img.png');
-    const storageMock = mockClient.storage.from('screenshots');
-    expect(storageMock.createSignedUrl).toHaveBeenCalledWith(
-      'path/to/image.png',
-      60 * 60 * 24 * 7
+    expect(data.steps[0].signedScreenshotUrl).toBe('https://signed.url/flat.png');
+    expect(mockGetFlattenedSignedUrl).toHaveBeenCalledWith({
+      originalPath: 'path/to/image.png',
+      annotations: [],
+    });
+  });
+
+  it('passes parsed annotations to the flatten pipeline (string JSON)', async () => {
+    const annotations = [{ id: 'a', type: 'circle', x: 0.5, y: 0.5 }];
+    const stepWithStringAnnotations = {
+      ...mockStep,
+      annotations: JSON.stringify(annotations),
+    };
+
+    mockCreateClient.mockResolvedValue(
+      createMockClient({
+        tutorialResult: { data: mockTutorial, error: null },
+        stepsResult: { data: [stepWithStringAnnotations], error: null },
+      })
     );
+
+    const request = new Request('http://localhost/api/public/tutorials/token/token-abc');
+    const response = await GET(request as any, { params: Promise.resolve({ token: 'token-abc' }) });
+    const data = await response.json();
+
+    expect(mockGetFlattenedSignedUrl).toHaveBeenCalledWith({
+      originalPath: 'path/to/image.png',
+      annotations,
+    });
+    // Annotations are baked into the image; the API does NOT ship them.
+    expect(data.steps[0].annotations).toBeNull();
   });
 
   it('parses element_info from string JSON', async () => {
@@ -200,16 +225,15 @@ describe('GET /api/public/tutorials/token/[token]', () => {
     expect(data.steps[0].element_info).toEqual({ tag: 'input', text: 'Search' });
   });
 
-  it('parses annotations from string JSON', async () => {
-    const stepWithStringAnnotations = {
+  it('never includes raw annotations in the response', async () => {
+    const stepWithAnnotations = {
       ...mockStep,
-      annotations: JSON.stringify([{ type: 'circle', x: 50, y: 50 }]),
+      annotations: [{ id: 'a', type: 'blur', x: 0.1, y: 0.1, width: 0.2, height: 0.2 }],
     };
-
     mockCreateClient.mockResolvedValue(
       createMockClient({
         tutorialResult: { data: mockTutorial, error: null },
-        stepsResult: { data: [stepWithStringAnnotations], error: null },
+        stepsResult: { data: [stepWithAnnotations], error: null },
       })
     );
 
@@ -217,7 +241,7 @@ describe('GET /api/public/tutorials/token/[token]', () => {
     const response = await GET(request as any, { params: Promise.resolve({ token: 'token-abc' }) });
     const data = await response.json();
 
-    expect(data.steps[0].annotations).toEqual([{ type: 'circle', x: 50, y: 50 }]);
+    expect(data.steps[0].annotations).toBeNull();
   });
 
   it('returns 500 when steps query fails', async () => {

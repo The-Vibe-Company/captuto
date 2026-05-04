@@ -497,6 +497,7 @@ export function PublicTutorialViewer({
                               stepNumber={isCountedStep ? currentStepNum : 0}
                               previousStepUrl={previousStepUrl}
                               readOnly
+                              flattened
                             />
                           </div>
                         </div>
