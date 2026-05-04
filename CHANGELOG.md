@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.14](https://github.com/The-Vibe-Company/captuto/compare/v0.1.13...v0.1.14) (2026-05-04)
+
+
+### Features
+
+* **dev:** support Conductor parallel workspaces via CONDUCTOR_PORT ([#92](https://github.com/The-Vibe-Company/captuto/issues/92)) ([b7c210b](https://github.com/The-Vibe-Company/captuto/commit/b7c210bba3fc3db27e61c7405734c7a4771b9a5f))
+
+
+### Bug Fixes
+
+* **editor:** make Preview/Reader modes actually render the tutorial ([#93](https://github.com/The-Vibe-Company/captuto/issues/93)) ([d205fbd](https://github.com/The-Vibe-Company/captuto/commit/d205fbd69bdef4585efd67768a5431d88b33e22a))
+
 ## [0.1.13](https://github.com/The-Vibe-Company/captuto/compare/v0.1.12...v0.1.13) (2026-05-04)
 
 
