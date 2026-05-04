@@ -1,0 +1,25 @@
+scripts/dev-start.sh
+  c7dc8078a0f6287b 15,125
+conductor.json
+  c7dc8078a0f6287b 1-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "732284b6f1b510e3b0cfc2f5db756e9205941798",
+  "prompts": {
+    "c7dc8078a0f6287b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4b6ddebb-a426-4e66-beee-895b50748562",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "StanGirard",
+      "messages": [],
+      "total_additions": 11,
+      "total_deletions": 3,
+      "accepted_lines": 10,
+      "overriden_lines": 0
+    }
+  }
+}
