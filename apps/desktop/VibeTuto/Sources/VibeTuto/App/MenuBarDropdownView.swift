@@ -158,6 +158,7 @@ struct CaptureTabView: View {
                     AppPickerView()
                         .transition(.opacity.combined(with: .move(edge: .top)))
                 }
+                recentRecordings
             }
             .padding(DT.Spacing.lg)
             .animation(.easeInOut(duration: 0.25), value: lastMode)
@@ -425,6 +426,50 @@ struct CaptureTabView: View {
         }
     }
 
+    @ViewBuilder
+    private var recentRecordings: some View {
+        let recordings = UserDefaults.standard.array(forKey: "recentRecordings") as? [[String: String]] ?? []
+        if !recordings.isEmpty {
+            VStack(alignment: .leading, spacing: DT.Spacing.sm) {
+                Text("RECENT RECORDINGS")
+                    .font(DT.Typography.sectionLabel)
+                    .tracking(1.5)
+                    .foregroundStyle(DT.Colors.textTertiary)
+
+                VStack(spacing: 1) {
+                    ForEach(Array(recordings.prefix(3).enumerated()), id: \.offset) { _, recording in
+                        Button {
+                            openRecentRecording(recording)
+                        } label: {
+                            HStack(spacing: DT.Spacing.sm) {
+                                Image(systemName: "doc.text.magnifyingglass")
+                                    .foregroundStyle(DT.Colors.textSecondary)
+                                    .frame(width: 18)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(recording["title"] ?? "Desktop Recording")
+                                        .font(DT.Typography.body)
+                                        .foregroundStyle(DT.Colors.textPrimary)
+                                        .lineLimit(1)
+                                    Text(relativeDate(recording["created_at"]))
+                                        .font(DT.Typography.caption)
+                                        .foregroundStyle(DT.Colors.textTertiary)
+                                }
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundStyle(DT.Colors.textTertiary)
+                            }
+                            .padding(.horizontal, DT.Spacing.md)
+                            .padding(.vertical, DT.Spacing.sm)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .studioCard()
+            }
+        }
+    }
+
     // MARK: - Helpers
 
     private func inlineNotice(icon: String, title: String, text: String, tint: Color) -> some View {
@@ -508,6 +553,23 @@ struct CaptureTabView: View {
     private func startRecording() {
         session.currentMode = RecordingMode(rawValue: lastMode) ?? .fullScreen
         session.startRecording()
+    }
+
+    private func openRecentRecording(_ recording: [String: String]) {
+        guard let id = recording["id"] else { return }
+        let baseURL = UserDefaults.standard.string(forKey: "apiBaseURL") ?? "https://captuto.com"
+        if let url = URL(string: "\(baseURL)/editor/\(id)?source=desktop") {
+            NSWorkspace.shared.open(url)
+        }
+    }
+
+    private func relativeDate(_ isoString: String?) -> String {
+        guard let isoString, let date = ISO8601DateFormatter().date(from: isoString) else {
+            return "recent"
+        }
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .short
+        return formatter.localizedString(for: date, relativeTo: Date())
     }
 }
 

@@ -237,6 +237,7 @@ extension RecordingState {
 // MARK: - NSPanel Controller
 
 /// Manages the floating NSPanel that hosts the recording toolbar.
+@MainActor
 final class RecordingToolbarController {
     private var panel: NSPanel?
 
@@ -272,14 +273,12 @@ final class RecordingToolbarController {
 
     private func reposition() {
         guard let panel else { return }
-        let candidateScreen = NSScreen.screens.first { screen in
-            screen.frame.contains(NSEvent.mouseLocation)
-        } ?? NSScreen.main
-
-        guard let screen = candidateScreen else { return }
-        let screenFrame = screen.visibleFrame
-        let x = screenFrame.midX - panel.frame.width / 2
-        let y = screenFrame.maxY - panel.frame.height - 24
+        let area = SessionManager.shared.currentCaptureArea
+        let frame = area.visibleFrame.intersection(area.frame).isNull
+            ? area.frame
+            : area.visibleFrame.intersection(area.frame)
+        let x = frame.midX - panel.frame.width / 2
+        let y = frame.minY + 24
         panel.setFrameOrigin(NSPoint(x: x, y: y))
     }
 }

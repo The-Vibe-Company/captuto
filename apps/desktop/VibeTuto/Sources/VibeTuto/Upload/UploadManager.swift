@@ -21,38 +21,45 @@ final class UploadManager: @unchecked Sendable {
         audioFile: URL?,
         metadata: RecordingMetadata
     ) async throws -> String {
-        onProgress?(0.1)
+        onProgress?(0.05)
 
         // Build upload steps, encoding screenshots one at a time to avoid
         // loading all base64 strings into memory simultaneously.
         var uploadSteps: [UploadStep] = []
         uploadSteps.reserveCapacity(steps.count)
-        for step in steps {
+        for (index, step) in steps.enumerated() {
             var base64Data: String? = nil
             if let fileURL = screenshotFiles[step.screenshotKey],
                let data = try? Data(contentsOf: fileURL) {
                 base64Data = data.base64EncodedString()
             }
             uploadSteps.append(UploadStep(step: step, screenshotData: base64Data))
+
+            let screenshotProgress = steps.isEmpty ? 0.20 : (Double(index + 1) / Double(steps.count)) * 0.20
+            onProgress?(0.05 + screenshotProgress)
         }
 
         logger.info("Uploading \(uploadSteps.count) steps (\(uploadSteps.filter { $0.screenshotData != nil }.count) with screenshots)")
 
-        onProgress?(0.3)
+        onProgress?(0.30)
 
-        // If audio was recorded, read the file so we can set the key.
-        // The actual audio data is not embedded in JSON — it's uploaded separately
-        // or handled by the web API via the audio_key reference.
         let audioKey: String? = audioFile != nil ? "narration.m4a" : nil
+        let audioData = try audioFile.flatMap { fileURL -> String? in
+            let data = try Data(contentsOf: fileURL)
+            return data.base64EncodedString()
+        }
 
-        // Single API call with everything embedded
+        // Single API call. Screenshots are still embedded for MVP compatibility;
+        // progress now accounts for local encoding and the server stores audio.
         let payload = RecordingPayload(
             recording: metadata,
             steps: uploadSteps,
-            audioKey: audioKey
+            audioKey: audioKey,
+            audioData: audioData,
+            audioContentType: audioData == nil ? nil : "audio/mp4"
         )
 
-        onProgress?(0.5)
+        onProgress?(0.45)
 
         let tutorialID = try await supabaseClient.createRecording(payload: payload)
 

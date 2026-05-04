@@ -27,6 +27,7 @@ final class SessionManager: ObservableObject {
     private var appsUsed: Set<String> = []
     private var sessionID: UUID?
     private var audioURL: URL?
+    private var currentLocalSessionDirectory: URL?
 
     private let captureEngine = CaptureEngine()
     private let frameProcessor = FrameProcessor()
@@ -44,6 +45,10 @@ final class SessionManager: ObservableObject {
     private lazy var uploadManager: UploadManager = {
         UploadManager(supabaseClient: supabaseClient)
     }()
+
+    var currentCaptureArea: CaptureGeometry.CaptureArea {
+        captureEngine.captureArea
+    }
 
     private init() {
         actionBuffer = ActionBuffer(stepDetector: stepDetector)
@@ -66,6 +71,7 @@ final class SessionManager: ObservableObject {
         detectedSteps = []
         screenshotFiles = [:]
         appsUsed = []
+        currentLocalSessionDirectory = nil
         stepCount = 0
         elapsedTime = 0
 
@@ -125,30 +131,7 @@ final class SessionManager: ObservableObject {
             }
         }
 
-        // Start screen capture
-        Task {
-            do {
-                let bundleID: String? = currentMode == .singleApp
-                    ? selectedAppBundleID
-                    : nil
-                try await captureEngine.startCapture(mode: currentMode, appBundleID: bundleID, regionRect: selectedRegion)
-            } catch {
-                state = .error("Failed to start capture: \(error.localizedDescription)")
-                return
-            }
-        }
-
-        // Start audio capture if mic is enabled (independent of action detection)
-        if micEnabled {
-            let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("VibeTuto/\(sessionID?.uuidString ?? UUID().uuidString)")
-            try? FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-            try? audioRecorder.start(outputDirectory: tempDir)
-        }
-
-        // Wire up the step detection pipeline:
-        // EventMonitor -> ActionBuffer -> StepDetector -> captureStepScreenshot
-        guard actionDetectionEnabled else { return }
-
+        // Wire the step detection callback before events start arriving.
         actionBuffer.onStepDetected = { [weak self] step in
             Task { @MainActor [weak self] in
                 guard let self else { return }
@@ -166,7 +149,36 @@ final class SessionManager: ObservableObject {
             }
         }
 
-        eventMonitor.start(sessionStart: sessionStart) { [weak self] action in
+        // Start screen capture
+        Task {
+            do {
+                let bundleID: String? = currentMode == .singleApp
+                    ? selectedAppBundleID
+                    : nil
+                try await captureEngine.startCapture(mode: currentMode, appBundleID: bundleID, regionRect: selectedRegion)
+                startAudioIfNeeded()
+                startActionMonitoring(sessionStart: sessionStart)
+            } catch {
+                timer?.invalidate()
+                timer = nil
+                _ = audioRecorder.stop()
+                state = .error("Failed to start capture: \(error.localizedDescription)")
+                return
+            }
+        }
+    }
+
+    private func startAudioIfNeeded() {
+        guard micEnabled else { return }
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("VibeTuto/\(sessionID?.uuidString ?? UUID().uuidString)")
+        try? FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        try? audioRecorder.start(outputDirectory: tempDir)
+    }
+
+    private func startActionMonitoring(sessionStart: Date) {
+        guard actionDetectionEnabled else { return }
+        eventMonitor.start(sessionStart: sessionStart, captureArea: captureEngine.captureArea) { [weak self] action in
             self?.actionBuffer.addAction(action)
         }
     }
@@ -192,7 +204,7 @@ final class SessionManager: ObservableObject {
             }
         }
         if actionDetectionEnabled {
-            eventMonitor.start(sessionStart: recordingStartTime ?? Date()) { [weak self] action in
+            eventMonitor.start(sessionStart: recordingStartTime ?? Date(), captureArea: captureEngine.captureArea) { [weak self] action in
                 self?.actionBuffer.addAction(action)
             }
         }
@@ -234,13 +246,13 @@ final class SessionManager: ObservableObject {
 
             // Save locally first before attempting upload
             if let sessionID {
-                let screenSize = NSScreen.main?.frame.size ?? CGSize(width: 2560, height: 1600)
+                let captureArea = self.captureEngine.captureArea
                 let session = RecordingSession(
                     id: sessionID,
                     startedAt: recordingStartTime ?? Date(),
                     duration: elapsedTime,
                     macosVersion: ProcessInfo.processInfo.operatingSystemVersionString,
-                    screenResolution: "\(Int(screenSize.width))x\(Int(screenSize.height))",
+                    screenResolution: captureArea.resolutionString,
                     appsUsed: Array(appsUsed),
                     steps: detectedSteps,
                     audioKey: self.audioURL != nil ? "narration.m4a" : nil
@@ -251,7 +263,11 @@ final class SessionManager: ObservableObject {
                         screenshotData[key] = data
                     }
                 }
-                _ = try? localStore.saveSession(session, screenshots: screenshotData)
+                currentLocalSessionDirectory = try? localStore.saveSession(
+                    session,
+                    screenshots: screenshotData,
+                    audioFile: self.audioURL
+                )
             }
 
             await beginUpload()
@@ -293,7 +309,7 @@ final class SessionManager: ObservableObject {
             let fileURL = try frameProcessor.saveToTemporaryFile(data, filename: "step-\(stepIndex).jpg")
             screenshotFiles[screenshotKey] = fileURL
 
-            let screenSize = NSScreen.main?.frame.size ?? CGSize(width: 2560, height: 1600)
+            let captureArea = captureEngine.captureArea
 
             let step = DetectedStep(
                 orderIndex: stepIndex,
@@ -302,8 +318,8 @@ final class SessionManager: ObservableObject {
                 screenshotKey: screenshotKey,
                 clickX: clickX,
                 clickY: clickY,
-                viewportWidth: Int(screenSize.width),
-                viewportHeight: Int(screenSize.height),
+                viewportWidth: captureArea.pixelWidth,
+                viewportHeight: captureArea.pixelHeight,
                 appBundleID: appBundleID,
                 appName: appName,
                 windowTitle: windowTitle,
@@ -330,13 +346,13 @@ final class SessionManager: ObservableObject {
 
         state = .uploading(progress: 0)
 
-        let screenSize = NSScreen.main?.frame.size ?? CGSize(width: 2560, height: 1600)
+        let captureArea = captureEngine.captureArea
 
         let metadata = RecordingMetadata(
             duration: elapsedTime,
             startedAt: ISO8601DateFormatter().string(from: recordingStartTime ?? Date()),
             macosVersion: ProcessInfo.processInfo.operatingSystemVersionString,
-            screenResolution: "\(Int(screenSize.width))x\(Int(screenSize.height))",
+            screenResolution: captureArea.resolutionString,
             appsUsed: Array(appsUsed)
         )
 
@@ -358,8 +374,16 @@ final class SessionManager: ObservableObject {
                 metadata: metadata
             )
             lastTutorialID = tutorialID
+            storeRecentRecording(tutorialID: tutorialID)
             state = .completed
             logger.info("Upload completed! Tutorial ID: \(tutorialID)")
+            if let currentLocalSessionDirectory {
+                try? localStore.removeSession(at: currentLocalSessionDirectory)
+                self.currentLocalSessionDirectory = nil
+            }
+            if UserDefaults.standard.bool(forKey: "autoOpenEditor"), let url = tutorialEditorURL {
+                NSWorkspace.shared.open(url)
+            }
 
             // Send notification
             sendUploadCompleteNotification()
@@ -403,6 +427,20 @@ final class SessionManager: ObservableObject {
         }
     }
 
+    private func storeRecentRecording(tutorialID: String) {
+        var recordings = UserDefaults.standard.array(forKey: "recentRecordings") as? [[String: String]] ?? []
+        recordings.removeAll { $0["id"] == tutorialID }
+        recordings.insert(
+            [
+                "id": tutorialID,
+                "title": "Desktop Recording",
+                "created_at": ISO8601DateFormatter().string(from: Date()),
+            ],
+            at: 0
+        )
+        UserDefaults.standard.set(Array(recordings.prefix(5)), forKey: "recentRecordings")
+    }
+
     /// Reset session state back to idle.
     func reset() {
         state = .idle
@@ -415,10 +453,42 @@ final class SessionManager: ObservableObject {
         audioURL = nil
         lastTutorialID = nil
         selectedRegion = nil
+        currentLocalSessionDirectory = nil
         eventMonitor.stop()
         _ = audioRecorder.stop()
         stepDetector.reset()
         actionBuffer.reset()
         contextTracker.reset()
+    }
+
+    /// Retry locally persisted sessions from previous failed/offline uploads.
+    func retryPendingUploadsSilently() {
+        guard supabaseClient.loadStoredToken() else { return }
+        let pending = localStore.pendingSessions()
+        guard !pending.isEmpty else { return }
+
+        Task {
+            for directory in pending {
+                do {
+                    let session = try localStore.loadSession(at: directory)
+                    let metadata = RecordingMetadata(
+                        duration: session.duration,
+                        startedAt: ISO8601DateFormatter().string(from: session.startedAt),
+                        macosVersion: session.macosVersion,
+                        screenResolution: session.screenResolution,
+                        appsUsed: session.appsUsed
+                    )
+                    _ = try await uploadManager.uploadSession(
+                        steps: session.steps,
+                        screenshotFiles: localStore.screenshotFiles(for: session, at: directory),
+                        audioFile: localStore.audioFile(for: session, at: directory),
+                        metadata: metadata
+                    )
+                    try? localStore.removeSession(at: directory)
+                } catch {
+                    logger.error("Pending upload retry failed: \(error.localizedDescription)")
+                }
+            }
+        }
     }
 }

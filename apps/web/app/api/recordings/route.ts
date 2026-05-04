@@ -40,6 +40,8 @@ interface DesktopRecordingPayload {
   };
   steps: DesktopStep[];
   audio_key?: string | null;
+  audio_data?: string | null;
+  audio_content_type?: string | null;
 }
 
 export async function POST(request: Request) {
@@ -196,11 +198,33 @@ export async function POST(request: Request) {
       // Don't fail the whole request - tutorial is created
     }
 
-    // 7. If audio was uploaded to storage, trigger transcription.
-    // Note: Desktop app sets audio_key but doesn't yet upload audio data to storage,
-    // so we verify the file exists before triggering transcription.
-    if (body.audio_key) {
-      const audioPath = `${userId}/${tutorial.id}.webm`;
+    // 7. Store desktop narration audio and trigger transcription when present.
+    let audioPath: string | null = null;
+    if (body.audio_key && body.audio_data) {
+      try {
+        const audioBuffer = Buffer.from(body.audio_data, 'base64');
+        const extension = body.audio_key.endsWith('.m4a') ? 'm4a' : 'webm';
+        const contentType = body.audio_content_type || (extension === 'm4a' ? 'audio/mp4' : 'audio/webm');
+        audioPath = `${userId}/${tutorial.id}.${extension}`;
+
+        const { error: audioUploadError } = await supabase.storage
+          .from('recordings')
+          .upload(audioPath, audioBuffer, {
+            contentType,
+            upsert: true,
+          });
+
+        if (audioUploadError) {
+          console.error('Failed to upload desktop audio:', audioUploadError);
+          audioPath = null;
+        }
+      } catch (err) {
+        console.error('Failed to decode desktop audio:', err);
+        audioPath = null;
+      }
+    }
+
+    if (audioPath) {
       const { data: audioCheck } = await supabase.storage
         .from('recordings')
         .createSignedUrl(audioPath, 10);
@@ -219,7 +243,7 @@ export async function POST(request: Request) {
           const transcribeResponse = await fetch(new URL('/api/transcribe', request.url), {
             method: 'POST',
             headers: transcribeHeaders,
-            body: JSON.stringify({ tutorialId: tutorial.id }),
+            body: JSON.stringify({ tutorialId: tutorial.id, audioPath }),
           });
 
           if (!transcribeResponse.ok) {
