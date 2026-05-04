@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type {
   Annotation,
   AnnotationType,
@@ -64,6 +64,7 @@ export function StudioEditor({
   );
   const [focusOpen, setFocusOpen] = useState(false);
   const [mode, setMode] = useState<StudioMode>('edit');
+  const previewScrollRef = useRef<HTMLDivElement>(null);
 
   const screenshots = useMemo(() => playheadSteps(steps), [steps]);
   const step = useMemo(
@@ -159,6 +160,7 @@ export function StudioEditor({
         </div>
       ) : (
         <div
+          ref={previewScrollRef}
           style={{
             flex: 1,
             position: 'relative',
@@ -179,6 +181,7 @@ export function StudioEditor({
               updatedAt: tutorial.updated_at,
             }}
             steps={steps}
+            scrollContainerRef={previewScrollRef}
           />
         </div>
       )}
