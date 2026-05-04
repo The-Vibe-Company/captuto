@@ -1,4 +1,4 @@
-import { Zap, Eye, CheckCircle2, Users } from 'lucide-react';
+import { Zap, Eye, CheckCircle2, Users, type LucideIcon } from 'lucide-react';
 
 interface KpiStripProps {
   tutorialsCount: number;
@@ -6,7 +6,7 @@ interface KpiStripProps {
 
 interface KpiCardProps {
   label: string;
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  icon: LucideIcon;
   value: string;
   delta?: { text: string; direction: 'up' | 'down' };
   sparkPath: string;
