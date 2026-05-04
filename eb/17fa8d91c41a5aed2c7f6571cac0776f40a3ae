@@ -1,0 +1,23 @@
+apps/web/next.config.mjs
+  053fc3326519fba9 22-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "eb17fa8d91c41a5aed2c7f6571cac0776f40a3ae",
+  "prompts": {
+    "053fc3326519fba9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0910d6dd-a073-4d01-b6de-58c44e0c5b94",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "StanGirard",
+      "messages": [],
+      "total_additions": 4287,
+      "total_deletions": 0,
+      "accepted_lines": 4567,
+      "overriden_lines": 0
+    }
+  }
+}
