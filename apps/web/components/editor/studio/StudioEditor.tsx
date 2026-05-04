@@ -77,6 +77,11 @@ export function StudioEditor({
     setSelectedAnnotationId(null);
   };
 
+  const handleModeChange = (next: StudioMode) => {
+    if (next !== 'edit') setFocusOpen(false);
+    setMode(next);
+  };
+
   return (
     <div
       className="studio"
@@ -92,7 +97,7 @@ export function StudioEditor({
         tutorial={tutorial}
         saveStatus={saveStatus}
         mode={mode}
-        onModeChange={setMode}
+        onModeChange={handleModeChange}
         onTitleChange={onTitleChange}
         onGenerateClick={onGenerateClick}
         isGenerating={isGenerating}
