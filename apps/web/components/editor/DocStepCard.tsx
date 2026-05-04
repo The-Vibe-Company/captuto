@@ -266,11 +266,16 @@ function DocStepCardComponent({
 
               <div
                 className={cn(
-                  'flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold shadow-sm',
+                  'flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold font-heading shadow-sm',
                   isTabChange
                     ? 'bg-amber-500/15 text-amber-600 ring-1 ring-amber-500/30'
-                    : 'bg-primary text-primary-foreground'
+                    : 'text-white'
                 )}
+                style={
+                  !isTabChange
+                    ? { backgroundImage: 'var(--brand-gradient)' }
+                    : undefined
+                }
               >
                 {stepNumber}
               </div>

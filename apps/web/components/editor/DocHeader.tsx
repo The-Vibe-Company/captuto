@@ -52,7 +52,7 @@ export function DocHeader({
                 size="sm"
                 onClick={onGenerateClick}
                 disabled={isGenerating}
-                className="gap-2 bg-gradient-to-r from-brand-600 to-brand-600 text-white shadow-sm hover:from-brand-700 hover:to-brand-700 border-0"
+                className="gap-2 bg-brand-600 text-white border-0 shadow-brand hover:bg-brand-500 hover:shadow-brand-lg transition-all"
               >
                 {isGenerating ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />

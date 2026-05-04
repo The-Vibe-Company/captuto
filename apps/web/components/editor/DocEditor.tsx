@@ -108,7 +108,7 @@ export function DocEditor({
 
   return (
     <TooltipProvider delayDuration={100}>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-stone-50">
         <DocHeader
           saveStatus={saveStatus}
           tutorialId={tutorial.id}
@@ -155,7 +155,7 @@ export function DocEditor({
                         </Badge>
                       )}
                     </div>
-                    <div className="mt-6 h-px bg-gradient-to-r from-border via-border/50 to-transparent" />
+                    <div className="mt-6 h-px bg-gradient-to-r from-brand-200 via-stone-200/60 to-transparent" />
                   </div>
 
                   {/* Steps list */}
@@ -223,16 +223,22 @@ export function DocEditor({
 
                     {/* Empty state */}
                     {steps.length === 0 && (
-                      <Card className="border-dashed border-2">
+                      <Card className="border-2 border-dashed border-stone-200/80">
                         <CardContent className="flex flex-col items-center justify-center py-20 text-center">
-                          <div className="rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 p-4 mb-5">
-                            <Sparkles className="h-8 w-8 text-primary/60" />
+                          <div className="mb-5 rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 to-teal-50 p-4">
+                            <Sparkles className="h-8 w-8 text-brand-600" />
                           </div>
-                          <h3 className="text-lg font-semibold text-foreground mb-1.5">
-                            No steps yet
+                          <h3 className="font-heading text-lg font-semibold text-stone-900">
+                            Your tutorial,{' '}
+                            <span
+                              className="font-serif italic font-normal bg-clip-text text-transparent"
+                              style={{ backgroundImage: 'var(--brand-gradient)' }}
+                            >
+                              ready when you are.
+                            </span>
                           </h3>
-                          <p className="text-sm text-muted-foreground mb-8 max-w-sm leading-relaxed">
-                            Start creating your tutorial by adding steps from the timeline or by creating steps manually.
+                          <p className="mt-2 mb-8 max-w-sm text-sm leading-relaxed text-stone-500">
+                            Add steps from the timeline on the right, or create them manually below.
                           </p>
                           <div className="flex items-center gap-3">
                             <AddStepButton
@@ -304,7 +310,7 @@ function AddStepButton({
           variant="outline"
           size="sm"
           onClick={onClick}
-          className="h-9 gap-2 border-dashed hover:border-primary hover:bg-primary/5 hover:text-primary transition-colors"
+          className="h-9 gap-2 border-dashed border-stone-300 text-stone-600 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700 transition-colors"
         >
           <Plus className="h-3.5 w-3.5" />
           <Icon className="h-3.5 w-3.5" />
@@ -372,7 +378,7 @@ function EditableTitle({
         onChange={(e) => setEditValue(e.target.value)}
         onBlur={handleSubmit}
         onKeyDown={handleKeyDown}
-        className="text-3xl font-bold tracking-tight text-foreground bg-transparent border-b-2 border-primary outline-none w-full max-w-lg"
+        className="font-heading text-3xl font-bold tracking-tight text-stone-900 bg-transparent border-b-2 border-brand-500 outline-none w-full max-w-lg"
         placeholder={placeholder}
       />
     );
@@ -383,10 +389,10 @@ function EditableTitle({
       onClick={() => setIsEditing(true)}
       className="group flex items-center gap-2 text-left"
     >
-      <h1 className="text-3xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
+      <h1 className="font-heading text-3xl font-bold tracking-tight text-stone-900 group-hover:text-brand-700 transition-colors">
         {value || placeholder}
       </h1>
-      <Pencil className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+      <Pencil className="h-4 w-4 text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity" />
     </button>
   );
 }
