@@ -17,6 +17,13 @@ interface StepScreenshotProps {
   onUpdateAnnotation?: (id: string, updates: Partial<Annotation>) => void;
   onDeleteAnnotation?: (id: string) => void;
   readOnly?: boolean;
+  /**
+   * When true, `src` already has annotations baked in. Skip mounting the
+   * canvas overlay entirely so we never double-draw annotations and never
+   * leave a hook that could leak the raw image. Used by public/embed views
+   * which receive flattened images from the server.
+   */
+  flattened?: boolean;
 }
 
 const ZOOM_LEVELS = [1, 1.5, 2];
@@ -29,6 +36,7 @@ export function StepScreenshot({
   onUpdateAnnotation,
   onDeleteAnnotation,
   readOnly = false,
+  flattened = false,
 }: StepScreenshotProps) {
   const [zoomIndex, setZoomIndex] = useState(0);
   const [isAnnotating, setIsAnnotating] = useState(false);
@@ -122,16 +130,18 @@ export function StepScreenshot({
                 decoding="async"
               />
 
-              <AnnotationCanvas
-                annotations={annotations}
-                activeTool={isAnnotating ? activeTool : null}
-                onAddAnnotation={handleAddAnnotation}
-                onUpdateAnnotation={onUpdateAnnotation}
-                onDeleteAnnotation={onDeleteAnnotation}
-                containerRef={containerRef}
-                readOnly={readOnly}
-                annotationStyle={annotationStyle}
-              />
+              {!flattened && (
+                <AnnotationCanvas
+                  annotations={annotations}
+                  activeTool={isAnnotating ? activeTool : null}
+                  onAddAnnotation={handleAddAnnotation}
+                  onUpdateAnnotation={onUpdateAnnotation}
+                  onDeleteAnnotation={onDeleteAnnotation}
+                  containerRef={containerRef}
+                  readOnly={readOnly}
+                  annotationStyle={annotationStyle}
+                />
+              )}
             </div>
           </div>
         </div>

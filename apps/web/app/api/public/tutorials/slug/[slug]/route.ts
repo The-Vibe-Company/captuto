@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getFlattenedSignedUrl } from '@/lib/flatten/cache';
+import type { Annotation } from '@/lib/types/editor';
 
 // GET /api/public/tutorials/slug/[slug] - Get public tutorial by slug
 // No authentication required - only returns tutorials with visibility = 'public'
@@ -61,20 +63,32 @@ export async function GET(
       );
     }
 
-    // Generate signed URLs for screenshots (7 days for public access)
+    // Public viewers only ever see flattened (annotations-baked-in) images.
     const stepsWithUrls = await Promise.all(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (steps || []).map(async (step: any) => {
-        let signedScreenshotUrl: string | null = null;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const source = (step as any).sources;
 
-        if (source?.screenshot_url) {
-          const { data: signedUrl } = await supabase.storage
-            .from('screenshots')
-            .createSignedUrl(source.screenshot_url, 60 * 60 * 24 * 7); // 7 days
+        // Parse annotations if it's a string
+        let annotations = step.annotations;
+        if (typeof annotations === 'string') {
+          try {
+            annotations = JSON.parse(annotations);
+          } catch {
+            annotations = null;
+          }
+        }
+        const annotationArray: Annotation[] = Array.isArray(annotations)
+          ? (annotations as Annotation[])
+          : [];
 
-          signedScreenshotUrl = signedUrl?.signedUrl || null;
+        let signedScreenshotUrl: string | null = null;
+        if (source?.screenshot_url) {
+          signedScreenshotUrl = await getFlattenedSignedUrl({
+            originalPath: source.screenshot_url,
+            annotations: annotationArray,
+          });
         }
 
         // Parse element_info if it's a string
@@ -87,16 +101,6 @@ export async function GET(
           }
         }
 
-        // Parse annotations if it's a string
-        let annotations = step.annotations;
-        if (typeof annotations === 'string') {
-          try {
-            annotations = JSON.parse(annotations);
-          } catch {
-            annotations = null;
-          }
-        }
-
         return {
           id: step.id,
           tutorial_id: step.tutorial_id,
@@ -104,7 +108,8 @@ export async function GET(
           order_index: step.order_index,
           text_content: step.text_content,
           step_type: step.step_type,
-          annotations,
+          // Do NOT ship raw annotations: see token route for rationale.
+          annotations: null,
           created_at: step.created_at,
           signedScreenshotUrl,
           // Legacy fields for compatibility

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
-import type { StepWithSignedUrl, StepType } from '@/lib/types/editor';
+import type { Annotation, StepWithSignedUrl, StepType } from '@/lib/types/editor';
+import { getFlattenedSignedUrl } from '@/lib/flatten/cache';
 
 export interface PublicTutorial {
   id: string;
@@ -19,21 +20,35 @@ export interface PublicTutorialData {
 }
 
 async function processSteps(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  _supabase: Awaited<ReturnType<typeof createClient>>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   steps: any[]
 ): Promise<StepWithSignedUrl[]> {
   return Promise.all(
     steps.map(async (step) => {
-      let signedScreenshotUrl: string | null = null;
       const source = step.sources;
 
-      if (source?.screenshot_url) {
-        const { data: signedUrl } = await supabase.storage
-          .from('screenshots')
-          .createSignedUrl(source.screenshot_url, 60 * 60 * 24 * 7); // 7 days
+      // Parse annotations if it's a string
+      let annotations = step.annotations;
+      if (typeof annotations === 'string') {
+        try {
+          annotations = JSON.parse(annotations);
+        } catch {
+          annotations = null;
+        }
+      }
+      const annotationArray: Annotation[] = Array.isArray(annotations)
+        ? (annotations as Annotation[])
+        : [];
 
-        signedScreenshotUrl = signedUrl?.signedUrl || null;
+      // Public viewers only ever see the flattened (annotations-baked-in) image.
+      // The raw screenshot URL is intentionally NOT exposed.
+      let signedScreenshotUrl: string | null = null;
+      if (source?.screenshot_url) {
+        signedScreenshotUrl = await getFlattenedSignedUrl({
+          originalPath: source.screenshot_url,
+          annotations: annotationArray,
+        });
       }
 
       // Parse element_info if it's a string
@@ -46,16 +61,6 @@ async function processSteps(
         }
       }
 
-      // Parse annotations if it's a string
-      let annotations = step.annotations;
-      if (typeof annotations === 'string') {
-        try {
-          annotations = JSON.parse(annotations);
-        } catch {
-          annotations = null;
-        }
-      }
-
       return {
         id: step.id,
         tutorial_id: step.tutorial_id,
@@ -64,7 +69,9 @@ async function processSteps(
         text_content: step.text_content,
         description: step.description ?? null,
         step_type: step.step_type as StepType,
-        annotations,
+        // Annotations are baked into signedScreenshotUrl; do not ship them
+        // to the client, as that would let viewers reconstruct the raw image.
+        annotations: null,
         created_at: step.created_at,
         signedScreenshotUrl,
         source: source ? {

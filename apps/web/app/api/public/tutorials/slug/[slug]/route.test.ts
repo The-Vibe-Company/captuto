@@ -4,10 +4,16 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(),
 }));
 
+vi.mock('@/lib/flatten/cache', () => ({
+  getFlattenedSignedUrl: vi.fn(),
+}));
+
 import { createClient } from '@/lib/supabase/server';
+import { getFlattenedSignedUrl } from '@/lib/flatten/cache';
 import { GET } from './route';
 
 const mockCreateClient = createClient as ReturnType<typeof vi.fn>;
+const mockGetFlattenedSignedUrl = getFlattenedSignedUrl as ReturnType<typeof vi.fn>;
 
 function createMockClient({
   tutorialResult = { data: null, error: null },
@@ -87,6 +93,7 @@ const mockStep = {
 describe('GET /api/public/tutorials/slug/[slug]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetFlattenedSignedUrl.mockResolvedValue('https://signed.url/flat.png');
   });
 
   it('returns 404 when tutorial is not found', async () => {
@@ -139,25 +146,24 @@ describe('GET /api/public/tutorials/slug/[slug]', () => {
     expect(data.steps).toHaveLength(1);
   });
 
-  it('generates signed URLs for screenshots with 7-day expiry', async () => {
-    const mockClient = createMockClient({
-      tutorialResult: { data: mockTutorial, error: null },
-      stepsResult: { data: [mockStep], error: null },
-      signedUrl: { data: { signedUrl: 'https://signed.url/img.png' }, error: null },
-    });
-    mockCreateClient.mockResolvedValue(mockClient);
+  it('serves flattened (annotations-baked-in) URLs', async () => {
+    mockGetFlattenedSignedUrl.mockResolvedValue('https://signed.url/flat-image.png');
+    mockCreateClient.mockResolvedValue(
+      createMockClient({
+        tutorialResult: { data: mockTutorial, error: null },
+        stepsResult: { data: [mockStep], error: null },
+      })
+    );
 
     const request = new Request('http://localhost/api/public/tutorials/slug/test-slug');
     const response = await GET(request as any, { params: Promise.resolve({ slug: 'test-slug' }) });
     const data = await response.json();
 
-    expect(data.steps[0].signedScreenshotUrl).toBe('https://signed.url/img.png');
-    // Verify createSignedUrl was called with 7 day seconds
-    const storageMock = mockClient.storage.from('screenshots');
-    expect(storageMock.createSignedUrl).toHaveBeenCalledWith(
-      'path/to/image.png',
-      60 * 60 * 24 * 7
-    );
+    expect(data.steps[0].signedScreenshotUrl).toBe('https://signed.url/flat-image.png');
+    expect(mockGetFlattenedSignedUrl).toHaveBeenCalledWith({
+      originalPath: 'path/to/image.png',
+      annotations: [],
+    });
   });
 
   it('parses element_info when stored as string', async () => {
@@ -183,10 +189,11 @@ describe('GET /api/public/tutorials/slug/[slug]', () => {
     expect(data.steps[0].element_info).toEqual({ tag: 'button', text: 'Submit' });
   });
 
-  it('parses annotations when stored as string', async () => {
+  it('parses annotations when stored as string and forwards to flatten pipeline', async () => {
+    const annotations = [{ id: 'a', type: 'highlight' }];
     const stepWithStringAnnotations = {
       ...mockStep,
-      annotations: JSON.stringify([{ type: 'highlight' }]),
+      annotations: JSON.stringify(annotations),
     };
 
     mockCreateClient.mockResolvedValue(
@@ -200,7 +207,12 @@ describe('GET /api/public/tutorials/slug/[slug]', () => {
     const response = await GET(request as any, { params: Promise.resolve({ slug: 'test-slug' }) });
     const data = await response.json();
 
-    expect(data.steps[0].annotations).toEqual([{ type: 'highlight' }]);
+    // Annotations are baked into the image; the API never ships the raw array.
+    expect(data.steps[0].annotations).toBeNull();
+    expect(mockGetFlattenedSignedUrl).toHaveBeenCalledWith({
+      originalPath: 'path/to/image.png',
+      annotations,
+    });
   });
 
   it('returns 500 when steps query fails', async () => {
