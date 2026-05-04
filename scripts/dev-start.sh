@@ -12,7 +12,7 @@ set -euo pipefail
 # =============================================================================
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-WEB_PORT=3678
+WEB_PORT="${CONDUCTOR_PORT:-3678}"
 PID_FILE="$ROOT_DIR/.dev-server.pid"
 LOG_FILE="$ROOT_DIR/.dev-server.log"
 
@@ -122,7 +122,7 @@ cmd_start() {
 
   # --- Start dev server ---
   warn "Starting dev server on port $WEB_PORT..."
-  nohup pnpm --filter web dev > "$LOG_FILE" 2>&1 &
+  nohup pnpm --filter web exec next dev -p "$WEB_PORT" > "$LOG_FILE" 2>&1 &
   echo $! > "$PID_FILE"
 
   # --- Wait for healthy response ---
