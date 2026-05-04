@@ -1,0 +1,59 @@
+apps/web/package.json
+  38691bdb53fe9a11 20
+apps/web/app/api/steps/[id]/route.ts
+  38691bdb53fe9a11 3,139-147
+apps/web/app/api/public/tutorials/slug/[slug]/route.ts
+  38691bdb53fe9a11 3-4,66,73-84,86-91,111-112
+apps/web/components/public/EmbedTutorialViewer.tsx
+  38691bdb53fe9a11 46
+apps/web/components/editor/StepScreenshot.tsx
+  38691bdb53fe9a11 20-26,39,133-144
+apps/web/app/api/tutorials/[id]/share/route.ts
+  38691bdb53fe9a11 4,173-183
+apps/web/lib/flatten/cache.ts
+  38691bdb53fe9a11 1-198
+apps/web/app/api/public/tutorials/token/[token]/route.test.ts
+  38691bdb53fe9a11 7-10,12,16,87,160-166,172-190,192-202,228-229,231,236,244
+apps/web/lib/flatten/draw-annotations.ts
+  38691bdb53fe9a11 1-310
+apps/web/lib/queries/public-tutorials.test.ts
+  38691bdb53fe9a11 7-10,12,16,99,157-158,168-172,196-197,200,212-217,236,264-265,268,285-289
+supabase/migrations/20260504195919_add_screenshots_flattened_bucket.sql
+  38691bdb53fe9a11 1-56
+apps/web/components/editor/DocStepCard.tsx
+  38691bdb53fe9a11 44-49,66,501,609
+apps/web/components/public/PublicTutorialViewer.tsx
+  38691bdb53fe9a11 500
+apps/web/lib/flatten/render-step.ts
+  38691bdb53fe9a11 1-24
+apps/web/app/api/public/tutorials/slug/[slug]/route.test.ts
+  38691bdb53fe9a11 7-10,12,16,96,149-156,162-166,192-193,196,210-215
+apps/web/lib/queries/public-tutorials.ts
+  38691bdb53fe9a11 2-3,23,31-42,44-51,72-74
+apps/web/app/api/public/tutorials/token/[token]/route.ts
+  38691bdb53fe9a11 3-4,71-72,79-90,92-97,117-120
+apps/web/app/api/tutorials/[id]/share/route.test.ts
+  38691bdb53fe9a11 12-15
+apps/web/lib/supabase/admin.ts
+  38691bdb53fe9a11 1-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "e6f8f5c1002ff059cde6d41ef210f61a59bb6d43",
+  "prompts": {
+    "38691bdb53fe9a11": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "167aedf4-a9a0-4cad-a2a6-25b675369531",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "StanGirard",
+      "messages": [],
+      "total_additions": 2373,
+      "total_deletions": 4508,
+      "accepted_lines": 2373,
+      "overriden_lines": 0
+    }
+  }
+}
