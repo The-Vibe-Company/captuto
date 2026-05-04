@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type {
   Annotation,
   AnnotationType,
@@ -11,12 +11,13 @@ import type {
 import type { SaveStatus } from '../EditorClient';
 import type { NewStepType } from '../DocEditor';
 import './studio.css';
-import { StudioTopBar } from './StudioTopBar';
+import { StudioTopBar, type StudioMode } from './StudioTopBar';
 import { Timeline } from './Timeline';
 import { Canvas } from './Canvas';
 import { Inspector } from './Inspector';
 import { FocusMode } from './FocusMode';
 import { playheadSteps } from './helpers';
+import { PublicTutorialViewer } from '@/components/public/PublicTutorialViewer';
 
 interface StudioEditorProps {
   tutorial: Tutorial;
@@ -62,6 +63,8 @@ export function StudioEditor({
     null
   );
   const [focusOpen, setFocusOpen] = useState(false);
+  const [mode, setMode] = useState<StudioMode>('edit');
+  const previewScrollRef = useRef<HTMLDivElement>(null);
 
   const screenshots = useMemo(() => playheadSteps(steps), [steps]);
   const step = useMemo(
@@ -73,6 +76,11 @@ export function StudioEditor({
   const handleSelectStep = (id: string) => {
     onSelectStep(id);
     setSelectedAnnotationId(null);
+  };
+
+  const handleModeChange = (next: StudioMode) => {
+    if (next !== 'edit') setFocusOpen(false);
+    setMode(next);
   };
 
   return (
@@ -89,64 +97,94 @@ export function StudioEditor({
       <StudioTopBar
         tutorial={tutorial}
         saveStatus={saveStatus}
+        mode={mode}
+        onModeChange={handleModeChange}
         onTitleChange={onTitleChange}
         onGenerateClick={onGenerateClick}
         isGenerating={isGenerating}
         hasSourcesForGeneration={sources.length > 0}
       />
 
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
-        <Timeline
-          steps={steps}
-          selectedStepId={selectedStepId}
-          onSelectStep={handleSelectStep}
-          onReorderSteps={onReorderSteps}
-          onAddStepAfter={(id) => onAddStep('text', id)}
-        />
+      {mode === 'edit' ? (
+        <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
+          <Timeline
+            steps={steps}
+            selectedStepId={selectedStepId}
+            onSelectStep={handleSelectStep}
+            onReorderSteps={onReorderSteps}
+            onAddStepAfter={(id) => onAddStep('text', id)}
+          />
 
-        <Canvas
-          step={step}
-          screenshots={screenshots}
-          selectedStepId={selectedStepId}
-          onSelectStep={handleSelectStep}
-          onTitleChange={onStepCaptionChange}
-          onCaptionChange={onStepDescriptionChange}
-          onAnnotationsChange={onStepAnnotationsChange}
-          selectedAnnotationId={selectedAnnotationId}
-          onSelectAnnotation={setSelectedAnnotationId}
-          activeTool={activeTool}
-          onToolChange={setActiveTool}
-          onOpenFocus={() => step && setFocusOpen(true)}
-        />
+          <Canvas
+            step={step}
+            screenshots={screenshots}
+            selectedStepId={selectedStepId}
+            onSelectStep={handleSelectStep}
+            onTitleChange={onStepCaptionChange}
+            onCaptionChange={onStepDescriptionChange}
+            onAnnotationsChange={onStepAnnotationsChange}
+            selectedAnnotationId={selectedAnnotationId}
+            onSelectAnnotation={setSelectedAnnotationId}
+            activeTool={activeTool}
+            onToolChange={setActiveTool}
+            onOpenFocus={() => step && setFocusOpen(true)}
+          />
 
-        <Inspector
-          step={step}
-          stepIdx={stepIdx}
-          selectedAnnotationId={selectedAnnotationId}
-          onAnnotationsChange={onStepAnnotationsChange}
-          onUrlChange={onStepUrlChange}
-          onShowUrlChange={onStepShowUrlChange}
-          onTitleChange={onStepCaptionChange}
-          onDeleteStep={onDeleteStep}
-        />
-
-        {focusOpen && step && (
-          <FocusMode
+          <Inspector
             step={step}
             stepIdx={stepIdx}
-            screenshots={screenshots}
+            selectedAnnotationId={selectedAnnotationId}
             onAnnotationsChange={onStepAnnotationsChange}
-            onPrev={() =>
-              stepIdx > 0 && handleSelectStep(screenshots[stepIdx - 1].id)
-            }
-            onNext={() =>
-              stepIdx < screenshots.length - 1 &&
-              handleSelectStep(screenshots[stepIdx + 1].id)
-            }
-            onClose={() => setFocusOpen(false)}
+            onUrlChange={onStepUrlChange}
+            onShowUrlChange={onStepShowUrlChange}
+            onTitleChange={onStepCaptionChange}
+            onDeleteStep={onDeleteStep}
           />
-        )}
-      </div>
+
+          {focusOpen && step && (
+            <FocusMode
+              step={step}
+              stepIdx={stepIdx}
+              screenshots={screenshots}
+              onAnnotationsChange={onStepAnnotationsChange}
+              onPrev={() =>
+                stepIdx > 0 && handleSelectStep(screenshots[stepIdx - 1].id)
+              }
+              onNext={() =>
+                stepIdx < screenshots.length - 1 &&
+                handleSelectStep(screenshots[stepIdx + 1].id)
+              }
+              onClose={() => setFocusOpen(false)}
+            />
+          )}
+        </div>
+      ) : (
+        <div
+          ref={previewScrollRef}
+          style={{
+            flex: 1,
+            position: 'relative',
+            overflow: 'auto',
+            transform: 'translateZ(0)',
+          }}
+        >
+          <PublicTutorialViewer
+            tutorial={{
+              id: tutorial.id,
+              title: tutorial.title || 'Untitled',
+              description: tutorial.description ?? null,
+              slug: tutorial.slug ?? null,
+              status: tutorial.status ?? 'draft',
+              visibility: 'private',
+              publishedAt: null,
+              createdAt: tutorial.created_at,
+              updatedAt: tutorial.updated_at,
+            }}
+            steps={steps}
+            scrollContainerRef={previewScrollRef}
+          />
+        </div>
+      )}
     </div>
   );
 }
