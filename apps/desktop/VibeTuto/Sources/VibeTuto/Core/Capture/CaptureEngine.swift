@@ -16,8 +16,18 @@ final class CaptureEngine: NSObject, CaptureEngineProtocol, @unchecked Sendable 
     private var streamOutput: CaptureStreamOutput?
     private let captureQueue = DispatchQueue(label: "com.vibetuto.capture", qos: .userInteractive)
     private var currentFilter: SCContentFilter?
-    private var currentRegionRect: CGRect?
+    private var currentSourceRect: CGRect?
+    private var currentCaptureArea = CaptureGeometry.CaptureArea(
+        frame: CGRect(x: 0, y: 0, width: 2560, height: 1600),
+        visibleFrame: CGRect(x: 0, y: 0, width: 2560, height: 1560),
+        scale: 1,
+        displayID: nil
+    )
     private var isCapturing = false
+
+    var captureArea: CaptureGeometry.CaptureArea {
+        currentCaptureArea
+    }
 
     /// Check if screen recording permission is granted.
     static func checkPermission() async -> PermissionStatus {
@@ -38,13 +48,29 @@ final class CaptureEngine: NSObject, CaptureEngineProtocol, @unchecked Sendable 
         guard !isCapturing else { return }
 
         let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+        let snapshots = await MainActor.run {
+            CaptureGeometry.snapshots(from: NSScreen.screens)
+        }
+        let mouseLocation = await MainActor.run { NSEvent.mouseLocation }
+        let area = CaptureGeometry.area(
+            for: mode,
+            region: regionRect,
+            mouseLocation: mouseLocation,
+            screens: snapshots
+        )
+        let targetDisplay = display(
+            matching: area.displayID,
+            in: content.displays
+        ) ?? content.displays.first
+        guard let display = targetDisplay else {
+            throw CaptureError.noDisplayFound
+        }
+
+        let targetScreenFrame = snapshots.first(where: { $0.displayID == area.displayID })?.frame ?? area.frame
 
         let filter: SCContentFilter
         switch mode {
         case .fullScreen:
-            guard let display = content.displays.first else {
-                throw CaptureError.noDisplayFound
-            }
             filter = SCContentFilter(display: display, excludingWindows: [])
 
         case .singleApp:
@@ -52,31 +78,27 @@ final class CaptureEngine: NSObject, CaptureEngineProtocol, @unchecked Sendable 
                   let app = content.applications.first(where: { $0.bundleIdentifier == bundleID }) else {
                 throw CaptureError.applicationNotFound
             }
-            guard let display = content.displays.first else {
-                throw CaptureError.noDisplayFound
-            }
             filter = SCContentFilter(display: display, including: [app], exceptingWindows: [])
 
         case .region:
-            guard let display = content.displays.first else {
-                throw CaptureError.noDisplayFound
-            }
             filter = SCContentFilter(display: display, excludingWindows: [])
         }
 
         currentFilter = filter
-        currentRegionRect = (mode == .region) ? regionRect : nil
+        currentCaptureArea = area
+        currentSourceRect = (mode == .region)
+            ? CaptureGeometry.rectRelativeToScreen(area.frame, screenFrame: targetScreenFrame)
+            : nil
 
         let config = SCStreamConfiguration()
-        if mode == .region, let regionRect = regionRect {
-            config.sourceRect = regionRect
-            let scale = await MainActor.run { NSScreen.main?.backingScaleFactor ?? 2.0 }
-            config.width = Int(regionRect.width * scale)
-            config.height = Int(regionRect.height * scale)
-            config.destinationRect = CGRect(origin: .zero, size: CGSize(width: regionRect.width, height: regionRect.height))
+        if let sourceRect = currentSourceRect {
+            config.sourceRect = sourceRect
+            config.width = area.pixelWidth
+            config.height = area.pixelHeight
+            config.destinationRect = CGRect(origin: .zero, size: area.frame.size)
         } else {
-            config.width = 2560
-            config.height = 1600
+            config.width = display.width
+            config.height = display.height
         }
         config.minimumFrameInterval = CMTime(value: 1, timescale: 2) // 2 fps background capture
         config.queueDepth = 5
@@ -99,7 +121,7 @@ final class CaptureEngine: NSObject, CaptureEngineProtocol, @unchecked Sendable 
         try await stream.stopCapture()
         self.stream = nil
         self.streamOutput = nil
-        self.currentRegionRect = nil
+        self.currentSourceRect = nil
         isCapturing = false
     }
 
@@ -110,15 +132,14 @@ final class CaptureEngine: NSObject, CaptureEngineProtocol, @unchecked Sendable 
         }
 
         let config = SCStreamConfiguration()
-        if let regionRect = currentRegionRect {
-            config.sourceRect = regionRect
-            let scale = await MainActor.run { NSScreen.main?.backingScaleFactor ?? 2.0 }
-            config.width = Int(regionRect.width * scale)
-            config.height = Int(regionRect.height * scale)
-            config.destinationRect = CGRect(origin: .zero, size: CGSize(width: regionRect.width, height: regionRect.height))
+        if let sourceRect = currentSourceRect {
+            config.sourceRect = sourceRect
+            config.width = currentCaptureArea.pixelWidth
+            config.height = currentCaptureArea.pixelHeight
+            config.destinationRect = CGRect(origin: .zero, size: currentCaptureArea.frame.size)
         } else {
-            config.width = 2560
-            config.height = 1600
+            config.width = currentCaptureArea.pixelWidth
+            config.height = currentCaptureArea.pixelHeight
         }
         config.pixelFormat = kCVPixelFormatType_32BGRA
         config.showsCursor = true
@@ -128,6 +149,11 @@ final class CaptureEngine: NSObject, CaptureEngineProtocol, @unchecked Sendable 
             configuration: config
         )
         return image
+    }
+
+    private func display(matching displayID: CGDirectDisplayID?, in displays: [SCDisplay]) -> SCDisplay? {
+        guard let displayID else { return nil }
+        return displays.first { $0.displayID == displayID }
     }
 }
 

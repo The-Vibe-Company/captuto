@@ -1,26 +1,14 @@
 import Cocoa
 
 /// Draws a glowing, pulsing border with viewfinder brackets around the recording area.
+@MainActor
 final class RecordingBorderController {
     private var window: NSWindow?
 
     func show(region: CGRect? = nil) {
-        guard let screen = NSScreen.main else { return }
-
-        let windowFrame: NSRect
-        if let region = region {
-            // Convert from ScreenCaptureKit coordinates (top-left origin) to AppKit (bottom-left origin)
-            let flippedY = screen.frame.height - region.origin.y - region.height
-            let padding: CGFloat = 6
-            windowFrame = CGRect(
-                x: region.origin.x - padding,
-                y: flippedY - padding,
-                width: region.width + padding * 2,
-                height: region.height + padding * 2
-            )
-        } else {
-            windowFrame = screen.frame
-        }
+        let area = SessionManager.shared.currentCaptureArea
+        let padding: CGFloat = region == nil ? 0 : 6
+        let windowFrame = area.frame.insetBy(dx: -padding, dy: -padding)
 
         if window == nil {
             let borderWindow = NSWindow(

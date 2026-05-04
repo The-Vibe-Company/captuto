@@ -6,6 +6,7 @@ import { validateApiToken } from '@/lib/auth/api-token';
 
 interface TranscribeRequest {
   tutorialId: string;
+  audioPath?: string;
 }
 
 interface TranscriptionSegment {
@@ -71,7 +72,13 @@ export async function POST(request: Request) {
     }
 
     // 5. Generate signed URL for audio file
-    const audioPath = `${userId}/${tutorial.id}.webm`;
+    const allowedAudioPaths = [
+      `${userId}/${tutorial.id}.webm`,
+      `${userId}/${tutorial.id}.m4a`,
+    ];
+    const audioPath = body.audioPath && allowedAudioPaths.includes(body.audioPath)
+      ? body.audioPath
+      : allowedAudioPaths[0];
     const { data: signedUrlData, error: signedUrlError } = await supabase.storage
       .from('recordings')
       .createSignedUrl(audioPath, 300); // 5 minutes validity

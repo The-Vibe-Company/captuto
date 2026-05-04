@@ -2,19 +2,17 @@ import Cocoa
 import ServiceManagement
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    private var floatingPanelController: FloatingPanelController?
+    private var menuBarController: MenuBarController?
     private var onboardingWindowController: OnboardingWindowController?
     private let permissionChecker = PermissionChecker()
     private var userDefaultsObserver: NSObjectProtocol?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        NSApp.setActivationPolicy(.regular)
+        NSApp.setActivationPolicy(.accessory)
         ProcessInfo.processInfo.disableAutomaticTermination("CapTuto stays alive while capture UI is hidden")
         ProcessInfo.processInfo.disableSuddenTermination()
 
-        floatingPanelController = FloatingPanelController()
-        floatingPanelController?.showWindow(nil)
-        NSApp.activate(ignoringOtherApps: true)
+        menuBarController = MenuBarController()
 
         // Hide the Settings menu item (preferences are integrated in the main panel)
         DispatchQueue.main.async {
@@ -40,6 +38,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if screenPerm != .granted || accessPerm != .granted {
             showOnboarding()
         }
+        SessionManager.shared.retryPendingUploadsSilently()
 
         // Register for app activation
         NSWorkspace.shared.notificationCenter.addObserver(
@@ -56,7 +55,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
-            floatingPanelController?.showWindow(nil)
+            showOnboarding()
             NSApp.activate(ignoringOtherApps: true)
         }
         return true
@@ -83,6 +82,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         onboardingWindowController?.showWindow(nil)
         onboardingWindowController?.window?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
 
     /// Register the app as a login item.
