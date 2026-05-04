@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.17](https://github.com/The-Vibe-Company/captuto/compare/v0.1.16...v0.1.17) (2026-05-04)
+
+
+### Features
+
+* **desktop:** simplify mac app design ([#98](https://github.com/The-Vibe-Company/captuto/issues/98)) ([14f595a](https://github.com/The-Vibe-Company/captuto/commit/14f595ad260f7917ba7812f4ff409e095b26ea83))
+
+
+### Bug Fixes
+
+* **dx:** keep Next dev server attached for Conductor `run` ([#101](https://github.com/The-Vibe-Company/captuto/issues/101)) ([ebffb29](https://github.com/The-Vibe-Company/captuto/commit/ebffb29d7b4fe2b11ea031bc777d96446eeda7a1))
+
 ## [0.1.16](https://github.com/The-Vibe-Company/captuto/compare/v0.1.15...v0.1.16) (2026-05-04)
 
 

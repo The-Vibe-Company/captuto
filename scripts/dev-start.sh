@@ -148,10 +148,48 @@ cmd_start() {
   die "Timeout (${max_wait}s). Logs:\n$(tail -30 "$LOG_FILE")"
 }
 
+cmd_start_foreground() {
+  cd "$ROOT_DIR"
+
+  # Foreground mode `exec`s into next dev so a supervisor (e.g. Conductor's `run`)
+  # watches that exact PID. If the port is busy we always reclaim it — handing
+  # control to a pre-existing process would leave the supervisor watching this
+  # shell, not the server.
+  if is_port_listening; then
+    warn "Port $WEB_PORT already occupied — reclaiming for foreground supervision..."
+    kill_server
+  fi
+
+  # --- Clean stale PID file (background-mode artifact) ---
+  if [ -f "$PID_FILE" ]; then
+    rm -f "$PID_FILE"
+  fi
+
+  # --- Check pnpm ---
+  command -v pnpm &>/dev/null || die "pnpm not found. Install: npm i -g pnpm@9"
+  info "pnpm $(pnpm --version)"
+
+  # --- Check env files ---
+  if [ ! -f "$ROOT_DIR/.env.local" ] && [ ! -f "$ROOT_DIR/apps/web/.env.local" ]; then
+    die "No .env.local found. Copy apps/web/.env.example to .env.local and fill in values."
+  fi
+  info "Environment config found"
+
+  # --- Install deps (pnpm is idempotent — instant if nothing changed) ---
+  info "Checking dependencies..."
+  pnpm install --frozen-lockfile 2>&1 | tail -3
+  info "Dependencies OK"
+
+  # --- Replace this shell with the dev server so the supervisor sees it directly ---
+  warn "Starting dev server on port $WEB_PORT (foreground)..."
+  exec pnpm --filter web exec next dev -p "$WEB_PORT" -H 0.0.0.0
+}
+
 # --------------- main ---------------
 
 case "${1:-}" in
-  --stop)   cmd_stop   ;;
-  --status) cmd_status ;;
-  *)        cmd_start  ;;
+  --stop)       cmd_stop              ;;
+  --status)     cmd_status            ;;
+  --foreground) cmd_start_foreground  ;;
+  *)            cmd_start             ;;
 esac
