@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Play, Menu, X } from "lucide-react";
+import { Play, Menu, X, Download } from "lucide-react";
+import { DESKTOP_DOWNLOAD_URL } from "@/lib/constants/download";
 
 const navLinks = [
   { label: "Features", href: "#features" },
@@ -59,6 +60,20 @@ export function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
+          <Button
+            asChild
+            variant="ghost"
+            className="cursor-pointer text-stone-500 hover:text-stone-900"
+          >
+            <a
+              href={DESKTOP_DOWNLOAD_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Download className="mr-2 h-4 w-4" aria-hidden="true" />
+              Download
+            </a>
+          </Button>
           <Link href="/login">
             <Button
               variant="ghost"
@@ -108,6 +123,21 @@ export function Navbar() {
                 </a>
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-stone-100">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="w-full cursor-pointer justify-center"
+                >
+                  <a
+                    href={DESKTOP_DOWNLOAD_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Download className="mr-2 h-4 w-4" aria-hidden="true" />
+                    Download
+                  </a>
+                </Button>
                 <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
                   <Button
                     variant="outline"
