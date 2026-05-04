@@ -1,545 +1,362 @@
 import SwiftUI
 
-// MARK: - Tab Enum
-
-enum PanelTab: String, CaseIterable {
-    case capture, audio, shortcuts, general, advanced
-
-    var icon: String {
-        switch self {
-        case .capture: return "record.circle"
-        case .audio: return "mic"
-        case .shortcuts: return "keyboard"
-        case .general: return "gearshape"
-        case .advanced: return "wrench.and.screwdriver"
-        }
-    }
-
-    var label: String {
-        switch self {
-        case .capture: return "Capture"
-        case .audio: return "Audio"
-        case .shortcuts: return "Shortcuts"
-        case .general: return "General"
-        case .advanced: return "Advanced"
-        }
-    }
-}
-
-// MARK: - Main Panel View
-
 struct FloatingPanelView: View {
-    @State private var selectedTab: PanelTab = .capture
-
-    var body: some View {
-        ZStack {
-            NativePanelBackground()
-
-            VStack(spacing: 0) {
-                tabBar
-
-                // Thin divider with subtle glow
-                Rectangle()
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                .clear,
-                                DT.Colors.dividerSubtle,
-                                DT.Colors.dividerMedium,
-                                DT.Colors.dividerSubtle,
-                                .clear,
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .frame(height: 1)
-
-                selectedTabContent
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            }
-        }
-        .frame(width: DT.Size.mainPanelWidth, height: 520)
-        .preferredColorScheme(.dark)
-    }
-
-    // MARK: - Tab Bar
-
-    private var tabBar: some View {
-        GeometryReader { geometry in
-            let tabWidth = (geometry.size.width - DT.Spacing.sm * 2) / CGFloat(PanelTab.allCases.count)
-
-            ZStack(alignment: .bottomLeading) {
-                // Tab buttons
-                HStack(spacing: 0) {
-                    ForEach(PanelTab.allCases, id: \.self) { tab in
-                        Button {
-                            withAnimation(DT.Anim.springGentle) {
-                                selectedTab = tab
-                            }
-                        } label: {
-                            VStack(spacing: 5) {
-                                ZStack {
-                                    // Subtle glow behind active icon
-                                    if selectedTab == tab {
-                                        Circle()
-                                            .fill(DT.Colors.accentRed.opacity(0.12))
-                                            .frame(width: 28, height: 28)
-                                            .blur(radius: 6)
-                                    }
-
-                                    Image(systemName: selectedTab == tab ? tab.icon + ".fill" : tab.icon)
-                                        .font(.system(size: 14, weight: selectedTab == tab ? .semibold : .regular))
-                                        .foregroundStyle(selectedTab == tab ? DT.Colors.accentRed : DT.Colors.textTertiary)
-                                }
-
-                                Text(tab.label)
-                                    .font(.system(size: 9, weight: selectedTab == tab ? .bold : .medium))
-                                    .foregroundStyle(selectedTab == tab ? DT.Colors.textPrimary : DT.Colors.textTertiary)
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(.horizontal, DT.Spacing.xs)
-
-                // Sliding indicator line
-                RoundedRectangle(cornerRadius: 1)
-                    .fill(DT.Colors.accentRed)
-                    .frame(width: tabWidth * 0.5, height: 2)
-                    .shadow(color: DT.Colors.accentRed.opacity(0.5), radius: 4, y: 0)
-                    .offset(x: DT.Spacing.xs + tabWidth * CGFloat(PanelTab.allCases.firstIndex(of: selectedTab) ?? 0) + tabWidth * 0.25)
-            }
-        }
-        .frame(height: 54)
-        .background(DT.Colors.card)
-    }
-
-    // MARK: - Tab Content
-
-    @ViewBuilder
-    private var selectedTabContent: some View {
-        switch selectedTab {
-        case .capture:
-            CaptureTabView()
-        case .audio:
-            AudioPreferencesView()
-        case .shortcuts:
-            ShortcutsPreferencesView()
-        case .general:
-            GeneralPreferencesView()
-        case .advanced:
-            AdvancedPreferencesView()
-        }
-    }
-}
-
-// MARK: - Capture Tab
-
-struct CaptureTabView: View {
     @ObservedObject private var session = SessionManager.shared
-    @AppStorage("lastRecordingMode") private var lastMode: String = RecordingMode.fullScreen.rawValue
-    private let modes: [(mode: RecordingMode, label: String, icon: String)] = [
+    @AppStorage("lastRecordingMode") private var lastMode = RecordingMode.fullScreen.rawValue
+
+    private let permissionChecker = PermissionChecker()
+    private let modes: [(RecordingMode, String, String)] = [
         (.fullScreen, "Screen", "rectangle.on.rectangle"),
         (.singleApp, "App", "app"),
         (.region, "Area", "selection.pin.in.out"),
     ]
 
     var body: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(alignment: .leading, spacing: DT.Spacing.lg) {
-                statusHeader
-                statsRow
-                controls
-                modeSelector
-                if lastMode == RecordingMode.singleApp.rawValue {
-                    AppPickerView()
-                        .transition(.opacity.combined(with: .move(edge: .top)))
+        VStack(alignment: .leading, spacing: 14) {
+            header
+
+            Divider()
+
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 14) {
+                    stateContent
+
+                    if lastMode == RecordingMode.singleApp.rawValue, canConfigure {
+                        AppPickerView()
+                            .frame(maxHeight: 132)
+                    }
+
+                    permissionNotice
+                    recentRecordings
                 }
-                recentRecordings
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(DT.Spacing.lg)
-            .animation(.easeInOut(duration: 0.25), value: lastMode)
+            .frame(maxHeight: 272)
+
+            Divider()
+            footer
+        }
+        .padding(16)
+        .frame(width: DT.Size.mainPanelWidth, alignment: .top)
+        .frame(minHeight: 320, idealHeight: 360, alignment: .top)
+        .background(.regularMaterial)
+        .onChange(of: lastMode) { _, newMode in
+            if newMode != RecordingMode.singleApp.rawValue {
+                session.selectedAppBundleID = nil
+            }
+            if newMode != RecordingMode.region.rawValue {
+                session.selectedRegion = nil
+            }
         }
     }
 
-    // MARK: - Status Header
-
-    private var statusHeader: some View {
-        HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(statusDescription)
-                    .font(DT.Typography.caption)
-                    .foregroundStyle(DT.Colors.textSecondary)
-                    .lineLimit(2)
-            }
-            Spacer()
-            statusBadgeView
-        }
-    }
-
-    private var statusBadgeView: some View {
-        HStack(spacing: 5) {
-            // Live indicator dot
-            if session.state == .recording {
-                Circle()
-                    .fill(DT.Colors.accentRed)
-                    .frame(width: 5, height: 5)
-                    .modifier(PulseModifier())
-            }
-
-            Text(statusBadge)
-                .font(.system(size: 10, weight: .bold, design: .monospaced))
-                .tracking(0.5)
+    private var header: some View {
+        HStack(spacing: 8) {
+            Image(systemName: statusIcon)
                 .foregroundStyle(statusTint)
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 5)
-        .background(
-            Capsule(style: .continuous)
-                .fill(statusTint.opacity(0.08))
-        )
-        .overlay(
-            Capsule(style: .continuous)
-                .strokeBorder(statusTint.opacity(0.2), lineWidth: 1)
-        )
-    }
-
-    // MARK: - Stats
-
-    private var statsRow: some View {
-        HStack(spacing: DT.Spacing.sm) {
-            statCard(label: "DURATION", value: formattedElapsedTime, icon: "clock")
-            statCard(label: "STEPS", value: "\(session.stepCount)", icon: "list.number")
-        }
-    }
-
-    private func statCard(label: String, value: String, icon: String) -> some View {
-        HStack(spacing: DT.Spacing.sm) {
-            // Accent bar — visible in all states
-            RoundedRectangle(cornerRadius: 1.5)
-                .fill(session.state == .recording ? DT.Colors.accentRed : DT.Colors.textTertiary)
-                .frame(width: 3)
-
-            VStack(alignment: .leading, spacing: DT.Spacing.xxs) {
-                Text(value)
-                    .font(.system(size: 18, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(DT.Colors.textPrimary)
-                    .monospacedDigit()
-                Text(label)
-                    .font(.system(size: 9, weight: .semibold, design: .monospaced))
-                    .tracking(1.2)
-                    .foregroundStyle(DT.Colors.textSecondary)
-            }
-
+            Text("CapTuto")
+                .font(.headline)
             Spacer()
+            Text(statusLabel)
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
-        .padding(.horizontal, DT.Spacing.md)
-        .padding(.vertical, DT.Spacing.sm)
-        .background(
-            RoundedRectangle(cornerRadius: DT.Radius.md, style: .continuous)
-                .fill(DT.Colors.card)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: DT.Radius.md, style: .continuous)
-                .strokeBorder(DT.Colors.border, lineWidth: 1)
-        )
     }
-
-    // MARK: - Controls
 
     @ViewBuilder
-    private var controls: some View {
+    private var stateContent: some View {
         switch session.state {
-        case .idle, .completed, .error:
-            Button(action: startRecording) {
-                HStack(spacing: 10) {
-                    Image(systemName: "record.circle.fill")
-                        .font(.system(size: 16))
-                    Text(primaryActionLabel)
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+        case .idle:
+            idleControls
+        case .completed:
+            completedControls
+        case .error(let message):
+            errorControls(message)
+        case .recording:
+            liveControls(title: "Recording", primaryTitle: "Pause", primaryIcon: "pause.fill", primaryAction: session.pauseRecording)
+        case .paused:
+            liveControls(title: "Paused", primaryTitle: "Resume", primaryIcon: "play.fill", primaryAction: session.resumeRecording)
+        case .countdown(let remaining):
+            inlineStatus(icon: "timer", title: "Starting in \(remaining)", detail: "The recorder will hide before capture starts.")
+        case .selectingRegion:
+            inlineStatus(icon: "viewfinder", title: "Select an area", detail: "Drag on screen. Press Escape to cancel.")
+        case .stopping:
+            inlineStatus(icon: "square.and.arrow.down", title: "Saving", detail: "Finishing the recording.")
+        case .uploading(let progress):
+            uploadProgress(progress)
+        }
+    }
+
+    private var completedControls: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Upload complete", systemImage: "checkmark.circle.fill")
+                .font(.headline)
+                .foregroundStyle(.green)
+
+            HStack {
+                Button("Open in Editor") {
+                    if let url = session.tutorialEditorURL {
+                        NSWorkspace.shared.open(url)
+                    }
+                    session.reset()
                 }
-                .frame(maxWidth: .infinity)
+                .buttonStyle(.borderedProminent)
+
+                Button("Dismiss") {
+                    session.reset()
+                }
+            }
+            .controlSize(.small)
+        }
+    }
+
+    private func errorControls(_ message: String) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Upload failed", systemImage: "exclamationmark.triangle.fill")
+                .font(.headline)
+                .foregroundStyle(.orange)
+
+            Text(message)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+
+            HStack {
+                Button("Retry") {
+                    session.retryUpload()
+                }
+                .buttonStyle(.borderedProminent)
+
+                Button("Save Locally") {
+                    session.reset()
+                }
+            }
+            .controlSize(.small)
+        }
+    }
+
+    private var idleControls: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Button(action: startRecording) {
+                Label(primaryActionLabel, systemImage: "record.circle.fill")
             }
             .buttonStyle(RecordButtonStyle())
             .disabled(lastMode == RecordingMode.singleApp.rawValue && session.selectedAppBundleID == nil)
 
-        case .recording:
-            HStack(spacing: DT.Spacing.sm) {
-                Button {
-                    session.pauseRecording()
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "pause.fill")
-                            .font(.system(size: 10))
-                        Text("Pause")
-                    }
+            Picker("Mode", selection: $lastMode) {
+                ForEach(modes, id: \.0) { mode, label, icon in
+                    Label(label, systemImage: icon).tag(mode.rawValue)
                 }
-                .buttonStyle(StudioButtonStyle())
-
-                Button {
-                    session.stopRecording()
-                } label: {
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(.white)
-                            .frame(width: 8, height: 8)
-                        Text("Stop")
-                    }
-                }
-                .buttonStyle(StudioButtonStyle(accentBorder: DT.Colors.accentRed))
             }
+            .pickerStyle(.segmented)
 
-        case .paused:
-            HStack(spacing: DT.Spacing.sm) {
-                Button {
-                    session.resumeRecording()
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "play.fill")
-                            .font(.system(size: 10))
-                        Text("Resume")
-                    }
-                }
-                .buttonStyle(RecordButtonStyle())
-
-                Button {
-                    session.stopRecording()
-                } label: {
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(.white)
-                            .frame(width: 8, height: 8)
-                        Text("Stop")
-                    }
-                }
-                .buttonStyle(StudioButtonStyle(accentBorder: DT.Colors.accentRed))
-            }
-
-        case .countdown(let remaining):
-            inlineNotice(
-                icon: "film",
-                title: "Starting in \(remaining)",
-                text: "CapTuto hides while the capture begins.",
-                tint: DT.Colors.accentRed
-            )
-
-        case .selectingRegion:
-            inlineNotice(
-                icon: "viewfinder",
-                title: "Choose area",
-                text: "Drag on screen. Press Escape to cancel.",
-                tint: DT.Colors.accentBlue
-            )
-
-        case .stopping:
-            inlineNotice(
-                icon: "arrow.down.doc",
-                title: "Finishing",
-                text: "Saving the recording.",
-                tint: DT.Colors.textSecondary
-            )
-
-        case .uploading(let progress):
-            VStack(alignment: .leading, spacing: DT.Spacing.sm) {
-                HStack {
-                    Text("Uploading")
-                        .font(DT.Typography.body)
-                        .foregroundStyle(DT.Colors.textPrimary)
-                    Spacer()
-                    Text("\(Int(progress * 100))%")
-                        .font(DT.Typography.monoSmall)
-                        .foregroundStyle(DT.Colors.textSecondary)
-                }
-
-                // Custom progress bar
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 3)
-                            .fill(DT.Colors.elevated)
-
-                        RoundedRectangle(cornerRadius: 3)
-                            .fill(DT.Colors.warmGradient)
-                            .frame(width: geo.size.width * progress)
-                            .shadow(color: DT.Colors.accentRed.opacity(0.3), radius: 6, x: 0, y: 0)
-                    }
-                }
-                .frame(height: 6)
-                .animation(DT.Anim.springGentle, value: progress)
-            }
+            Toggle("Record microphone", isOn: $session.micEnabled)
+                .toggleStyle(.checkbox)
+                .font(DT.Typography.body)
         }
     }
 
-    // MARK: - Mode Selector
+    private func liveControls(
+        title: String,
+        primaryTitle: String,
+        primaryIcon: String,
+        primaryAction: @escaping () -> Void
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.headline)
+                    Text("\(formattedElapsedTime) · \(session.stepCount) steps")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button(action: session.stopRecording) {
+                    Label("Stop", systemImage: "stop.fill")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
+            }
 
-    private var modeSelector: some View {
-        VStack(alignment: .leading, spacing: DT.Spacing.sm) {
-            Text("CAPTURE MODE")
-                .font(DT.Typography.sectionLabel)
-                .tracking(1.5)
-                .foregroundStyle(DT.Colors.textTertiary)
+            HStack {
+                Button(action: primaryAction) {
+                    Label(primaryTitle, systemImage: primaryIcon)
+                }
+                Button(action: session.addMarker) {
+                    Label("Marker", systemImage: "flag")
+                }
+                .disabled(session.state != .recording)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+        }
+    }
 
-            HStack(spacing: DT.Spacing.sm) {
-                ForEach(modes, id: \.mode) { item in
-                    let isSelected = lastMode == item.mode.rawValue
+    private func inlineStatus(icon: String, title: String, detail: String) -> some View {
+        Label {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.headline)
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        } icon: {
+            Image(systemName: icon)
+        }
+        .padding(.vertical, 4)
+    }
 
-                    Button {
-                        lastMode = item.mode.rawValue
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: item.icon)
-                                .font(.system(size: 11, weight: .semibold))
-                            Text(item.label)
-                                .font(.system(size: 12, weight: .medium))
-                        }
-                        .foregroundStyle(isSelected ? DT.Colors.surface : DT.Colors.textSecondary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(
-                            RoundedRectangle(cornerRadius: DT.Radius.sm, style: .continuous)
-                                .fill(isSelected ? DT.Colors.textPrimary : DT.Colors.card)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: DT.Radius.sm, style: .continuous)
-                                .strokeBorder(isSelected ? .clear : DT.Colors.border, lineWidth: 1)
-                        )
+    private func uploadProgress(_ progress: Double) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Uploading")
+                    .font(.headline)
+                Spacer()
+                Text("\(Int(progress * 100))%")
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+            ProgressView(value: progress)
+        }
+    }
+
+    @ViewBuilder
+    private var permissionNotice: some View {
+        let screenGranted = permissionChecker.checkScreenRecordingSilent() == .granted
+        let accessibilityGranted = permissionChecker.checkAccessibility() == .granted
+
+        if canConfigure && (!screenGranted || !accessibilityGranted || !session.actionDetectionEnabled) {
+            VStack(alignment: .leading, spacing: 8) {
+                if !screenGranted {
+                    permissionRow("Screen Recording", icon: "rectangle.dashed.badge.record") {
+                        permissionChecker.requestScreenRecording()
                     }
-                    .buttonStyle(.plain)
+                }
+                if !accessibilityGranted {
+                    permissionRow("Accessibility", icon: "hand.point.up.left") {
+                        permissionChecker.promptAccessibility()
+                    }
+                }
+                if !session.actionDetectionEnabled {
+                    Toggle("Detect actions", isOn: $session.actionDetectionEnabled)
+                        .toggleStyle(.checkbox)
+                        .font(.caption)
                 }
             }
-            .onChange(of: lastMode) { _, newMode in
-                if newMode != RecordingMode.singleApp.rawValue {
-                    session.selectedAppBundleID = nil
-                }
-                if newMode != RecordingMode.region.rawValue {
-                    session.selectedRegion = nil
-                }
-            }
+            .padding(10)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(Color(nsColor: .controlBackgroundColor))
+            )
+        }
+    }
 
-            if lastMode == RecordingMode.region.rawValue {
-                Text("The app hides itself so you can draw the capture area.")
-                    .font(DT.Typography.caption)
-                    .foregroundStyle(DT.Colors.textTertiary)
-            }
+    private func permissionRow(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
+        HStack {
+            Label(title, systemImage: icon)
+                .font(.caption)
+            Spacer()
+            Button("Allow", action: action)
+                .controlSize(.small)
         }
     }
 
     @ViewBuilder
     private var recentRecordings: some View {
         let recordings = UserDefaults.standard.array(forKey: "recentRecordings") as? [[String: String]] ?? []
-        if !recordings.isEmpty {
-            VStack(alignment: .leading, spacing: DT.Spacing.sm) {
-                Text("RECENT RECORDINGS")
-                    .font(DT.Typography.sectionLabel)
-                    .tracking(1.5)
-                    .foregroundStyle(DT.Colors.textTertiary)
+        if canConfigure && !recordings.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Recent")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
 
-                VStack(spacing: 1) {
-                    ForEach(Array(recordings.prefix(3).enumerated()), id: \.offset) { _, recording in
-                        Button {
-                            openRecentRecording(recording)
-                        } label: {
-                            HStack(spacing: DT.Spacing.sm) {
-                                Image(systemName: "doc.text.magnifyingglass")
-                                    .foregroundStyle(DT.Colors.textSecondary)
-                                    .frame(width: 18)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(recording["title"] ?? "Desktop Recording")
-                                        .font(DT.Typography.body)
-                                        .foregroundStyle(DT.Colors.textPrimary)
-                                        .lineLimit(1)
-                                    Text(relativeDate(recording["created_at"]))
-                                        .font(DT.Typography.caption)
-                                        .foregroundStyle(DT.Colors.textTertiary)
-                                }
-                                Spacer()
-                                Image(systemName: "arrow.up.right")
-                                    .font(.system(size: 10, weight: .semibold))
-                                    .foregroundStyle(DT.Colors.textTertiary)
+                ForEach(Array(recordings.prefix(3).enumerated()), id: \.offset) { _, recording in
+                    Button {
+                        openRecentRecording(recording)
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(recording["title"] ?? "Desktop Recording")
+                                    .lineLimit(1)
+                                Text(relativeDate(recording["created_at"]))
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
                             }
-                            .padding(.horizontal, DT.Spacing.md)
-                            .padding(.vertical, DT.Spacing.sm)
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
-                        .buttonStyle(.plain)
+                        .contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
                 }
-                .studioCard()
             }
         }
     }
 
-    // MARK: - Helpers
-
-    private func inlineNotice(icon: String, title: String, text: String, tint: Color) -> some View {
-        HStack(spacing: DT.Spacing.md) {
-            Image(systemName: icon)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(tint)
-                .frame(width: 32, height: 32)
-                .background(
-                    RoundedRectangle(cornerRadius: DT.Radius.sm, style: .continuous)
-                        .fill(tint.opacity(0.08))
-                )
-
-            VStack(alignment: .leading, spacing: DT.Spacing.xxs) {
-                Text(title)
-                    .font(DT.Typography.subheading)
-                    .foregroundStyle(DT.Colors.textPrimary)
-                Text(text)
-                    .font(DT.Typography.caption)
-                    .foregroundStyle(DT.Colors.textSecondary)
+    private var footer: some View {
+        HStack {
+            SettingsLink {
+                Text("Preferences...")
             }
+            .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
+
+            Spacer()
+
+            Button("Quit") {
+                NSApplication.shared.terminate(nil)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(DT.Spacing.md)
-        .studioCard()
+        .font(.caption)
     }
 
-    private var statusDescription: String {
+    private var canConfigure: Bool {
         switch session.state {
-        case .idle: return "Record the screen, one app, or a selected area."
-        case .selectingRegion: return "Draw the exact area you want to capture."
-        case .countdown: return "Getting out of the way before recording starts."
-        case .recording: return "Use the floating controls to pause or stop."
-        case .paused: return "Resume when you are ready."
-        case .stopping: return "Wrapping up the capture."
-        case .uploading: return "Sending the recording to your workspace."
-        case .completed: return "Your recording finished successfully."
-        case .error: return "The recording flow was interrupted."
+        case .idle:
+            return true
+        default:
+            return false
         }
     }
 
-    private var statusBadge: String {
+    private var statusIcon: String {
         switch session.state {
-        case .idle: return "IDLE"
-        case .selectingRegion: return "SELECT"
-        case .countdown: return "READY"
-        case .recording: return "LIVE"
-        case .paused: return "PAUSED"
-        case .stopping: return "SAVING"
-        case .uploading: return "UPLOAD"
-        case .completed: return "DONE"
-        case .error: return "ERROR"
+        case .recording: return "record.circle.fill"
+        case .paused: return "pause.circle.fill"
+        case .uploading: return "arrow.up.circle"
+        case .completed: return "checkmark.circle.fill"
+        case .error: return "exclamationmark.triangle.fill"
+        default: return "record.circle"
         }
     }
 
     private var statusTint: Color {
         switch session.state {
-        case .recording: return DT.Colors.accentRed
-        case .paused: return DT.Colors.accentAmber
-        case .completed: return DT.Colors.accentTeal
-        case .error: return .orange
-        default: return DT.Colors.textSecondary
+        case .recording, .error: return .red
+        case .paused: return .orange
+        case .completed: return .green
+        default: return .secondary
         }
     }
 
-    private var formattedElapsedTime: String {
-        let totalSeconds = Int(session.elapsedTime)
-        let minutes = totalSeconds / 60
-        let seconds = totalSeconds % 60
-        return String(format: "%02d:%02d", minutes, seconds)
+    private var statusLabel: String {
+        switch session.state {
+        case .idle: return "Ready"
+        case .recording: return "Live"
+        case .paused: return "Paused"
+        case .uploading: return "Uploading"
+        case .completed: return "Done"
+        case .error: return "Error"
+        case .selectingRegion: return "Area"
+        case .countdown: return "Starting"
+        case .stopping: return "Saving"
+        }
     }
 
     private var primaryActionLabel: String {
@@ -550,9 +367,17 @@ struct CaptureTabView: View {
         }
     }
 
+    private var formattedElapsedTime: String {
+        let totalSeconds = Int(session.elapsedTime)
+        return String(format: "%02d:%02d", totalSeconds / 60, totalSeconds % 60)
+    }
+
     private func startRecording() {
         session.currentMode = RecordingMode(rawValue: lastMode) ?? .fullScreen
-        session.startRecording()
+        let hasCountdownPreference = UserDefaults.standard.object(forKey: "showCountdown") != nil
+        let showCountdown = hasCountdownPreference ? UserDefaults.standard.bool(forKey: "showCountdown") : true
+        let duration = UserDefaults.standard.integer(forKey: "countdownDuration")
+        session.startRecording(countdown: showCountdown ? (duration == 0 ? 3 : duration) : 0)
     }
 
     private func openRecentRecording(_ recording: [String: String]) {
@@ -565,34 +390,10 @@ struct CaptureTabView: View {
 
     private func relativeDate(_ isoString: String?) -> String {
         guard let isoString, let date = ISO8601DateFormatter().date(from: isoString) else {
-            return "recent"
+            return "recently"
         }
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .short
         return formatter.localizedString(for: date, relativeTo: Date())
-    }
-}
-
-// MARK: - Pulse Animation Modifier
-
-private struct PulseModifier: ViewModifier {
-    @State private var isPulsing = false
-
-    func body(content: Content) -> some View {
-        content
-            .opacity(isPulsing ? 0.4 : 1.0)
-            .animation(
-                .easeInOut(duration: 0.8).repeatForever(autoreverses: true),
-                value: isPulsing
-            )
-            .onAppear { isPulsing = true }
-    }
-}
-
-// MARK: - Solid Dark Background
-
-private struct NativePanelBackground: View {
-    var body: some View {
-        DT.Colors.surface
     }
 }

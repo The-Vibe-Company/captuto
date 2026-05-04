@@ -14,15 +14,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         menuBarController = MenuBarController()
 
-        // Hide the Settings menu item (preferences are integrated in the main panel)
-        DispatchQueue.main.async {
-            if let appMenu = NSApp.mainMenu?.item(at: 0)?.submenu {
-                for item in appMenu.items where item.action == Selector(("showSettingsWindow:")) || item.action == Selector(("showPreferencesWindow:")) {
-                    item.isHidden = true
-                }
-            }
-        }
-
         syncLaunchAtLoginPreference()
         userDefaultsObserver = NotificationCenter.default.addObserver(
             forName: UserDefaults.didChangeNotification,

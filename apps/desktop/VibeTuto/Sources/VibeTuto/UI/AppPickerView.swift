@@ -19,29 +19,28 @@ struct AppPickerView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DT.Spacing.sm) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: DT.Spacing.sm) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 11))
-                    .foregroundStyle(Color(nsColor: .secondaryLabelColor))
+                    .foregroundStyle(.secondary)
                 TextField("Search apps", text: $searchText)
                     .textFieldStyle(.plain)
                     .font(.system(size: 12))
-                    .foregroundStyle(.white)
                 if !searchText.isEmpty {
                     Button(action: { searchText = "" }) {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 10))
-                            .foregroundStyle(Color(nsColor: .secondaryLabelColor))
+                            .foregroundStyle(.secondary)
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
             .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color.white.opacity(0.035))
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .fill(Color(nsColor: .textBackgroundColor))
             )
 
             if isLoading {
@@ -55,13 +54,13 @@ struct AppPickerView: View {
                 .frame(height: 80)
             } else if filteredApps.isEmpty {
                 Text("No apps found")
-                    .font(DT.Typography.caption)
-                    .foregroundStyle(DT.Colors.textTertiary)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, DT.Spacing.sm)
             } else {
                 ScrollView {
-                    LazyVStack(spacing: 6) {
+                    LazyVStack(spacing: 2) {
                         ForEach(filteredApps) { app in
                             AppRow(app: app, isSelected: session.selectedAppBundleID == app.id)
                                 .onTapGesture {
@@ -75,7 +74,7 @@ struct AppPickerView: View {
                         }
                     }
                 }
-                .frame(maxHeight: 160)
+                .frame(maxHeight: 112)
             }
         }
         .task {
@@ -131,22 +130,21 @@ struct AppRow: View {
             }
             Text(app.name)
                 .font(.system(size: 13))
-                .foregroundStyle(.white)
                 .lineLimit(1)
             Spacer()
             if isSelected {
                 Image(systemName: "checkmark")
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.accentColor)
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
         .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
                 .fill(
-                    isSelected ? Color.white.opacity(0.10) :
-                    isHovering ? Color.white.opacity(0.05) : .clear
+                    isSelected ? Color.accentColor.opacity(0.12) :
+                    isHovering ? Color(nsColor: .separatorColor).opacity(0.15) : .clear
                 )
         )
         .contentShape(Rectangle())
