@@ -4,7 +4,7 @@
 
 .studio {
   --studio-bg: #fbfaf7;
-  --studio-canvas-bg: #ece7db;
+  --studio-canvas-bg: #fbfaf7;
   --studio-surface: #ffffff;
   --studio-surface-2: #f5f3ee;
   --studio-ink: #16140f;
@@ -189,8 +189,8 @@
 /* ---- Dot-grid canvas background ---- */
 .studio .studio-canvas-bg {
   background:
-    radial-gradient(circle at center, #d6cfbb 1px, transparent 1.4px) 0 0 / 22px 22px,
-    radial-gradient(circle at center, #d6cfbb 1px, transparent 1.4px) 11px 11px / 22px 22px,
+    radial-gradient(circle at center, #e5e3dd 1px, transparent 1.4px) 0 0 / 22px 22px,
+    radial-gradient(circle at center, #e5e3dd 1px, transparent 1.4px) 11px 11px / 22px 22px,
     var(--studio-canvas-bg);
 }
 
