@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.16](https://github.com/The-Vibe-Company/captuto/compare/v0.1.15...v0.1.16) (2026-05-04)
+
+
+### Features
+
+* **web:** add desktop binary download button on landing and dashboard ([#95](https://github.com/The-Vibe-Company/captuto/issues/95)) ([4620801](https://github.com/The-Vibe-Company/captuto/commit/4620801c8e60f1b6f6838c3deec96569fc27d69c))
+
 ## [0.1.15](https://github.com/The-Vibe-Company/captuto/compare/v0.1.14...v0.1.15) (2026-05-04)
 
 
