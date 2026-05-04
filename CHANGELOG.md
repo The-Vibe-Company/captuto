@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.18](https://github.com/The-Vibe-Company/captuto/compare/v0.1.17...v0.1.18) (2026-05-04)
+
+
+### Features
+
+* **web:** apply CapTuto design system across landing, dashboard, editor & share viewer ([#102](https://github.com/The-Vibe-Company/captuto/issues/102)) ([80f3b62](https://github.com/The-Vibe-Company/captuto/commit/80f3b6218bbe1a6696962df933b099ed179aba49))
+
 ## [0.1.17](https://github.com/The-Vibe-Company/captuto/compare/v0.1.16...v0.1.17) (2026-05-04)
 
 
