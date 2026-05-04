@@ -1,0 +1,27 @@
+apps/web/lib/constants/download.ts
+  336710ece00d5c65 1-2
+apps/web/components/landing/Navbar.tsx
+  336710ece00d5c65 7-8,63-76,126-140
+apps/web/components/dashboard/Header.tsx
+  336710ece00d5c65 6-7,60-72,74-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "e2e05d0bff1e9944d11ae0c152f18e008ad22333",
+  "prompts": {
+    "336710ece00d5c65": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5a5ffe56-cc07-4a65-b43a-e6dc0d56d2ae",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "StanGirard",
+      "messages": [],
+      "total_additions": 507,
+      "total_deletions": 152,
+      "accepted_lines": 406,
+      "overriden_lines": 0
+    }
+  }
+}
