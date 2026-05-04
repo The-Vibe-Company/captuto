@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { DocEditor, type NewStepType } from './DocEditor';
+import { type NewStepType } from './DocEditor';
+import { StudioEditor } from './studio/StudioEditor';
 import { GenerateDialog } from './GenerateDialog';
 import type { Tutorial, SourceWithSignedUrl, StepWithSignedUrl, Annotation } from '@/lib/types/editor';
 import type { GeneratedTutorialContent } from '@/lib/types/generation';
@@ -701,11 +702,13 @@ export function EditorClient({
 
   return (
     <>
-      <DocEditor
+      <StudioEditor
         tutorial={tutorial}
         sources={sources}
         steps={steps}
         saveStatus={isSaving || isReordering ? 'saving' : saveStatus}
+        selectedStepId={selectedStepId}
+        onSelectStep={handleSelectStep}
         onTitleChange={handleTitleChange}
         onStepCaptionChange={handleStepCaptionChange}
         onStepDescriptionChange={handleStepDescriptionChange}
@@ -715,9 +718,6 @@ export function EditorClient({
         onDeleteStep={handleDeleteStep}
         onReorderSteps={handleReorderSteps}
         onAddStep={handleAddStep}
-        onCreateStepFromSource={handleCreateStepFromSource}
-        onRemoveStepImage={handleRemoveStepImage}
-        onSetStepImage={handleSetStepImage}
         onGenerateClick={handleGenerateClick}
         isGenerating={isGenerating}
       />
