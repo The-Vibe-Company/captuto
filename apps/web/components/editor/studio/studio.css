@@ -3,31 +3,33 @@
    Everything is scoped to `.studio` so it doesn't leak into the rest of the app. */
 
 .studio {
-  --studio-bg: #fbfaf7;
-  --studio-canvas-bg: #fbfaf7;
+  /* Aligned to the CapTuto design system — stone neutrals + brand indigo. */
+  --studio-bg: var(--stone-50);
+  --studio-canvas-bg: var(--stone-50);
   --studio-surface: #ffffff;
-  --studio-surface-2: #f5f3ee;
-  --studio-ink: #16140f;
-  --studio-ink-2: #3a342a;
-  --studio-muted: #6b6357;
-  --studio-muted-2: #8a8175;
-  --studio-line: #e9e4da;
-  --studio-line-strong: #d9d2c3;
-  --studio-accent: #4f46e5;
-  --studio-accent-soft: color-mix(in oklab, #4f46e5 12%, white);
-  --studio-accent-ink: color-mix(in oklab, #4f46e5 70%, black);
+  --studio-surface-2: var(--stone-100);
+  --studio-ink: var(--stone-900);
+  --studio-ink-2: var(--stone-700);
+  --studio-muted: var(--stone-600);
+  --studio-muted-2: var(--stone-500);
+  --studio-line: var(--stone-200);
+  --studio-line-strong: var(--stone-300);
+  --studio-accent: var(--brand-600);
+  --studio-accent-soft: var(--brand-50);
+  --studio-accent-ink: var(--brand-700);
   --studio-click: #ef5a3a;
   --studio-click-soft: #fff1ec;
   --studio-warn: #c08a2a;
-  --studio-ok: #2f7a4d;
+  --studio-ok: var(--success-600);
   --studio-radius-sm: 6px;
   --studio-radius: 10px;
   --studio-radius-lg: 16px;
-  --studio-shadow-1: 0 1px 0 rgba(20, 16, 8, 0.04), 0 1px 2px rgba(20, 16, 8, 0.04);
-  --studio-shadow-2: 0 1px 0 rgba(20, 16, 8, 0.04), 0 8px 24px -8px rgba(20, 16, 8, 0.1);
-  --studio-shadow-3: 0 1px 0 rgba(20, 16, 8, 0.04), 0 24px 60px -20px rgba(20, 16, 8, 0.18);
+  --studio-shadow-1: 0 1px 0 rgba(28, 25, 23, 0.04), 0 1px 2px rgba(28, 25, 23, 0.04);
+  --studio-shadow-2: 0 1px 0 rgba(28, 25, 23, 0.04), 0 8px 24px -8px rgba(28, 25, 23, 0.1);
+  --studio-shadow-3: 0 1px 0 rgba(28, 25, 23, 0.04), 0 24px 60px -20px rgba(28, 25, 23, 0.18);
   --studio-font-ui: var(--font-inter), system-ui, sans-serif;
   --studio-font-display: var(--font-display-serif), Georgia, serif;
+  --studio-font-heading: var(--font-heading), system-ui, sans-serif;
   --studio-font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 
   font-family: var(--studio-font-ui);
@@ -189,8 +191,8 @@
 /* ---- Dot-grid canvas background ---- */
 .studio .studio-canvas-bg {
   background:
-    radial-gradient(circle at center, #e5e3dd 1px, transparent 1.4px) 0 0 / 22px 22px,
-    radial-gradient(circle at center, #e5e3dd 1px, transparent 1.4px) 11px 11px / 22px 22px,
+    radial-gradient(circle at center, rgba(99, 102, 241, 0.07) 1px, transparent 1.4px) 0 0 / 22px 22px,
+    radial-gradient(circle at center, rgba(99, 102, 241, 0.07) 1px, transparent 1.4px) 11px 11px / 22px 22px,
     var(--studio-canvas-bg);
 }
 
@@ -200,13 +202,13 @@
   height: 10px;
 }
 .studio *::-webkit-scrollbar-thumb {
-  background: #d8d2c3;
+  background: var(--stone-300);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 .studio *::-webkit-scrollbar-thumb:hover {
-  background: #c0b9a7;
+  background: var(--stone-400);
   background-clip: padding-box;
   border: 2px solid transparent;
 }

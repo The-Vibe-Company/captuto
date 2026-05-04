@@ -81,8 +81,8 @@ function ApiTokensSection() {
     <Card>
       <CardHeader>
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-100">
-            <Key className="h-5 w-5 text-violet-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-100">
+            <Key className="h-5 w-5 text-brand-600" />
           </div>
           <div>
             <CardTitle className="text-base">API Tokens</CardTitle>
@@ -251,7 +251,7 @@ export default function SettingsPage() {
             >
               {section.comingSoon && (
                 <div className="absolute right-2 top-2">
-                  <span className="rounded-full bg-violet-100 px-2 py-1 text-xs font-medium text-violet-600">
+                  <span className="rounded-full bg-brand-100 px-2 py-1 text-xs font-medium text-brand-600">
                     Coming soon
                   </span>
                 </div>

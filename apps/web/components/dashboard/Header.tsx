@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { LayoutDashboard, Settings, HelpCircle, LogOut, ExternalLink, Play, Download } from 'lucide-react';
+import { LayoutDashboard, Settings, HelpCircle, LogOut, ExternalLink, Download } from 'lucide-react';
 import { DESKTOP_DOWNLOAD_URL } from '@/lib/constants/download';
 import {
   DropdownMenu,
@@ -48,11 +48,14 @@ export function Header({ userEmail }: HeaderProps) {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         {/* Logo */}
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-violet-600 shadow-sm">
-            <Play className="h-4 w-4 fill-white text-white" />
-          </div>
-          <span className="text-lg font-semibold tracking-tight text-stone-900">CapTuto</span>
-          <span className="ml-1 rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-600">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/captuto-mark.svg"
+            alt=""
+            className="h-8 w-8 rounded-lg shadow-sm"
+          />
+          <span className="font-heading text-lg font-semibold tracking-tight text-stone-900">CapTuto</span>
+          <span className="ml-1 rounded-full bg-brand-50 border border-brand-200/50 px-2 py-0.5 text-xs font-medium text-brand-700">
             Beta
           </span>
         </Link>
@@ -81,7 +84,7 @@ export function Header({ userEmail }: HeaderProps) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar className="h-10 w-10">
-                  <AvatarFallback className="bg-violet-100 text-violet-600">
+                  <AvatarFallback className="bg-brand-100 text-brand-700 font-heading">
                     {initials}
                   </AvatarFallback>
                 </Avatar>

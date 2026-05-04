@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Play, Menu, X, Download } from "lucide-react";
+import { Menu, X, Download } from "lucide-react";
 import { DESKTOP_DOWNLOAD_URL } from "@/lib/constants/download";
 
 const navLinks = [
@@ -36,13 +36,16 @@ export function Navbar() {
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-sm shadow-indigo-500/20">
-            <Play className="h-4 w-4 fill-white text-white" />
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/captuto-mark.svg"
+            alt=""
+            className="h-8 w-8 rounded-lg"
+          />
           <span className="font-heading text-lg font-semibold tracking-tight text-stone-900">
             CapTuto
           </span>
-          <span className="ml-1 rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-600 border border-indigo-200/50">
+          <span className="ml-1 rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700 border border-brand-200/50">
             Beta
           </span>
         </Link>
@@ -83,7 +86,7 @@ export function Navbar() {
             </Button>
           </Link>
           <Link href="/login">
-            <Button className="cursor-pointer bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/25 transition-all duration-200">
+            <Button className="cursor-pointer bg-brand-600 text-white hover:bg-brand-500 shadow-brand hover:shadow-brand-lg transition-all duration-200">
               Get started free
             </Button>
           </Link>
@@ -147,7 +150,7 @@ export function Navbar() {
                   </Button>
                 </Link>
                 <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full cursor-pointer justify-center bg-indigo-600 text-white hover:bg-indigo-500">
+                  <Button className="w-full cursor-pointer justify-center bg-brand-600 text-white hover:bg-brand-500 shadow-brand">
                     Get started free
                   </Button>
                 </Link>

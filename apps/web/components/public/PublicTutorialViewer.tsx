@@ -111,7 +111,7 @@ export function PublicTutorialViewer({
           className="fixed top-0 left-0 right-0 z-[60] h-[3px]"
           style={{ scaleX: readingProgress, transformOrigin: '0%' }}
         >
-          <div className="h-full w-full bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500" />
+          <div className="h-full w-full bg-gradient-to-r from-brand-500 via-teal-500 to-cyan-500" />
         </motion.div>
 
         {/* Floating Header */}
@@ -127,9 +127,12 @@ export function PublicTutorialViewer({
               <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <Link href="/" className="flex-shrink-0">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 shadow-md shadow-violet-200/50">
-                      <Play className="h-3.5 w-3.5 fill-white text-white" />
-                    </div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/brand/captuto-mark.svg"
+                      alt=""
+                      className="h-8 w-8 rounded-lg shadow-md shadow-brand-200/50"
+                    />
                   </Link>
                   <div className="h-5 w-px bg-stone-200" />
                   <p className="truncate text-sm font-medium text-stone-700">
@@ -141,7 +144,7 @@ export function PublicTutorialViewer({
                   variant="outline"
                   size="sm"
                   onClick={handleShare}
-                  className="flex-shrink-0 gap-2 border-stone-200 bg-white hover:border-violet-300 hover:bg-violet-50"
+                  className="flex-shrink-0 gap-2 border-stone-200 bg-white hover:border-brand-300 hover:bg-teal-50"
                 >
                   <AnimatePresence mode="wait">
                     {copied ? (
@@ -178,9 +181,12 @@ export function PublicTutorialViewer({
         <div className="fixed top-[3px] left-0 right-0 z-40">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-200/50 transition-transform group-hover:scale-105">
-                <Play className="h-4 w-4 fill-white text-white" />
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/captuto-mark.svg"
+                alt=""
+                className="h-9 w-9 rounded-xl shadow-lg shadow-brand-200/50 transition-transform group-hover:scale-105"
+              />
               <span className="text-lg font-semibold tracking-tight text-stone-800">
                 CapTuto
               </span>
@@ -230,7 +236,7 @@ export function PublicTutorialViewer({
           {/* Animated mesh gradient background */}
           <div className="absolute inset-0 -z-10 overflow-hidden">
             {/* Base gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-violet-50 via-white to-purple-50" />
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-50 via-white to-teal-50" />
 
             {/* Animated orbs */}
             <motion.div
@@ -239,7 +245,7 @@ export function PublicTutorialViewer({
                 y: [0, -40, 20, 0],
               }}
               transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-              className="absolute -top-20 left-[15%] h-[500px] w-[500px] rounded-full bg-violet-200/40 blur-[120px]"
+              className="absolute -top-20 left-[15%] h-[500px] w-[500px] rounded-full bg-brand-200/40 blur-[120px]"
             />
             <motion.div
               animate={{
@@ -252,7 +258,7 @@ export function PublicTutorialViewer({
                 ease: 'linear',
                 delay: 5,
               }}
-              className="absolute -bottom-20 right-[10%] h-[400px] w-[400px] rounded-full bg-fuchsia-200/30 blur-[100px]"
+              className="absolute -bottom-20 right-[10%] h-[400px] w-[400px] rounded-full bg-cyan-200/30 blur-[100px]"
             />
             <motion.div
               animate={{
@@ -282,7 +288,7 @@ export function PublicTutorialViewer({
             <motion.div
               animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute right-[20%] top-[20%] h-16 w-16 rounded-2xl border border-violet-200/50 bg-gradient-to-br from-white/80 to-violet-50/80 shadow-lg backdrop-blur-sm sm:h-20 sm:w-20"
+              className="absolute right-[20%] top-[20%] h-16 w-16 rounded-2xl border border-brand-200/50 bg-gradient-to-br from-white/80 to-teal-50/80 shadow-lg backdrop-blur-sm sm:h-20 sm:w-20"
             />
             <motion.div
               animate={{ y: [0, 12, 0], rotate: [0, -3, 0] }}
@@ -292,7 +298,7 @@ export function PublicTutorialViewer({
                 ease: 'easeInOut',
                 delay: 2,
               }}
-              className="absolute left-[12%] bottom-[25%] h-12 w-12 rounded-xl border border-purple-200/50 bg-gradient-to-br from-white/80 to-purple-50/80 shadow-lg backdrop-blur-sm sm:h-16 sm:w-16"
+              className="absolute left-[12%] bottom-[25%] h-12 w-12 rounded-xl border border-teal-200/50 bg-gradient-to-br from-white/80 to-teal-50/80 shadow-lg backdrop-blur-sm sm:h-16 sm:w-16"
             />
             <motion.div
               animate={{ y: [0, -10, 0], rotate: [0, 8, 0] }}
@@ -302,7 +308,7 @@ export function PublicTutorialViewer({
                 ease: 'easeInOut',
                 delay: 4,
               }}
-              className="absolute right-[8%] bottom-[30%] hidden h-10 w-10 rounded-lg border border-fuchsia-200/50 bg-gradient-to-br from-white/80 to-fuchsia-50/80 shadow-md backdrop-blur-sm sm:block"
+              className="absolute right-[8%] bottom-[30%] hidden h-10 w-10 rounded-lg border border-cyan-200/50 bg-gradient-to-br from-white/80 to-cyan-50/80 shadow-md backdrop-blur-sm sm:block"
             />
           </div>
 
@@ -320,8 +326,8 @@ export function PublicTutorialViewer({
                 transition={{ delay: 0.15, duration: 0.5 }}
                 className="mb-8 flex flex-wrap items-center justify-center gap-3"
               >
-                <div className="inline-flex items-center gap-2 rounded-full border border-violet-100 bg-white/90 px-4 py-2 text-sm text-stone-600 shadow-sm backdrop-blur-sm">
-                  <Layers className="h-3.5 w-3.5 text-violet-500" />
+                <div className="inline-flex items-center gap-2 rounded-full border border-brand-100 bg-white/90 px-4 py-2 text-sm text-stone-600 shadow-sm backdrop-blur-sm">
+                  <Layers className="h-3.5 w-3.5 text-brand-500" />
                   <span className="font-medium">
                     {totalSteps} step{totalSteps !== 1 ? 's' : ''}
                   </span>
@@ -339,11 +345,9 @@ export function PublicTutorialViewer({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25, duration: 0.7 }}
-                className="text-4xl font-bold tracking-tight leading-[1.1] sm:text-5xl lg:text-6xl"
+                className="font-heading text-4xl font-bold tracking-tight leading-[1.1] text-stone-900 sm:text-5xl lg:text-6xl"
               >
-                <span className="bg-gradient-to-br from-stone-900 via-stone-800 to-stone-600 bg-clip-text text-transparent">
-                  {tutorial.title}
-                </span>
+                {tutorial.title}
               </motion.h1>
 
               {/* Description */}
@@ -391,7 +395,7 @@ export function PublicTutorialViewer({
             <div className="relative">
               {/* Vertical timeline line */}
               <div className="absolute left-6 top-0 bottom-0 hidden w-px sm:block">
-                <div className="h-full w-full bg-gradient-to-b from-violet-300/80 via-violet-200/50 to-transparent" />
+                <div className="h-full w-full bg-gradient-to-b from-brand-300/80 via-brand-200/50 to-transparent" />
               </div>
 
               <div className="space-y-6 sm:space-y-10">
@@ -447,8 +451,8 @@ export function PublicTutorialViewer({
                             }}
                             className="relative"
                           >
-                            <div className="h-3 w-3 rounded-full bg-violet-500 ring-[3px] ring-stone-50 shadow-md shadow-violet-200/50" />
-                            <div className="absolute inset-0 animate-ping rounded-full bg-violet-400 opacity-20" />
+                            <div className="h-3 w-3 rounded-full bg-brand-500 ring-[3px] ring-stone-50 shadow-md shadow-brand-200/50" />
+                            <div className="absolute inset-0 animate-ping rounded-full bg-brand-400 opacity-20" />
                           </motion.div>
                         </div>
                       )}
@@ -456,7 +460,7 @@ export function PublicTutorialViewer({
                       {/* Decorative step number (in the left gutter, before the timeline) */}
                       {isCountedStep && (
                         <div className="absolute left-0 top-0 z-0 hidden w-14 select-none pointer-events-none sm:flex sm:items-start sm:justify-end sm:-top-1">
-                          <span className="text-3xl font-black text-violet-200/80 lg:text-4xl">
+                          <span className="text-3xl font-black text-brand-200/80 lg:text-4xl">
                             {String(currentStepNum).padStart(2, '0')}
                           </span>
                         </div>
@@ -539,9 +543,9 @@ export function PublicTutorialViewer({
           className="relative overflow-hidden border-t border-stone-200/50"
         >
           {/* Gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white via-violet-50/30 to-violet-50/50" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white via-teal-50/30 to-teal-50/50" />
           <div className="absolute inset-0">
-            <div className="absolute bottom-0 left-1/2 h-[300px] w-[600px] -translate-x-1/2 translate-y-1/2 rounded-full bg-violet-200/20 blur-[80px]" />
+            <div className="absolute bottom-0 left-1/2 h-[300px] w-[600px] -translate-x-1/2 translate-y-1/2 rounded-full bg-brand-200/20 blur-[80px]" />
           </div>
 
           <div className="relative mx-auto max-w-4xl px-6 py-20 text-center">
@@ -550,7 +554,7 @@ export function PublicTutorialViewer({
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-200/60 bg-white/80 px-4 py-2 text-sm text-violet-600 shadow-sm backdrop-blur-sm"
+              className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-200/60 bg-white/80 px-4 py-2 text-sm text-brand-600 shadow-sm backdrop-blur-sm"
             >
               <Sparkles className="h-4 w-4" />
               <span className="font-medium">Created with CapTuto</span>
@@ -587,7 +591,7 @@ export function PublicTutorialViewer({
               <Link href="/login">
                 <Button
                   size="lg"
-                  className="group h-12 gap-2 bg-gradient-to-r from-violet-600 to-purple-600 px-8 text-base font-medium text-white shadow-lg shadow-violet-300/40 transition-all hover:shadow-xl hover:shadow-violet-300/50 hover:from-violet-700 hover:to-purple-700"
+                  className="group h-12 gap-2 bg-gradient-to-r from-brand-600 to-teal-600 px-8 text-base font-medium text-white shadow-lg shadow-brand-300/40 transition-all hover:shadow-xl hover:shadow-brand-300/50 hover:from-brand-700 hover:to-teal-700"
                 >
                   Try for free
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

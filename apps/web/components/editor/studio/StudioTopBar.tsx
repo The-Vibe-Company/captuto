@@ -21,10 +21,10 @@ interface StudioTopBarProps {
 }
 
 const SAVE_DOT_COLOR: Record<SaveStatus, string> = {
-  saved: '#7bd3a0',
-  saving: '#9a8e76',
-  unsaved: '#c08a2a',
-  error: '#c0392b',
+  saved: '#10b981',
+  saving: 'rgba(255,255,255,0.5)',
+  unsaved: '#f59e0b',
+  error: '#ef4444',
 };
 const SAVE_LABEL: Record<SaveStatus, string> = {
   saved: 'Auto-saved',
@@ -51,13 +51,13 @@ export function StudioTopBar({
         flex: 'none',
         height: 52,
         padding: '0 14px',
-        background: '#16140f',
-        color: '#f1ece1',
+        background: 'var(--stone-950)',
+        color: '#fafaf9',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 12,
-        borderBottom: '1px solid #2a261d',
+        borderBottom: '1px solid var(--stone-800)',
       }}
     >
       {/* Left cluster: back + logo + title meta */}
@@ -65,31 +65,21 @@ export function StudioTopBar({
         <a
           href="/dashboard"
           className="ed-btn-icon ed-btn-sm"
-          style={{ background: 'transparent', border: 0, color: '#bdb5a3' }}
+          style={{
+            background: 'transparent',
+            border: 0,
+            color: 'rgba(250,250,249,0.6)',
+          }}
           aria-label="Back to dashboard"
         >
           <Icon d={ICON.back} size={14} />
         </a>
-        <span
-          aria-hidden
-          style={{
-            width: 26,
-            height: 26,
-            borderRadius: 6,
-            background: '#f1ece1',
-            color: '#16140f',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontFamily: 'var(--studio-font-display)',
-            fontSize: 19,
-            lineHeight: 1,
-            paddingTop: 1,
-            flex: 'none',
-          }}
-        >
-          C
-        </span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/brand/captuto-mark.svg"
+          alt=""
+          style={{ width: 26, height: 26, borderRadius: 6, flex: 'none' }}
+        />
         <div
           className="flex flex-col"
           style={{ lineHeight: 1.2, minWidth: 0, gap: 0 }}
@@ -102,12 +92,13 @@ export function StudioTopBar({
             className="flex items-center"
             style={{
               fontSize: 10.5,
-              color: '#9a8e76',
+              color: 'rgba(250,250,249,0.5)',
               gap: 8,
               minWidth: 0,
+              fontFamily: 'var(--studio-font-mono)',
             }}
           >
-            <span style={{ whiteSpace: 'nowrap' }}>Captuto workspace</span>
+            <span style={{ whiteSpace: 'nowrap' }}>CapTuto workspace</span>
             <span style={{ opacity: 0.4 }}>·</span>
             <span className="inline-flex items-center" style={{ gap: 4 }}>
               {saveStatus === 'saving' ? (
@@ -150,8 +141,8 @@ export function StudioTopBar({
                 fontSize: 11.5,
                 fontWeight: 600,
                 borderRadius: 5,
-                background: on ? '#f1ece1' : 'transparent',
-                color: on ? '#16140f' : '#bdb5a3',
+                background: on ? '#fafaf9' : 'transparent',
+                color: on ? 'var(--stone-900)' : 'rgba(250,250,249,0.6)',
                 border: 0,
                 cursor: 'pointer',
                 fontFamily: 'inherit',
@@ -173,7 +164,7 @@ export function StudioTopBar({
             className="ed-btn ed-btn-sm"
             style={{
               background: 'rgba(255,255,255,.06)',
-              color: '#f1ece1',
+              color: '#fafaf9',
               border: '1px solid rgba(255,255,255,.08)',
             }}
           >
@@ -239,7 +230,7 @@ function EditableTitle({
           fontWeight: 400,
           fontSize: 17,
           letterSpacing: -0.005,
-          color: '#f1ece1',
+          color: '#fafaf9',
           background: 'transparent',
           border: 0,
           outline: 'none',
@@ -263,7 +254,7 @@ function EditableTitle({
         fontWeight: 400,
         fontSize: 17,
         letterSpacing: -0.005,
-        color: '#f1ece1',
+        color: '#fafaf9',
         background: 'transparent',
         border: 0,
         cursor: 'text',

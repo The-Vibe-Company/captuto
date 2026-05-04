@@ -101,8 +101,8 @@ export function StepScreenshot({
         className={cn(
           'relative overflow-hidden rounded-lg border shadow-sm transition-all duration-200',
           isAnnotating
-            ? 'border-primary ring-2 ring-primary/20'
-            : 'border-border'
+            ? 'border-brand-500 ring-2 ring-brand-500/20'
+            : 'border-stone-200/60'
         )}
       >
         {/* Scrollable zoom container */}
@@ -156,12 +156,12 @@ export function StepScreenshot({
                 className="h-6 gap-1 bg-background/90 backdrop-blur-sm text-xs shadow-sm"
               >
                 <span className="tabular-nums">{annotations.length}</span>
-                <span className="text-muted-foreground">annotations</span>
+                <span className="text-stone-500">annotations</span>
               </Badge>
             )}
 
             {/* Zoom controls - button group */}
-            <div className="flex items-center rounded-lg border border-border bg-background/90 shadow-sm backdrop-blur-sm overflow-hidden">
+            <div className="flex items-center rounded-lg border border-stone-200/60 bg-background/90 shadow-sm backdrop-blur-sm overflow-hidden">
               {ZOOM_LEVELS.map((level, i) => (
                 <button
                   key={level}
@@ -169,8 +169,8 @@ export function StepScreenshot({
                   className={cn(
                     'px-2.5 py-1 text-xs font-medium transition-colors',
                     i === zoomIndex
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      ? 'bg-brand-600 text-white'
+                      : 'text-stone-500 hover:text-stone-900 hover:bg-stone-100'
                   )}
                 >
                   {level}x
