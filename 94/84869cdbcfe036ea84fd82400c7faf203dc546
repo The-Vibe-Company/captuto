@@ -1,0 +1,77 @@
+apps/web/components/dashboard/Header.tsx
+  053fc3326519fba9 6,51-58,87
+apps/web/components/public/PublicTutorialViewer.tsx
+  053fc3326519fba9 114,130-135,147,184-189,239,248,261,291,301,311,329-330,348,350,398,454-455,463,546,548,557,594
+apps/web/app/signup/page.tsx
+  053fc3326519fba9 78,115,133,168,177,192
+apps/web/tailwind.config.ts
+  053fc3326519fba9 22-23,26-56,96-107
+apps/web/public/brand/captuto-wordmark.svg
+  053fc3326519fba9 1-21
+apps/web/app/support/page.tsx
+  053fc3326519fba9 87,126,134-135,145,163,252
+apps/web/components/landing/AnnouncementBar.tsx
+  053fc3326519fba9 27
+apps/web/components/editor/DocHeader.tsx
+  053fc3326519fba9 55
+apps/web/components/landing/PricingCard.tsx
+  053fc3326519fba9 27-33,35-41,56,60,63,88-89,99
+apps/web/components/landing/Navbar.tsx
+  053fc3326519fba9 7,39-44,48,89,153
+apps/web/app/not-found.tsx
+  053fc3326519fba9 11,20,47
+apps/web/components/landing/FAQAccordion.tsx
+  053fc3326519fba9 47-53,55-61
+apps/web/components/landing/FinalCTA.tsx
+  053fc3326519fba9 22,27,53-56,94
+apps/web/app/dashboard/page.tsx
+  053fc3326519fba9 114-136,145-148,150-151,153,157
+apps/web/app/captuto-tokens.css
+  053fc3326519fba9 1-87
+apps/web/components/landing/HeroSection.tsx
+  053fc3326519fba9 33,35-38,41,46-51,64-69,76,80-83,105,132-136,206,234,240,245,256-259,264,267-268
+apps/web/components/dashboard/ShareDialog.tsx
+  053fc3326519fba9 153,173,193
+apps/web/public/brand/captuto-mark.svg
+  053fc3326519fba9 1-30
+apps/web/app/settings/page.tsx
+  053fc3326519fba9 84-85,254
+apps/web/public/brand/captuto-mark-mono.svg
+  053fc3326519fba9 1-9
+apps/web/app/icon.svg
+  053fc3326519fba9 4-6,9-14
+apps/web/components/landing/HowItWorks.tsx
+  053fc3326519fba9 13-16,25-28,37-40,54-60,62-68,75,80
+apps/web/components/editor/GenerateDialog.tsx
+  053fc3326519fba9 185,236,277,308,326,354,376,459
+apps/web/components/landing/Footer.tsx
+  053fc3326519fba9 22-27
+apps/web/components/landing/FeatureBento.tsx
+  053fc3326519fba9 21-22,30-31,39-40,72-78,80-86,103,108,112,135
+apps/web/components/editor/SourcesSidebar.tsx
+  053fc3326519fba9 53-61,263,265
+apps/web/components/landing/SolutionSection.tsx
+  053fc3326519fba9 16,21-24,46-47,56-57,62-63,72
+apps/web/app/globals.css
+  053fc3326519fba9 5-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "9484869cdbcfe036ea84fd82400c7faf203dc546",
+  "prompts": {
+    "053fc3326519fba9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0910d6dd-a073-4d01-b6de-58c44e0c5b94",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "StanGirard",
+      "messages": [],
+      "total_additions": 11365,
+      "total_deletions": 5448,
+      "accepted_lines": 8157,
+      "overriden_lines": 0
+    }
+  }
+}
