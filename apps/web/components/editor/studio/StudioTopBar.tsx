@@ -7,9 +7,13 @@ import { ShareDialog } from '@/components/dashboard/ShareDialog';
 import type { SaveStatus } from '../EditorClient';
 import type { Tutorial } from '@/lib/types/editor';
 
+export type StudioMode = 'edit' | 'preview' | 'reader';
+
 interface StudioTopBarProps {
   tutorial: Tutorial;
   saveStatus: SaveStatus;
+  mode: StudioMode;
+  onModeChange: (mode: StudioMode) => void;
   onTitleChange: (title: string) => void;
   onGenerateClick?: () => void;
   isGenerating?: boolean;
@@ -32,13 +36,14 @@ const SAVE_LABEL: Record<SaveStatus, string> = {
 export function StudioTopBar({
   tutorial,
   saveStatus,
+  mode,
+  onModeChange,
   onTitleChange,
   onGenerateClick,
   isGenerating,
   hasSourcesForGeneration,
 }: StudioTopBarProps) {
   const [shareOpen, setShareOpen] = useState(false);
-  const [mode, setMode] = useState<'edit' | 'preview' | 'reader'>('edit');
 
   return (
     <header
@@ -139,7 +144,7 @@ export function StudioTopBar({
           return (
             <button
               key={k}
-              onClick={() => setMode(k)}
+              onClick={() => onModeChange(k)}
               style={{
                 padding: '5px 12px',
                 fontSize: 11.5,

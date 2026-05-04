@@ -36,12 +36,14 @@ interface PublicTutorialViewerProps {
   tutorial: PublicTutorial;
   steps: StepWithSignedUrl[];
   shareUrl?: string;
+  scrollContainerRef?: React.RefObject<HTMLElement>;
 }
 
 export function PublicTutorialViewer({
   tutorial,
   steps,
   shareUrl,
+  scrollContainerRef,
 }: PublicTutorialViewerProps) {
   const [copied, setCopied] = useState(false);
   const [showFloatingHeader, setShowFloatingHeader] = useState(false);
@@ -51,13 +53,16 @@ export function PublicTutorialViewer({
   // Hero parallax
   const { scrollYProgress: heroProgress } = useScroll({
     target: heroRef,
+    container: scrollContainerRef,
     offset: ['start start', 'end start'],
   });
   const heroOpacity = useTransform(heroProgress, [0, 0.6], [1, 0]);
   const heroY = useTransform(heroProgress, [0, 1], [0, 80]);
 
   // Global reading progress
-  const { scrollYProgress: readingProgress } = useScroll();
+  const { scrollYProgress: readingProgress } = useScroll({
+    container: scrollContainerRef,
+  });
 
   // Show floating header after hero
   useMotionValueEvent(heroProgress, 'change', (latest) => {
