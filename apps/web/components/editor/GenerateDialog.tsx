@@ -209,7 +209,7 @@ export function GenerateDialog({
                   rows={3}
                   className="resize-none"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-stone-500">
                   Describe the goal to help AI generate more focused content.
                 </p>
               </div>
@@ -222,35 +222,35 @@ export function GenerateDialog({
                   onValueChange={(v) => setStyle(v as GenerationStyle)}
                   className="space-y-2"
                 >
-                  <div className="flex items-start space-x-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-start space-x-3 rounded-lg border p-3 hover:bg-stone-100/50 transition-colors">
                     <RadioGroupItem value="concise" id="concise" className="mt-0.5" />
                     <div className="space-y-0.5">
                       <Label htmlFor="concise" className="font-medium cursor-pointer">
                         Concise
                       </Label>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-stone-500">
                         Short, action-focused instructions only. No detailed explanations.
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start space-x-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors border-brand-200 bg-brand-50/30">
+                  <div className="flex items-start space-x-3 rounded-lg border p-3 hover:bg-stone-100/50 transition-colors border-brand-200 bg-brand-50/30">
                     <RadioGroupItem value="normal" id="normal" className="mt-0.5" />
                     <div className="space-y-0.5">
                       <Label htmlFor="normal" className="font-medium cursor-pointer">
                         Normal (Recommended)
                       </Label>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-stone-500">
                         Clear instructions with brief context. Good balance.
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start space-x-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-start space-x-3 rounded-lg border p-3 hover:bg-stone-100/50 transition-colors">
                     <RadioGroupItem value="detailed" id="detailed" className="mt-0.5" />
                     <div className="space-y-0.5">
                       <Label htmlFor="detailed" className="font-medium cursor-pointer">
                         Detailed
                       </Label>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-stone-500">
                         Comprehensive instructions with explanations of WHY each step matters.
                       </p>
                     </div>
@@ -260,7 +260,7 @@ export function GenerateDialog({
 
               {/* Generate Button */}
               <div className="flex flex-col items-center pt-4">
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-sm text-stone-500 mb-4">
                   AI will analyze {sources.length} screenshot{sources.length !== 1 ? 's' : ''} and any audio transcription.
                 </p>
                 <Button onClick={handleGenerate} size="lg" className="gap-2">
@@ -421,7 +421,7 @@ export function GenerateDialog({
                                   value={step.description || ''}
                                   onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => updateStepDescription(index, e.target.value)}
                                   rows={3}
-                                  className="text-sm text-muted-foreground"
+                                  className="text-sm text-stone-500"
                                   placeholder="Add detailed explanation of why this step matters..."
                                 />
                                 {currentDesc && currentDesc !== (step.description || '') && (

@@ -911,7 +911,7 @@ export function AnnotationCanvas({
           ref={textInputRef}
           type="text"
           placeholder="Type annotation text..."
-          className="absolute z-10 rounded border border-primary bg-background/95 px-2 py-1 text-sm shadow-lg outline-none ring-2 ring-primary/30 backdrop-blur-sm"
+          className="absolute z-10 rounded border border-brand-500 bg-background/95 px-2 py-1 text-sm shadow-lg outline-none ring-2 ring-brand-500/30 backdrop-blur-sm"
           style={{
             left: getTextInputPosition().left,
             top: getTextInputPosition().top,

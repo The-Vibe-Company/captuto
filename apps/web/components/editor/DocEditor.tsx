@@ -119,39 +119,52 @@ export function DocEditor({
           hasSourcesForGeneration={sources.length > 0}
         />
 
-        {/* Subtle dot grid background */}
+        {/* Subtle dot grid background — masked to the hero area */}
         <div
           className="relative"
           style={{
-            backgroundImage: 'radial-gradient(circle, hsl(var(--border) / 0.3) 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
+            backgroundImage:
+              'radial-gradient(circle at 1px 1px, rgba(99,102,241,0.06) 1px, transparent 0)',
+            backgroundSize: '28px 28px',
+            WebkitMaskImage:
+              'linear-gradient(180deg, #000 0%, #000 220px, transparent 480px)',
+            maskImage:
+              'linear-gradient(180deg, #000 0%, #000 220px, transparent 480px)',
           }}
         >
-          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
             <div className="flex gap-8">
               {/* Main content area */}
               <main className="min-w-0 flex-1">
                 <div className="mx-auto max-w-4xl">
                   {/* Tutorial header */}
                   <div className="mb-10">
+                    <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-brand-600">
+                      Tutorial
+                    </p>
                     <div className="flex items-start justify-between gap-4">
-                      <div className="space-y-2">
+                      <div className="min-w-0 space-y-2">
                         <EditableTitle
                           value={tutorial.title || ''}
                           onChange={onTitleChange}
                           placeholder="Untitled"
                         />
                         {tutorial.description && (
-                          <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
+                          <p className="max-w-2xl text-sm leading-relaxed text-stone-500">
                             {tutorial.description}
                           </p>
                         )}
                       </div>
                       {steps.length > 0 && (
-                        <Badge variant="secondary" className="gap-1.5 shrink-0">
-                          <Layers className="h-3 w-3" />
+                        <Badge
+                          variant="outline"
+                          className="shrink-0 gap-1.5 border-stone-200 bg-white px-2.5 py-1 font-mono text-[11px] font-medium text-stone-600"
+                        >
+                          <Layers className="h-3 w-3" strokeWidth={2} />
                           <span className="tabular-nums">{steps.length}</span>
-                          <span>steps</span>
+                          <span className="uppercase tracking-[0.06em]">
+                            steps
+                          </span>
                         </Badge>
                       )}
                     </div>
