@@ -19,12 +19,12 @@ const badges = [
 
 export function FinalCTA() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-violet-500 to-indigo-600 py-24">
+    <section className="relative overflow-hidden bg-gradient-to-br from-brand-600 via-teal-500 to-brand-600 py-24">
       {/* Floating orbs */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -left-40 -top-40 h-80 w-80 rounded-full bg-white/10 blur-3xl animate-float" />
         <div
-          className="absolute -right-40 -bottom-40 h-80 w-80 rounded-full bg-white/10 blur-3xl animate-float"
+          className="absolute -right-40 -bottom-40 h-80 w-80 rounded-full bg-cyan-300/30 blur-3xl animate-float"
           style={{ animationDelay: "2s" }}
         />
         <div
@@ -50,9 +50,10 @@ export function FinalCTA() {
           viewport={{ once: true }}
         >
           <h2 className="mb-6 font-heading text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-5xl">
-            Ready to revolutionize
-            <br />
-            your documentation?
+            Your tutorials,{" "}
+            <span className="font-serif italic font-normal text-teal-100">
+              finally written.
+            </span>
           </h2>
 
           <p className="mx-auto mb-10 max-w-lg text-lg text-white/70">
@@ -90,7 +91,7 @@ export function FinalCTA() {
             <Link href="/login">
               <Button
                 size="lg"
-                className="group cursor-pointer h-14 bg-white px-10 text-lg font-semibold text-indigo-600 shadow-2xl hover:bg-stone-50 transition-all duration-200"
+                className="group cursor-pointer h-14 bg-white px-10 text-lg font-semibold text-brand-700 shadow-2xl hover:bg-stone-50 transition-all duration-200"
               >
                 Start for free
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />

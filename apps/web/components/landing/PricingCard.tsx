@@ -24,11 +24,21 @@ export function PricingCard() {
           viewport={{ once: true }}
           className="mb-16 text-center"
         >
-          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-indigo-500">
-            Pricing
-          </p>
+          <div className="mb-4 flex items-center justify-center gap-3">
+            <span className="h-px w-8 bg-brand-300" />
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-brand-600">
+              Pricing
+            </p>
+            <span className="h-px w-8 bg-brand-300" />
+          </div>
           <h2 className="font-heading text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
-            Simple, transparent pricing
+            Simple plans.{" "}
+            <span
+              className="font-serif italic font-normal bg-clip-text text-transparent"
+              style={{ backgroundImage: "var(--brand-gradient)" }}
+            >
+              Generous limits.
+            </span>
           </h2>
           <p className="mx-auto mt-4 max-w-md text-stone-500">
             One plan, everything included. No surprises.
@@ -43,14 +53,14 @@ export function PricingCard() {
         >
           <div className="relative">
             {/* Radial glow */}
-            <div className="absolute -inset-4 -z-10 rounded-3xl bg-indigo-500/10 blur-[80px]" />
+            <div className="absolute -inset-4 -z-10 rounded-3xl bg-brand-500/10 blur-[80px]" />
 
             <div className="relative overflow-hidden rounded-3xl border border-stone-200/60 bg-white p-8 shadow-xl shadow-stone-200/30">
               {/* Top accent gradient */}
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-600 via-violet-500 to-purple-500" />
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand-600 via-teal-500 to-cyan-500" />
 
               {/* Badge */}
-              <div className="mb-6 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-50 to-violet-50 px-3 py-1 text-xs font-semibold text-indigo-600 border border-indigo-200/50">
+              <div className="mb-6 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-50 to-teal-50 px-3 py-1 text-xs font-semibold text-brand-700 border border-brand-200/50">
                 <Sparkles className="h-3 w-3" />
                 All-in-one
               </div>
@@ -75,8 +85,8 @@ export function PricingCard() {
                     key={i}
                     className="flex items-center gap-3 text-stone-600"
                   >
-                    <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-indigo-50">
-                      <Check className="h-3 w-3 text-indigo-600" />
+                    <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-brand-50">
+                      <Check className="h-3 w-3 text-brand-600" />
                     </div>
                     {feature}
                   </li>
@@ -86,7 +96,7 @@ export function PricingCard() {
               <Link href="/login" className="block">
                 <Button
                   size="lg"
-                  className="group cursor-pointer w-full h-12 bg-indigo-600 text-base font-medium text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 hover:shadow-xl hover:shadow-indigo-500/30 transition-all duration-200"
+                  className="group cursor-pointer w-full h-12 bg-brand-600 text-base font-medium text-white shadow-brand hover:bg-brand-500 hover:shadow-brand-lg transition-all duration-200"
                 >
                   Get started free
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />

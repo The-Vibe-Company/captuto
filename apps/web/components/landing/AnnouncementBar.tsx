@@ -24,7 +24,7 @@ export function AnnouncementBar() {
   if (!isVisible) return null;
 
   return (
-    <div className="relative bg-gradient-to-r from-indigo-600 via-violet-500 to-indigo-600 px-4 py-2.5 text-center text-sm text-white">
+    <div className="relative bg-gradient-to-r from-brand-600 via-teal-500 to-brand-600 px-4 py-2.5 text-center text-sm text-white">
       <Link
         href="/login"
         className="flex items-center justify-center gap-2 cursor-pointer"

@@ -111,6 +111,29 @@ export default function DashboardPage() {
       />
 
       <div className="mx-auto max-w-6xl px-6 py-8">
+        {/* Greeting */}
+        <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-brand-600">
+              Library
+            </p>
+            <h1 className="mt-2 font-heading text-3xl font-semibold tracking-tight text-stone-900">
+              Your tutorials,{" "}
+              <span
+                className="font-serif italic font-normal bg-clip-text text-transparent"
+                style={{ backgroundImage: "var(--brand-gradient)" }}
+              >
+                ready to share.
+              </span>
+            </h1>
+            <p className="mt-1 text-sm text-stone-500">
+              {loading
+                ? "Loading…"
+                : `${tutorials.length} ${tutorials.length === 1 ? "tutorial" : "tutorials"} in your library`}
+            </p>
+          </div>
+        </div>
+
       {/* Content */}
       {loading ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -119,20 +142,19 @@ export default function DashboardPage() {
           ))}
         </div>
       ) : tutorials.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-violet-100">
-              <Plus className="h-6 w-6 text-violet-600" />
+        <Card className="border-stone-200/60">
+          <CardContent className="flex flex-col items-center justify-center p-12 text-center">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 border border-brand-100">
+              <Plus className="h-6 w-6 text-brand-600" />
             </div>
-            <h2 className="text-xl font-semibold text-stone-900">
-              No tutorials
+            <h2 className="font-heading text-xl font-semibold text-stone-900">
+              No tutorials yet
             </h2>
-            <p className="mt-2 text-stone-500">
+            <p className="mt-2 max-w-sm text-stone-500">
               Use the Chrome extension to create your first tutorial.
             </p>
             <p className="mt-4 text-sm text-stone-400">
-              Click on the CapTuto icon in Chrome to start
-              recording.
+              Click on the CapTuto icon in Chrome to start recording.
             </p>
           </CardContent>
         </Card>

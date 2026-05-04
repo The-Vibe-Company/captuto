@@ -50,15 +50,15 @@ const ACTION_CONFIG = {
   click: {
     icon: MousePointerClick,
     label: 'Click',
-    dotColor: 'bg-violet-500',
-    dotGlow: 'shadow-violet-500/40',
-    badgeBg: 'bg-violet-500/10 dark:bg-violet-500/20',
-    badgeText: 'text-violet-600 dark:text-violet-400',
-    badgeBorder: 'border-violet-200/60 dark:border-violet-500/30',
-    cardBorder: 'border-violet-100 dark:border-violet-900/40',
-    cardHoverBorder: 'hover:border-violet-300 dark:hover:border-violet-700/60',
-    cardBg: 'bg-violet-50/30 dark:bg-violet-950/20',
-    addBtnBg: 'bg-violet-500 hover:bg-violet-600',
+    dotColor: 'bg-brand-500',
+    dotGlow: 'shadow-brand-500/40',
+    badgeBg: 'bg-brand-500/10 dark:bg-brand-500/20',
+    badgeText: 'text-brand-600 dark:text-brand-400',
+    badgeBorder: 'border-brand-200/60 dark:border-brand-500/30',
+    cardBorder: 'border-brand-100 dark:border-brand-900/40',
+    cardHoverBorder: 'hover:border-brand-300 dark:hover:border-brand-700/60',
+    cardBg: 'bg-brand-50/30 dark:bg-brand-950/20',
+    addBtnBg: 'bg-brand-500 hover:bg-brand-600',
   },
   navigation: {
     icon: Globe,
@@ -260,9 +260,9 @@ function TimelineItemComponent({
                   }}
                 >
                   {/* Outer ring */}
-                  <div className="absolute inset-0 -m-2.5 rounded-full border-2 border-violet-400/50 bg-violet-400/10" />
+                  <div className="absolute inset-0 -m-2.5 rounded-full border-2 border-brand-400/50 bg-brand-400/10" />
                   {/* Inner dot */}
-                  <div className="h-2.5 w-2.5 rounded-full bg-violet-500 shadow-lg shadow-violet-500/50 ring-2 ring-white/80" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-brand-500 shadow-lg shadow-brand-500/50 ring-2 ring-white/80" />
                 </div>
               )}
           </div>

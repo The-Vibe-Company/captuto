@@ -150,7 +150,7 @@ export function ShareDialog({
                   className={cn(
                     'flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors',
                     visibility === 'private'
-                      ? 'border-violet-500 bg-violet-50'
+                      ? 'border-brand-500 bg-brand-50'
                       : 'border-stone-200 hover:bg-stone-50'
                   )}
                 >
@@ -170,7 +170,7 @@ export function ShareDialog({
                   className={cn(
                     'flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors',
                     visibility === 'link_only'
-                      ? 'border-violet-500 bg-violet-50'
+                      ? 'border-brand-500 bg-brand-50'
                       : 'border-stone-200 hover:bg-stone-50'
                   )}
                 >
@@ -190,7 +190,7 @@ export function ShareDialog({
                   className={cn(
                     'flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors',
                     visibility === 'public'
-                      ? 'border-violet-500 bg-violet-50'
+                      ? 'border-brand-500 bg-brand-50'
                       : 'border-stone-200 hover:bg-stone-50',
                     !tutorialSlug && 'cursor-not-allowed opacity-50'
                   )}
