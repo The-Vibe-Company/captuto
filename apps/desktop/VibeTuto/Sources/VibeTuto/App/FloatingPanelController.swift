@@ -17,7 +17,7 @@ final class FloatingPanelController: NSWindowController, NSWindowDelegate {
 
     convenience init() {
         let panelWidth = DT.Size.mainPanelWidth
-        let panelHeight: CGFloat = 520
+        let panelHeight: CGFloat = 360
 
         let panel = FloatingPanelWindow(
             contentRect: NSRect(x: 0, y: 0, width: panelWidth, height: panelHeight),
@@ -37,7 +37,6 @@ final class FloatingPanelController: NSWindowController, NSWindowDelegate {
         panel.hasShadow = true
         panel.backgroundColor = DT.Colors.surfaceNS
         panel.isOpaque = true
-        panel.appearance = NSAppearance(named: .darkAqua)
         panel.center()
 
         let hostingController = NSHostingController(rootView: FloatingPanelView())

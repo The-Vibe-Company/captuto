@@ -1,55 +1,24 @@
 import SwiftUI
-import AVFoundation
 
-// MARK: - Settings Section Helper
-
-private struct SettingsSection<Content: View>: View {
-    let title: String
-    @ViewBuilder let content: () -> Content
-
+struct PreferencesRootView: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: DT.Spacing.sm) {
-            Text(title.uppercased())
-                .font(DT.Typography.sectionLabel)
-                .tracking(1.5)
-                .foregroundStyle(DT.Colors.textTertiary)
+        TabView {
+            GeneralPreferencesView()
+                .tabItem { Label("General", systemImage: "gearshape") }
 
-            VStack(alignment: .leading, spacing: 1) {
-                content()
-            }
-            .background(
-                RoundedRectangle(cornerRadius: DT.Radius.md, style: .continuous)
-                    .fill(DT.Colors.card)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: DT.Radius.md, style: .continuous)
-                    .strokeBorder(DT.Colors.border, lineWidth: 1)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: DT.Radius.md, style: .continuous))
+            AudioPreferencesView()
+                .tabItem { Label("Audio", systemImage: "mic") }
+
+            ShortcutsPreferencesView()
+                .tabItem { Label("Shortcuts", systemImage: "keyboard") }
+
+            AdvancedPreferencesView()
+                .tabItem { Label("Advanced", systemImage: "wrench.and.screwdriver") }
         }
+        .frame(width: 460, height: 360)
+        .padding(20)
     }
 }
-
-private struct SettingsRow<Content: View>: View {
-    @ViewBuilder let content: () -> Content
-
-    var body: some View {
-        content()
-            .padding(.horizontal, DT.Spacing.md)
-            .padding(.vertical, DT.Spacing.sm)
-    }
-}
-
-private struct SettingsDivider: View {
-    var body: some View {
-        Rectangle()
-            .fill(DT.Colors.border)
-            .frame(height: 1)
-            .padding(.leading, DT.Spacing.md)
-    }
-}
-
-// MARK: - General Tab
 
 struct GeneralPreferencesView: View {
     @AppStorage("apiToken") private var apiToken = ""
@@ -60,99 +29,55 @@ struct GeneralPreferencesView: View {
     @AppStorage("captureQuality") private var captureQuality = "standard"
 
     var body: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(alignment: .leading, spacing: DT.Spacing.lg) {
+        Form {
+            Toggle("Launch at login", isOn: $launchAtLogin)
+            Toggle("Show countdown", isOn: $showCountdown)
 
-                SettingsSection(title: "Startup") {
-                    SettingsRow {
-                        Toggle("Launch at login", isOn: $launchAtLogin)
-                            .tint(DT.Colors.accentRed)
-                            .font(DT.Typography.body)
-                            .foregroundStyle(DT.Colors.textPrimary)
-                    }
-                }
-
-                SettingsSection(title: "Recording") {
-                    SettingsRow {
-                        Toggle("Show countdown", isOn: $showCountdown)
-                            .tint(DT.Colors.accentRed)
-                            .font(DT.Typography.body)
-                            .foregroundStyle(DT.Colors.textPrimary)
-                    }
-                    if showCountdown {
-                        SettingsDivider()
-                        SettingsRow {
-                            Picker("Duration", selection: $countdownDuration) {
-                                Text("3s").tag(3)
-                                Text("5s").tag(5)
-                            }
-                            .pickerStyle(.segmented)
-                        }
-                    }
-                    SettingsDivider()
-                    SettingsRow {
-                        Toggle("Auto-open editor after upload", isOn: $autoOpenEditor)
-                            .tint(DT.Colors.accentRed)
-                            .font(DT.Typography.body)
-                            .foregroundStyle(DT.Colors.textPrimary)
-                    }
-                    SettingsDivider()
-                    SettingsRow {
-                        HStack {
-                            Text("Capture quality")
-                                .font(DT.Typography.body)
-                                .foregroundStyle(DT.Colors.textPrimary)
-                            Spacer()
-                            Picker("", selection: $captureQuality) {
-                                Text("1x").tag("standard")
-                                Text("2x Retina").tag("high")
-                            }
-                            .pickerStyle(.segmented)
-                            .frame(width: 140)
-                        }
-                    }
-                }
-
-                SettingsSection(title: "Account") {
-                    SettingsRow {
-                        VStack(alignment: .leading, spacing: DT.Spacing.sm) {
-                            SecureField("API token", text: $apiToken)
-                                .textFieldStyle(.plain)
-                                .font(DT.Typography.mono)
-                                .foregroundStyle(DT.Colors.textPrimary)
-                                .padding(.horizontal, DT.Spacing.md)
-                                .padding(.vertical, DT.Spacing.sm)
-                                .background(
-                                    RoundedRectangle(cornerRadius: DT.Radius.sm)
-                                        .fill(DT.Colors.elevated)
-                                )
-                            HStack {
-                                if !apiToken.isEmpty {
-                                    Label("Saved", systemImage: "checkmark.circle.fill")
-                                        .font(DT.Typography.caption)
-                                        .foregroundStyle(DT.Colors.accentTeal)
-                                }
-                                Spacer()
-                                Button("Get Token") {
-                                    let baseURL = UserDefaults.standard.string(forKey: "apiBaseURL") ?? "https://captuto.com"
-                                    if let url = URL(string: "\(baseURL)/settings") {
-                                        NSWorkspace.shared.open(url)
-                                    }
-                                }
-                                .buttonStyle(.plain)
-                                .font(DT.Typography.caption)
-                                .foregroundStyle(DT.Colors.accentBlue)
-                            }
-                        }
-                    }
+            if showCountdown {
+                Picker("Countdown", selection: $countdownDuration) {
+                    Text("3 seconds").tag(3)
+                    Text("5 seconds").tag(5)
                 }
             }
-            .padding(DT.Spacing.lg)
+
+            Toggle("Open editor after upload", isOn: $autoOpenEditor)
+
+            Picker("Capture quality", selection: $captureQuality) {
+                Text("Standard").tag("standard")
+                Text("High").tag("high")
+            }
+
+            SecureField("API token", text: $apiToken)
+                .textFieldStyle(.roundedBorder)
+
+            Button("Get token") {
+                let baseURL = UserDefaults.standard.string(forKey: "apiBaseURL") ?? "https://captuto.com"
+                if let url = URL(string: "\(baseURL)/settings") {
+                    NSWorkspace.shared.open(url)
+                }
+            }
         }
+        .formStyle(.grouped)
     }
 }
 
-// MARK: - Shortcuts Tab
+struct AudioPreferencesView: View {
+    @ObservedObject private var session = SessionManager.shared
+    @AppStorage("noiseReduction") private var noiseReduction = true
+
+    var body: some View {
+        Form {
+            Toggle("Record microphone", isOn: $session.micEnabled)
+            Toggle("Noise reduction", isOn: $noiseReduction)
+
+            LabeledContent("Input") {
+                Text("Default")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .formStyle(.grouped)
+    }
+}
 
 struct ShortcutsPreferencesView: View {
     @AppStorage("shortcutRecord") private var shortcutRecord = "Cmd+Shift+R"
@@ -160,134 +85,26 @@ struct ShortcutsPreferencesView: View {
     @AppStorage("shortcutMarker") private var shortcutMarker = "Cmd+Shift+M"
 
     var body: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(alignment: .leading, spacing: DT.Spacing.lg) {
+        Form {
+            shortcutRow("Start/Stop Recording", shortcutRecord)
+            shortcutRow("Pause/Resume", shortcutPause)
+            shortcutRow("Add Marker", shortcutMarker)
 
-                SettingsSection(title: "Global Keyboard Shortcuts") {
-                    shortcutRow(label: "Start/Stop Recording", shortcut: shortcutRecord)
-                    SettingsDivider()
-                    shortcutRow(label: "Pause/Resume", shortcut: shortcutPause)
-                    SettingsDivider()
-                    shortcutRow(label: "Add Marker", shortcut: shortcutMarker)
-                }
-
-                Text("Click a shortcut to change it. Press Escape to clear.")
-                    .font(DT.Typography.caption)
-                    .foregroundStyle(DT.Colors.textTertiary)
-            }
-            .padding(DT.Spacing.lg)
+            Text("Shortcut editing is not enabled yet.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
+        .formStyle(.grouped)
     }
 
-    private func shortcutRow(label: String, shortcut: String) -> some View {
-        SettingsRow {
-            HStack {
-                Text(label)
-                    .font(DT.Typography.body)
-                    .foregroundStyle(DT.Colors.textPrimary)
-                Spacer()
-                HStack(spacing: 3) {
-                    ForEach(shortcut.components(separatedBy: "+"), id: \.self) { key in
-                        Text(key)
-                            .font(DT.Typography.monoSmall)
-                            .foregroundStyle(DT.Colors.textPrimary)
-                            .padding(.horizontal, DT.Spacing.sm)
-                            .padding(.vertical, DT.Spacing.xs)
-                            .background(
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(DT.Colors.elevated)
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 4)
-                                    .strokeBorder(DT.Colors.border, lineWidth: 1)
-                            )
-                    }
-                }
-            }
+    private func shortcutRow(_ title: String, _ shortcut: String) -> some View {
+        LabeledContent(title) {
+            Text(shortcut)
+                .font(.system(size: 12, design: .monospaced))
+                .foregroundStyle(.secondary)
         }
     }
 }
-
-// MARK: - Audio Tab
-
-struct AudioPreferencesView: View {
-    @ObservedObject private var session = SessionManager.shared
-    @AppStorage("noiseReduction") private var noiseReduction = true
-    @State private var selectedDevice = "Default"
-    @State private var audioLevel: Float = 0.0
-
-    var body: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(alignment: .leading, spacing: DT.Spacing.lg) {
-
-                SettingsSection(title: "Recording") {
-                    SettingsRow {
-                        Toggle("Microphone enabled", isOn: $session.micEnabled)
-                            .tint(DT.Colors.accentRed)
-                            .font(DT.Typography.body)
-                            .foregroundStyle(DT.Colors.textPrimary)
-                    }
-                }
-
-                SettingsSection(title: "Input Device") {
-                    SettingsRow {
-                        HStack {
-                            Text("Microphone")
-                                .font(DT.Typography.body)
-                                .foregroundStyle(DT.Colors.textPrimary)
-                            Spacer()
-                            Text("Default")
-                                .font(DT.Typography.body)
-                                .foregroundStyle(DT.Colors.textSecondary)
-                        }
-                    }
-                }
-
-                SettingsSection(title: "Processing") {
-                    SettingsRow {
-                        Toggle("Noise reduction", isOn: $noiseReduction)
-                            .tint(DT.Colors.accentRed)
-                            .font(DT.Typography.body)
-                            .foregroundStyle(DT.Colors.textPrimary)
-                    }
-                }
-
-                SettingsSection(title: "Level Meter") {
-                    SettingsRow {
-                        VStack(alignment: .leading, spacing: DT.Spacing.sm) {
-                            GeometryReader { geometry in
-                                ZStack(alignment: .leading) {
-                                    RoundedRectangle(cornerRadius: 3)
-                                        .fill(DT.Colors.elevated)
-                                        .frame(height: 8)
-
-                                    RoundedRectangle(cornerRadius: 3)
-                                        .fill(
-                                            LinearGradient(
-                                                colors: [DT.Colors.accentTeal, DT.Colors.accentBlue],
-                                                startPoint: .leading,
-                                                endPoint: .trailing
-                                            )
-                                        )
-                                        .frame(width: max(0, geometry.size.width * CGFloat(audioLevel)), height: 8)
-                                        .animation(.easeOut(duration: 0.1), value: audioLevel)
-                                }
-                            }
-                            .frame(height: 8)
-
-                            Text("Speak to test your microphone level")
-                                .font(DT.Typography.caption)
-                                .foregroundStyle(DT.Colors.textTertiary)
-                        }
-                    }
-                }
-            }
-            .padding(DT.Spacing.lg)
-        }
-    }
-}
-
-// MARK: - Advanced Tab
 
 struct AdvancedPreferencesView: View {
     @ObservedObject private var session = SessionManager.shared
@@ -296,89 +113,28 @@ struct AdvancedPreferencesView: View {
     @AppStorage("apiBaseURL") private var apiBaseURL = "https://captuto.com"
 
     var body: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(alignment: .leading, spacing: DT.Spacing.lg) {
+        Form {
+            Toggle("Detect actions", isOn: $session.actionDetectionEnabled)
 
-                SettingsSection(title: "Action Detection") {
-                    SettingsRow {
-                        Toggle("Action detection", isOn: $session.actionDetectionEnabled)
-                            .tint(DT.Colors.accentRed)
-                            .font(DT.Typography.body)
-                            .foregroundStyle(DT.Colors.textPrimary)
-                    }
-                    SettingsDivider()
-                    SettingsRow {
-                        VStack(alignment: .leading, spacing: DT.Spacing.sm) {
-                            Text("Sensitivity")
-                                .font(DT.Typography.body)
-                                .foregroundStyle(DT.Colors.textPrimary)
-                            Picker("", selection: $sensitivity) {
-                                Text("Low").tag(0)
-                                Text("Medium").tag(1)
-                                Text("High").tag(2)
-                            }
-                            .pickerStyle(.segmented)
-                        }
-                    }
-                    SettingsDivider()
-                    SettingsRow {
-                        VStack(alignment: .leading, spacing: DT.Spacing.xs) {
-                            HStack {
-                                Text("Grouping delay")
-                                    .font(DT.Typography.body)
-                                    .foregroundStyle(DT.Colors.textPrimary)
-                                Spacer()
-                                Text("\(Int(groupingDelay))ms")
-                                    .font(DT.Typography.monoSmall)
-                                    .foregroundStyle(DT.Colors.textSecondary)
-                            }
-                            Slider(value: $groupingDelay, in: 200...2000, step: 100)
-                                .tint(DT.Colors.accentRed)
-                        }
-                    }
-                }
-
-                SettingsSection(title: "Server") {
-                    SettingsRow {
-                        TextField("API URL", text: $apiBaseURL)
-                            .textFieldStyle(.plain)
-                            .font(DT.Typography.mono)
-                            .foregroundStyle(DT.Colors.textPrimary)
-                            .padding(.horizontal, DT.Spacing.md)
-                            .padding(.vertical, DT.Spacing.sm)
-                            .background(
-                                RoundedRectangle(cornerRadius: DT.Radius.sm)
-                                    .fill(DT.Colors.elevated)
-                            )
-                    }
-                }
-
-                SettingsSection(title: "Data") {
-                    SettingsRow {
-                        Button("Clear Local Cache") {
-                            clearCache()
-                        }
-                        .buttonStyle(GhostButtonStyle())
-                    }
-                    SettingsDivider()
-                    SettingsRow {
-                        Button("Reset All Preferences") {
-                            resetPreferences()
-                        }
-                        .font(DT.Typography.caption)
-                        .foregroundStyle(DT.Colors.accentRed)
-                    }
-                }
-
-                // Quit button at the bottom
-                Button("Quit CapTuto") {
-                    NSApplication.shared.terminate(nil)
-                }
-                .buttonStyle(GhostButtonStyle())
-                .frame(maxWidth: .infinity, alignment: .center)
+            Picker("Sensitivity", selection: $sensitivity) {
+                Text("Low").tag(0)
+                Text("Medium").tag(1)
+                Text("High").tag(2)
             }
-            .padding(DT.Spacing.lg)
+
+            VStack(alignment: .leading) {
+                LabeledContent("Grouping delay", value: "\(Int(groupingDelay))ms")
+                Slider(value: $groupingDelay, in: 200...2000, step: 100)
+            }
+
+            TextField("API URL", text: $apiBaseURL)
+                .textFieldStyle(.roundedBorder)
+
+            Button("Clear local cache", action: clearCache)
+
+            Button("Reset preferences", role: .destructive, action: resetPreferences)
         }
+        .formStyle(.grouped)
     }
 
     private func clearCache() {
