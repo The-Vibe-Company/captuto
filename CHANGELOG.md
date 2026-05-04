@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.15](https://github.com/The-Vibe-Company/captuto/compare/v0.1.14...v0.1.15) (2026-05-04)
+
+
+### Features
+
+* **web:** bake annotations into flattened images for public share links ([#96](https://github.com/The-Vibe-Company/captuto/issues/96)) ([fa0b7d9](https://github.com/The-Vibe-Company/captuto/commit/fa0b7d9ee8b89ab30f9e42ce60da3483b9a2e98e))
+
 ## [0.1.14](https://github.com/The-Vibe-Company/captuto/compare/v0.1.13...v0.1.14) (2026-05-04)
 
 
