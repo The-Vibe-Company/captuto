@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.13](https://github.com/The-Vibe-Company/captuto/compare/v0.1.12...v0.1.13) (2026-05-04)
+
+
+### Features
+
+* **desktop:** improve mac recorder reliability ([#89](https://github.com/The-Vibe-Company/captuto/issues/89)) ([71f724f](https://github.com/The-Vibe-Company/captuto/commit/71f724fd65d6d078172ef4a1b89f0c73ce1a2c8e))
+* **desktop:** unify floating panel and preferences into single tabbed window ([#87](https://github.com/The-Vibe-Company/captuto/issues/87)) ([709db97](https://github.com/The-Vibe-Company/captuto/commit/709db9708ac4297f1760cf79f704e0c641211a5f))
+* **editor:** redesign editor as Studio workbench (timeline + canvas + inspector) ([#90](https://github.com/The-Vibe-Company/captuto/issues/90)) ([fab795b](https://github.com/The-Vibe-Company/captuto/commit/fab795baaedd1ac603675f1ecd00b0f6b3638b70))
+
 ## [0.1.12](https://github.com/The-Vibe-Company/captuto/compare/v0.1.11...v0.1.12) (2026-04-01)
 
 
