@@ -6,9 +6,7 @@ import {
   LayoutDashboard,
   Zap,
   BarChart3,
-  Users,
   Folder,
-  ChevronDown,
   HelpCircle,
   Settings,
 } from 'lucide-react';
@@ -17,7 +15,6 @@ const primaryNav = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard?tab=tutorials', label: 'Tutorials', icon: Zap },
   { href: '/dashboard?tab=analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/dashboard?tab=team', label: 'Team', icon: Users },
 ];
 
 const libraryNav = [
@@ -53,8 +50,8 @@ export function DashboardSidebar({
         </span>
       </Link>
 
-      {/* Workspace switcher */}
-      <button className="mb-3 flex items-center gap-2.5 rounded-[10px] border border-stone-200/60 bg-stone-50 px-2.5 py-2 text-left transition-colors hover:bg-stone-100">
+      {/* Workspace badge */}
+      <div className="mb-3 flex items-center gap-2.5 rounded-[10px] border border-stone-200/60 bg-stone-50 px-2.5 py-2">
         <div
           className="flex h-7 w-7 items-center justify-center rounded-md text-[12px] font-semibold text-white shadow-sm font-heading"
           style={{ backgroundImage: 'var(--brand-gradient)' }}
@@ -69,8 +66,7 @@ export function DashboardSidebar({
             {workspaceRole}
           </div>
         </div>
-        <ChevronDown className="h-3.5 w-3.5 flex-shrink-0 text-stone-400" />
-      </button>
+      </div>
 
       {/* Primary nav */}
       {primaryNav.map((item) => {
@@ -107,46 +103,24 @@ export function DashboardSidebar({
         </Link>
       ))}
 
-      {/* Bottom: upgrade card */}
-      <div className="mt-auto pt-4">
-        <div
-          className="rounded-xl p-3.5 text-white"
-          style={{
-            background:
-              'linear-gradient(160deg, var(--brand-900), var(--brand-700))',
-          }}
+      {/* Bottom: help + settings */}
+      <div className="mt-auto flex gap-1.5 pt-4">
+        <a
+          href="https://vibetuto.notion.site/Centre-d-aide"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-1 items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium text-stone-600 transition-colors hover:bg-stone-100 hover:text-stone-900"
         >
-          <h5 className="font-heading text-[13px] font-semibold leading-snug">
-            Unlock Team plan
-          </h5>
-          <p className="mt-1 text-[11px] leading-snug text-white/65">
-            Custom branding, analytics & 14 languages.
-          </p>
-          <button
-            type="button"
-            className="mt-2.5 w-full rounded-md bg-white px-2.5 py-1.5 text-[11px] font-semibold text-brand-700 transition-colors hover:bg-stone-50"
-          >
-            Start trial →
-          </button>
-        </div>
-        <div className="mt-3 flex gap-1.5">
-          <a
-            href="https://vibetuto.notion.site/Centre-d-aide"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex flex-1 items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium text-stone-600 transition-colors hover:bg-stone-100 hover:text-stone-900"
-          >
-            <HelpCircle className="h-4 w-4" />
-            Help
-          </a>
-          <Link
-            href="/settings"
-            className="flex items-center justify-center rounded-lg p-2 text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900"
-            aria-label="Settings"
-          >
-            <Settings className="h-4 w-4" />
-          </Link>
-        </div>
+          <HelpCircle className="h-4 w-4" />
+          Help
+        </a>
+        <Link
+          href="/settings"
+          className="flex items-center justify-center rounded-lg p-2 text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900"
+          aria-label="Settings"
+        >
+          <Settings className="h-4 w-4" />
+        </Link>
       </div>
     </aside>
   );
