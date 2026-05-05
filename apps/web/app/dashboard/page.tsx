@@ -2,17 +2,30 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, Filter, RefreshCw, ListOrdered, Plus } from 'lucide-react';
+import { AlertCircle, RefreshCw, ListOrdered, Plus } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { TutorialTableRow } from '@/components/dashboard/TutorialTableRow';
 import { TutorialCardProps } from '@/components/dashboard/TutorialCard';
 import { KpiStrip } from '@/components/dashboard/KpiStrip';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 type Tutorial = Omit<TutorialCardProps, 'onEdit' | 'onDelete' | 'onShare'>;
 
 type TabKey = 'all' | 'published' | 'draft' | 'processing';
+type SortKey = 'recent' | 'oldest' | 'title';
+
+const sortLabels: Record<SortKey, string> = {
+  recent: 'Recent',
+  oldest: 'Oldest',
+  title: 'Title',
+};
 
 async function fetchTutorials(): Promise<Tutorial[]> {
   const response = await fetch('/api/tutorials');
@@ -28,6 +41,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabKey>('all');
+  const [sortOrder, setSortOrder] = useState<SortKey>('recent');
 
   const {
     data: tutorials = [],
@@ -72,22 +86,35 @@ export default function DashboardPage() {
   }, [tutorials]);
 
   const filtered = useMemo(() => {
-    if (activeTab === 'all') return tutorials;
-    if (activeTab === 'published') {
-      return tutorials.filter(
+    let list: Tutorial[];
+    if (activeTab === 'all') {
+      list = tutorials;
+    } else if (activeTab === 'published') {
+      list = tutorials.filter(
         (t) => t.visibility === 'link_only' || t.visibility === 'public',
       );
+    } else if (activeTab === 'processing') {
+      list = tutorials.filter((t) => t.status === 'processing');
+    } else {
+      list = tutorials.filter(
+        (t) =>
+          t.status !== 'processing' &&
+          t.visibility !== 'link_only' &&
+          t.visibility !== 'public',
+      );
     }
-    if (activeTab === 'processing') {
-      return tutorials.filter((t) => t.status === 'processing');
+    const sorted = [...list];
+    if (sortOrder === 'recent') {
+      sorted.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+    } else if (sortOrder === 'oldest') {
+      sorted.sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
+    } else {
+      sorted.sort((a, b) =>
+        a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }),
+      );
     }
-    return tutorials.filter(
-      (t) =>
-        t.status !== 'processing' &&
-        t.visibility !== 'link_only' &&
-        t.visibility !== 'public',
-    );
-  }, [activeTab, tutorials]);
+    return sorted;
+  }, [activeTab, tutorials, sortOrder]);
 
   if (error?.message === 'UNAUTHORIZED') return null;
 
@@ -174,20 +201,28 @@ export default function DashboardPage() {
           );
         })}
         <div className="ml-auto flex items-center gap-2">
-          <button
-            type="button"
-            className="inline-flex items-center gap-1.5 rounded-md border border-stone-200 bg-white px-3 py-1.5 text-[13px] font-medium text-stone-600 transition-colors hover:border-stone-300 hover:text-stone-900"
-          >
-            <Filter className="h-3.5 w-3.5" />
-            Filter
-          </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1.5 rounded-md border border-stone-200 bg-white px-3 py-1.5 text-[13px] font-medium text-stone-600 transition-colors hover:border-stone-300 hover:text-stone-900"
-          >
-            <ListOrdered className="h-3.5 w-3.5" />
-            Sort: Recent
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 rounded-md border border-stone-200 bg-white px-3 py-1.5 text-[13px] font-medium text-stone-600 transition-colors hover:border-stone-300 hover:text-stone-900"
+              >
+                <ListOrdered className="h-3.5 w-3.5" />
+                Sort: {sortLabels[sortOrder]}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => setSortOrder('recent')}>
+                Most recent
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setSortOrder('oldest')}>
+                Oldest
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setSortOrder('title')}>
+                Title (A–Z)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
