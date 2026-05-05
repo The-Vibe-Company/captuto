@@ -209,7 +209,22 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      get_user_dashboard_tutorials: {
+        Args: {
+          p_limit?: number;
+          p_offset?: number;
+        };
+        Returns: {
+          id: string;
+          title: string;
+          slug: string | null;
+          status: string;
+          visibility: string | null;
+          created_at: string;
+          steps_count: number;
+          thumbnail_path: string | null;
+        }[];
+      };
     };
     Enums: {
       [_ in never]: never;
