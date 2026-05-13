@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
+const AUTH_CHECK_TIMEOUT_MS = 5000;
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -16,18 +18,37 @@ export default function LoginPage() {
 
   // Check if user is already logged in
   useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+    let isMounted = true;
 
-      if (user) {
-        router.push('/dashboard');
-      } else {
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient();
+        const authResult = await Promise.race([
+          supabase.auth.getUser(),
+          new Promise<null>((resolve) =>
+            window.setTimeout(() => resolve(null), AUTH_CHECK_TIMEOUT_MS)
+          ),
+        ]);
+
+        if (!isMounted) return;
+
+        if (authResult?.data.user) {
+          router.push('/dashboard');
+        } else {
+          setCheckingAuth(false);
+        }
+      } catch (err) {
+        console.error('Auth check failed:', err);
+        if (!isMounted) return;
         setCheckingAuth(false);
       }
     };
 
     checkAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
 
   const syncToExtension = (userEmail: string, accessToken: string) => {

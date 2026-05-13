@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Play, MousePointer2, Sparkles, Star } from "lucide-react";
+import {
+  ArrowRight,
+  Play,
+  MousePointer2,
+  Sparkles,
+  MonitorUp,
+  Share2,
+  CheckCircle2,
+} from "lucide-react";
 
 const customEase = [0.16, 1, 0.3, 1] as const;
 type Easing = [number, number, number, number];
@@ -30,12 +38,10 @@ const stagger = {
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden pt-20 pb-16 sm:pt-28 sm:pb-24">
-      {/* Gradient mesh background */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-32 right-1/4 h-[600px] w-[600px] rounded-full bg-indigo-400/20 blur-[120px]" />
-        <div className="absolute top-1/2 -left-32 h-[500px] w-[500px] rounded-full bg-violet-400/15 blur-[100px]" />
-        <div className="absolute top-1/3 left-1/2 h-[400px] w-[400px] -translate-x-1/2 rounded-full bg-purple-300/10 blur-[80px]" />
-        <div className="absolute bottom-0 right-1/4 h-[300px] w-[300px] rounded-full bg-indigo-300/10 blur-[80px]" />
+        <div className="absolute inset-x-0 top-0 h-96 bg-[linear-gradient(180deg,rgba(79,70,229,0.12),rgba(255,255,255,0))]" />
+        <div className="absolute inset-y-0 right-0 w-1/2 bg-[linear-gradient(120deg,rgba(16,185,129,0.08),rgba(255,255,255,0)_55%)]" />
+        <div className="absolute inset-y-0 left-0 w-1/2 bg-[linear-gradient(240deg,rgba(124,58,237,0.08),rgba(255,255,255,0)_55%)]" />
       </div>
 
       {/* Dot grid pattern */}
@@ -59,7 +65,7 @@ export function HeroSection() {
           <motion.div variants={fadeUp} className="mb-8">
             <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-50 to-violet-50 px-4 py-1.5 text-sm font-medium text-indigo-600 border border-indigo-200/50 shadow-sm shadow-indigo-100/50">
               <Sparkles className="h-3.5 w-3.5" />
-              Powered by AI
+              Capture, edit, publish
             </span>
           </motion.div>
 
@@ -68,10 +74,10 @@ export function HeroSection() {
             variants={fadeUp}
             className="mb-6 font-heading text-5xl font-bold leading-[1.08] tracking-tight text-stone-900 sm:text-6xl lg:text-7xl"
           >
-            Stop writing tutorials.
+            Turn workflows into
             <br />
             <span className="bg-gradient-to-r from-indigo-600 via-violet-500 to-purple-500 bg-clip-text text-transparent">
-              Record them.
+              polished tutorials.
             </span>
           </motion.h1>
 
@@ -80,8 +86,8 @@ export function HeroSection() {
             variants={fadeUp}
             className="mx-auto mb-10 max-w-xl text-lg text-stone-500 leading-relaxed sm:text-xl"
           >
-            Record your screen. Click through your workflow. AI writes every
-            step for you.
+            Record a process once, clean it in the editor, then share a link
+            that looks good in docs, Slack, and customer support threads.
           </motion.p>
 
           {/* Dual CTA */}
@@ -94,7 +100,7 @@ export function HeroSection() {
                 size="lg"
                 className="group cursor-pointer h-12 bg-indigo-600 px-8 text-base font-medium text-white shadow-lg shadow-indigo-500/25 hover:bg-indigo-500 hover:shadow-xl hover:shadow-indigo-500/30 transition-all duration-200"
               >
-                Start for free
+                Open Captuto
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
@@ -110,57 +116,28 @@ export function HeroSection() {
             </a>
           </motion.div>
 
-          {/* Social proof strip with avatars */}
           <motion.div
             variants={fadeUp}
-            className="mt-12 flex flex-col items-center gap-4"
+            className="mt-12 grid gap-3 text-left sm:grid-cols-3"
           >
-            {/* Avatar stack */}
-            <div className="flex items-center">
-              <div className="flex -space-x-2">
-                {[
-                  "bg-gradient-to-br from-indigo-400 to-indigo-600",
-                  "bg-gradient-to-br from-violet-400 to-violet-600",
-                  "bg-gradient-to-br from-purple-400 to-purple-600",
-                  "bg-gradient-to-br from-indigo-300 to-indigo-500",
-                  "bg-gradient-to-br from-violet-300 to-violet-500",
-                ].map((gradient, i) => (
-                  <div
-                    key={i}
-                    className={`h-8 w-8 rounded-full ${gradient} border-2 border-white flex items-center justify-center text-[10px] font-bold text-white`}
-                  >
-                    {["M", "S", "A", "J", "L"][i]}
-                  </div>
-                ))}
+            {[
+              [MonitorUp, "Capture", "Screenshots and click context are saved as you work."],
+              [Sparkles, "Generate", "AI drafts clear steps from the raw recording."],
+              [Share2, "Share", "Publish a clean public page or embeddable tutorial."],
+            ].map(([Icon, title, copy]) => (
+              <div
+                key={title as string}
+                className="rounded-xl border border-stone-200/70 bg-white/80 p-4 shadow-sm"
+              >
+                <Icon className="mb-3 h-5 w-5 text-indigo-600" />
+                <p className="text-sm font-semibold text-stone-900">{title as string}</p>
+                <p className="mt-1 text-sm leading-6 text-stone-500">{copy as string}</p>
               </div>
-              <span className="ml-3 text-sm font-medium text-stone-600">
-                Loved by 500+ teams
-              </span>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm text-stone-400">
-              <div className="flex items-center gap-1">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-3.5 w-3.5 fill-amber-400 text-amber-400"
-                    />
-                  ))}
-                </div>
-                <span className="ml-1 font-semibold text-stone-600">
-                  4.9/5
-                </span>
-              </div>
-              <div className="hidden sm:block h-4 w-px bg-stone-200" />
-              <span className="text-stone-500">
-                Trusted by product & support teams
-              </span>
-            </div>
+            ))}
           </motion.div>
         </motion.div>
 
-        {/* Browser mockup */}
+        {/* Product preview */}
         <motion.div
           initial={{ opacity: 0, y: 60 }}
           animate={{ opacity: 1, y: 0 }}
@@ -186,14 +163,13 @@ export function HeroSection() {
               <div className="flex items-center gap-2 text-xs">
                 <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span className="font-medium text-stone-600">
-                  AI writing instructions...
+                  Publishing preview metadata...
                 </span>
               </div>
             </div>
           </motion.div>
 
           <div className="relative mx-auto max-w-4xl">
-            <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-b from-indigo-500/5 to-transparent blur-2xl" />
             <div className="overflow-hidden rounded-2xl border border-stone-200/60 bg-white shadow-2xl shadow-stone-200/40">
               {/* Browser chrome */}
               <div className="flex items-center gap-2 border-b border-stone-100 bg-stone-50/80 px-4 py-3">
@@ -246,13 +222,20 @@ export function HeroSection() {
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-sm font-medium text-white">
                         1
                       </div>
-                      <div className="h-3 w-48 rounded bg-stone-200" />
+                      <div>
+                        <div className="h-3 w-48 rounded bg-stone-300" />
+                        <div className="mt-2 h-2 w-32 rounded bg-stone-100" />
+                      </div>
                     </div>
                     <div className="aspect-video rounded-xl bg-gradient-to-br from-indigo-50 to-violet-50 p-4">
                       <div className="relative h-full rounded-lg bg-white/60">
                         <div className="absolute left-1/3 top-1/2 flex h-8 w-8 items-center justify-center">
                           <div className="absolute h-8 w-8 animate-ping rounded-full bg-indigo-400/30" />
                           <MousePointer2 className="h-5 w-5 text-indigo-500" />
+                        </div>
+                        <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-stone-600 shadow-sm">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                          Step saved
                         </div>
                       </div>
                     </div>

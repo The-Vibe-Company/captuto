@@ -3,7 +3,6 @@ import { Play } from "lucide-react";
 
 const productLinks = [
   { label: "Features", href: "#features" },
-  { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
 ];
 

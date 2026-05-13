@@ -6,6 +6,7 @@ export interface PublicTutorial {
   title: string;
   description: string | null;
   slug: string | null;
+  publicToken: string | null;
   status: string;
   visibility: string;
   publishedAt: string | null;
@@ -16,6 +17,11 @@ export interface PublicTutorial {
 export interface PublicTutorialData {
   tutorial: PublicTutorial;
   steps: StepWithSignedUrl[];
+  previewImageUrl: string | null;
+}
+
+function getPreviewImageUrl(steps: StepWithSignedUrl[]) {
+  return steps.find((step) => step.signedScreenshotUrl)?.signedScreenshotUrl ?? null;
 }
 
 async function processSteps(
@@ -160,6 +166,7 @@ export async function getPublicTutorialByToken(
         title: tutorial.title,
         description: tutorial.description,
         slug: tutorial.slug,
+        publicToken: tutorial.public_token,
         status: tutorial.status,
         visibility: tutorial.visibility,
         publishedAt: tutorial.published_at,
@@ -167,6 +174,7 @@ export async function getPublicTutorialByToken(
         updatedAt: tutorial.updated_at,
       },
       steps: stepsWithUrls,
+      previewImageUrl: getPreviewImageUrl(stepsWithUrls),
     };
   } catch (error) {
     console.error('Error fetching public tutorial by token:', error);
@@ -246,6 +254,7 @@ export async function getPublicTutorialBySlug(
         title: tutorial.title,
         description: tutorial.description,
         slug: tutorial.slug,
+        publicToken: tutorial.public_token,
         status: tutorial.status,
         visibility: tutorial.visibility,
         publishedAt: tutorial.published_at,
@@ -253,6 +262,7 @@ export async function getPublicTutorialBySlug(
         updatedAt: tutorial.updated_at,
       },
       steps: stepsWithUrls,
+      previewImageUrl: getPreviewImageUrl(stepsWithUrls),
     };
   } catch (error) {
     console.error('Error fetching public tutorial by slug:', error);

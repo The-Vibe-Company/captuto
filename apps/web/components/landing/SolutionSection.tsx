@@ -17,14 +17,14 @@ export function SolutionSection() {
             The solution
           </p>
           <h2 className="font-heading text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
-            What if documentation{" "}
-            <span className="bg-gradient-to-r from-indigo-600 via-violet-500 to-purple-500 bg-clip-text text-transparent">
+            <span className="block">What if documentation</span>
+            <span className="block bg-gradient-to-r from-indigo-600 via-violet-500 to-purple-500 bg-clip-text text-transparent">
               wrote itself?
             </span>
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-lg text-stone-500 leading-relaxed">
-            Record your workflow once, and let AI transform your clicks into
-            polished, shareable tutorials. Automatically.
+            Record your workflow once, then edit the AI draft into a polished,
+            shareable tutorial.
           </p>
         </motion.div>
 
@@ -60,7 +60,7 @@ export function SolutionSection() {
                   <Wand2 className="h-6 w-6 text-violet-600" />
                 </div>
                 <span className="text-xs font-medium text-stone-500">
-                  AI magic
+                  Draft
                 </span>
               </div>
 

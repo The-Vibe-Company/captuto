@@ -34,6 +34,7 @@ export function EditorClient({
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved');
   const [isReordering, setIsReordering] = useState(false);
+  const [editorError, setEditorError] = useState<string | null>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // AI Generation state
@@ -63,9 +64,11 @@ export function EditorClient({
       if (!response.ok) {
         throw new Error('Failed to update title');
       }
+      setEditorError(null);
     } catch (error) {
       console.error('Failed to update title:', error);
-      // Rollback on error
+      setEditorError('The title could not be saved. Your previous title was restored.');
+      setSaveStatus('error');
       setTutorial((prev) => ({ ...prev, title: previousTitle }));
     }
   }, [tutorial.id, tutorial.title]);
@@ -212,9 +215,11 @@ export function EditorClient({
       setPendingUrls({});
       setPendingShowUrls({});
       setSaveStatus('saved');
+      setEditorError(null);
     } catch (error) {
       console.error('Failed to save:', error);
       setSaveStatus('error');
+      setEditorError('Some changes could not be saved. Check your connection and retry.');
     } finally {
       setIsSaving(false);
     }
@@ -241,6 +246,7 @@ export function EditorClient({
       }
     } catch (error) {
       console.error('Failed to reorder steps:', error);
+      setEditorError('The step order could not be saved. The previous order was restored.');
       setSteps(previousSteps);
     } finally {
       setIsReordering(false);
@@ -295,6 +301,7 @@ export function EditorClient({
       }
     } catch (error) {
       console.error('Failed to delete step:', error);
+      setEditorError('The step could not be deleted. It was restored in the editor.');
       setSteps(previousSteps);
       setSelectedStepId(stepId);
     }
@@ -364,6 +371,7 @@ export function EditorClient({
       setSelectedStepId(data.step.id);
     } catch (error) {
       console.error('Failed to add step:', error);
+      setEditorError('The new step could not be created.');
       setSteps(previousSteps);
       setSelectedStepId(previousSteps[0]?.id ?? null);
     }
@@ -436,6 +444,7 @@ export function EditorClient({
       setSelectedStepId(data.step.id);
     } catch (error) {
       console.error('Failed to create step from source:', error);
+      setEditorError('The screenshot could not be converted into a tutorial step.');
       setSteps(previousSteps);
       setSelectedStepId(previousSteps[previousSteps.length - 1]?.id ?? null);
     }
@@ -476,6 +485,7 @@ export function EditorClient({
       }
     } catch (error) {
       console.error('Failed to remove step image:', error);
+      setEditorError('The image could not be removed from this step.');
       setSteps(previousSteps);
     }
   }, [steps]);
@@ -528,6 +538,7 @@ export function EditorClient({
       }
     } catch (error) {
       console.error('Failed to set step image:', error);
+      setEditorError('The selected image could not be attached to this step.');
       setSteps(previousSteps);
     }
   }, [steps]);
@@ -657,9 +668,11 @@ export function EditorClient({
       }
 
       setSaveStatus('saved');
+      setEditorError(null);
     } catch (error) {
       console.error('Failed to apply generated content:', error);
       setSaveStatus('error');
+      setEditorError('Generated content could not be applied. Review the generation and try again.');
       throw error; // Re-throw to let the dialog handle the error
     } finally {
       setIsGenerating(false);
@@ -699,6 +712,17 @@ export function EditorClient({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSave]);
 
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!hasChanges) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasChanges]);
+
   return (
     <>
       <DocEditor
@@ -720,6 +744,8 @@ export function EditorClient({
         onSetStepImage={handleSetStepImage}
         onGenerateClick={handleGenerateClick}
         isGenerating={isGenerating}
+        errorMessage={editorError}
+        onRetrySave={hasChanges ? handleSave : undefined}
       />
 
       <GenerateDialog

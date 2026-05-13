@@ -51,9 +51,6 @@ export function Header({ userEmail }: HeaderProps) {
             <Play className="h-4 w-4 fill-white text-white" />
           </div>
           <span className="text-lg font-semibold tracking-tight text-stone-900">CapTuto</span>
-          <span className="ml-1 rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-600">
-            Beta
-          </span>
         </Link>
 
         {/* User Menu */}

@@ -115,6 +115,13 @@ cmd_start() {
   fi
   info "Environment config found"
 
+  # Next.js loads env files from the app directory. Export root env values too,
+  # because this repo keeps shared local configuration at the workspace root.
+  set -a
+  [ -f "$ROOT_DIR/.env.local" ] && source "$ROOT_DIR/.env.local"
+  [ -f "$ROOT_DIR/apps/web/.env.local" ] && source "$ROOT_DIR/apps/web/.env.local"
+  set +a
+
   # --- Install deps (pnpm is idempotent — instant if nothing changed) ---
   info "Checking dependencies..."
   pnpm install --frozen-lockfile 2>&1 | tail -3

@@ -9,7 +9,6 @@ import { Play, Menu, X } from "lucide-react";
 const navLinks = [
   { label: "Features", href: "#features" },
   { label: "How it works", href: "#how-it-works" },
-  { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
 ];
 
@@ -41,9 +40,6 @@ export function Navbar() {
           <span className="font-heading text-lg font-semibold tracking-tight text-stone-900">
             CapTuto
           </span>
-          <span className="ml-1 rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-600 border border-indigo-200/50">
-            Beta
-          </span>
         </Link>
 
         <div className="hidden md:flex items-center gap-8 text-sm text-stone-500">
@@ -69,7 +65,7 @@ export function Navbar() {
           </Link>
           <Link href="/login">
             <Button className="cursor-pointer bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/25 transition-all duration-200">
-              Get started free
+              Open app
             </Button>
           </Link>
         </div>
@@ -118,7 +114,7 @@ export function Navbar() {
                 </Link>
                 <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
                   <Button className="w-full cursor-pointer justify-center bg-indigo-600 text-white hover:bg-indigo-500">
-                    Get started free
+                    Open app
                   </Button>
                 </Link>
               </div>

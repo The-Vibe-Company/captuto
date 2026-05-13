@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { Copy, Check, ExternalLink, Link2, Globe, Lock, Code, Loader2 } from 'lucide-react';
 import {
   Dialog,
@@ -45,14 +45,7 @@ export function ShareDialog({
   const [saving, setSaving] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  // Fetch current share settings
-  useEffect(() => {
-    if (open && tutorialId) {
-      fetchSettings();
-    }
-  }, [open, tutorialId]);
-
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`/api/tutorials/${tutorialId}/share`);
@@ -65,7 +58,14 @@ export function ShareDialog({
     } finally {
       setLoading(false);
     }
-  };
+  }, [tutorialId]);
+
+  // Fetch current share settings
+  useEffect(() => {
+    if (open && tutorialId) {
+      fetchSettings();
+    }
+  }, [fetchSettings, open, tutorialId]);
 
   const updateVisibility = async (visibility: Visibility) => {
     setSaving(true);
