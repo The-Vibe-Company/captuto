@@ -1,0 +1,101 @@
+apps/web/app/t/[token]/page.tsx
+  s_5a623dcdca7097::t_01e38fcd755d39 24-27,31,36,39-53
+apps/web/components/editor/GenerateDialog.tsx
+  s_5a623dcdca7097::t_192b036acbce27 4,365,368-369
+apps/web/components/landing/SolutionSection.tsx
+  s_5a623dcdca7097::t_351e3062c80d4c 20-21
+  s_5a623dcdca7097::t_05aba66658c551 26-27,63
+apps/web/lib/stripe/server.ts
+  s_5a623dcdca7097::t_d979e8c33508a4 1-45
+apps/web/components/dashboard/TutorialCard.tsx
+  s_5a623dcdca7097::t_7c7d3241a1eee5 35,83,109,141
+apps/web/components/landing/FAQAccordion.tsx
+  s_5a623dcdca7097::t_112e983067e19b 9,11,31
+apps/web/app/dashboard/page.tsx
+  s_5a623dcdca7097::t_7c7d3241a1eee5 5-6,12,64-65,107,109-116,120-126,128-147,149-195,200-215
+apps/web/components/landing/FinalCTA.tsx
+  s_5a623dcdca7097::t_112e983067e19b 10,15-17,46,48,52-53,88
+  s_5a623dcdca7097::t_e634b322c4bf21 24-26
+apps/web/.env.example
+  s_5a623dcdca7097::t_1acd0b34deede2 15-20
+apps/web/app/api/billing/status/route.test.ts
+  s_5a623dcdca7097::t_9f0ac8f78254af 1-62
+apps/web/app/api/oembed/route.ts
+  s_5a623dcdca7097::t_0f9b784e209afb 50-51,55
+  s_5a623dcdca7097::t_01e38fcd755d39 2,39-43,45-46,49,57-59,63,69,71,75-77
+apps/web/app/tutorial/[slug]/page.tsx
+  s_5a623dcdca7097::t_01e38fcd755d39 24-27,31,41,45-52,57-58
+apps/web/app/api/oembed/route.test.ts
+  s_5a623dcdca7097::t_9f0ac8f78254af 1-66
+apps/web/app/api/og/tutorial/route.tsx
+  s_5a623dcdca7097::t_d066372b781e80 90
+  s_5a623dcdca7097::t_01e38fcd755d39 1-2,4,6-8,10-23,25-44,56-82,84-89,91-107
+  s_5a623dcdca7097::t_e634b322c4bf21 46-55,83
+supabase/migrations/20260512190000_add_billing_customers.sql
+  s_5a623dcdca7097::t_d979e8c33508a4 1-32
+apps/web/app/api/billing/status/route.ts
+  s_5a623dcdca7097::t_f5491b21579cee 1-60
+apps/web/app/api/billing/webhook/route.ts
+  s_5a623dcdca7097::t_a6b6ac9ef6d082 27
+  s_5a623dcdca7097::t_f5491b21579cee 1-26,28-107
+apps/web/lib/supabase/admin.ts
+  s_5a623dcdca7097::t_d979e8c33508a4 1-18
+apps/web/app/api/billing/checkout/route.ts
+  s_5a623dcdca7097::t_f5491b21579cee 1-110
+apps/web/app/settings/page.tsx
+  s_5a623dcdca7097::t_e634b322c4bf21 166,176
+  s_5a623dcdca7097::t_7de1d4c0ba612d 5-19,23-165,167-175,177-184,381-382
+apps/web/components/editor/DocEditor.tsx
+  s_5a623dcdca7097::t_f0845eb1f8fb1b 20,59-60,82-83,135-153
+apps/web/components/editor/EditorClient.tsx
+  s_5a623dcdca7097::t_f0845eb1f8fb1b 37,67,70-71,218,222,249,304,374,447,488,541,671,675,715-725,747-748
+apps/web/package.json
+  s_5a623dcdca7097::t_07344859ec66c2 48
+apps/web/components/editor/DocStepCard.tsx
+  s_5a623dcdca7097::t_43a9f8f8d3e46a 3,67
+scripts/dev-start.sh
+  s_5a623dcdca7097::t_56c7f6cb42256a 118-124
+apps/web/components/public/EmbedTutorialViewer.tsx
+  s_5a623dcdca7097::t_0f9b784e209afb 12
+apps/web/components/landing/HeroSection.tsx
+  s_5a623dcdca7097::t_e634b322c4bf21 42-44
+  s_5a623dcdca7097::t_d7354537162b4f 6-14,68,77,80,89-90,103,121,123-134,136,140,166,225-228,236-238
+apps/web/components/dashboard/ShareDialog.tsx
+  s_5a623dcdca7097::t_43a9f8f8d3e46a 3,48,61-68
+apps/web/app/api/billing/portal/route.ts
+  s_5a623dcdca7097::t_f5491b21579cee 1-53
+apps/web/app/api/billing/checkout/route.test.ts
+  s_5a623dcdca7097::t_9f0ac8f78254af 1-60
+README.md
+  s_5a623dcdca7097::t_1acd0b34deede2 15,61-63
+apps/web/components/public/PublicTutorialViewer.tsx
+  s_5a623dcdca7097::t_0f9b784e209afb 28
+apps/web/components/landing/Navbar.tsx
+  s_5a623dcdca7097::t_d7354537162b4f 68,117
+apps/web/lib/queries/public-tutorials.ts
+  s_5a623dcdca7097::t_0f9b784e209afb 9,169,257
+  s_5a623dcdca7097::t_01e38fcd755d39 20-24,177,265
+apps/web/app/login/page.tsx
+  s_5a623dcdca7097::t_7c1856822b6480 8-9,21-22,24-31,33-42,48-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "bcebcf24d769de0856b0b6583ad6252818aeb37c",
+  "prompts": {},
+  "humans": {
+    "h_42fad98ca714c8": {
+      "author": "StanGirard"
+    }
+  },
+  "sessions": {
+    "s_5a623dcdca7097": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e1db0-97f1-7eb0-a5e9-612fb643922f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "StanGirard <stan@quivr.app>"
+    }
+  }
+}
