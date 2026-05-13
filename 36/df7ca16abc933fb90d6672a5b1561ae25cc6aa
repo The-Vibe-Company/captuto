@@ -1,0 +1,12 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "36df7ca16abc933fb90d6672a5b1561ae25cc6aa",
+  "prompts": {},
+  "humans": {
+    "h_42fad98ca714c8": {
+      "author": "StanGirard"
+    }
+  }
+}
