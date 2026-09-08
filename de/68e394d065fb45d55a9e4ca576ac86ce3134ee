@@ -1,0 +1,41 @@
+apps/web/app/api/dashboard/route.test.ts
+  s_1930cc3a6b228d::t_7aa20be690cd9d 1-32
+apps/web/app/api/dashboard/route.ts
+  s_1930cc3a6b228d::t_9b973bdb7b0452 1-18
+apps/web/app/dashboard/layout.tsx
+  s_1930cc3a6b228d::t_897bf692b634e9 5,7-12
+apps/web/app/dashboard/page.tsx
+  s_1930cc3a6b228d::t_a9b4b2ffab1525 3-5,7-8,10-22,27-41,43-55,57-65,67-81
+apps/web/app/editor/layout.tsx
+  s_1930cc3a6b228d::t_65ffc17df729bb 1-9,18
+apps/web/app/layout.tsx
+  s_1930cc3a6b228d::t_f41430ac85ec73 47
+apps/web/components/dashboard/DashboardTopBar.tsx
+  s_1930cc3a6b228d::t_ccedb4422d37b2 5-7,9-10,14,16-17,19-28,30-48,51-52
+apps/web/lib/dashboard/query.ts
+  s_1930cc3a6b228d::t_4a3a271ce26986 1-27
+apps/web/lib/supabase/types.ts
+  s_1930cc3a6b228d::t_557259df75da4d 240-243
+docs/captuto/dashboard-performance.md
+  s_1930cc3a6b228d::t_aca81b6dc0fa8b 1-34
+scripts/check-dashboard-pages.sql
+  s_1930cc3a6b228d::t_fb0b8851c06e8c 1-32
+supabase/migrations/20260908233000_dashboard_pages.sql
+  s_1930cc3a6b228d::t_c6bd8c6d4775cd 1-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "de68e394d065fb45d55a9e4ca576ac86ce3134ee",
+  "prompts": {},
+  "sessions": {
+    "s_1930cc3a6b228d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08264-1a3c-7973-8ac1-d1503c6b7118",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "StanGirard <stan@quivr.app>"
+    }
+  }
+}
