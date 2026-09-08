@@ -14,7 +14,7 @@ Same local Supabase database, authenticated browser, 1,001 guides (1,000 tempora
 | JSON response bytes | 221,180 | 5,138 |
 | Median warm request | 64 ms | 61 ms |
 
-Initial JSON payload is **97.7% smaller**. The old endpoint silently omitted guides beyond its 1,000-row cap; the new page can reach them through search and pagination. Temporary performance fixtures were removed after measurement.
+Initial JSON payload is **97.7% smaller**. Production build output also decreased dashboard first-load JavaScript from 152 to 147 kB. The old endpoint silently omitted guides beyond its 1,000-row cap; the new page can reach them through search and pagination. Temporary performance fixtures were removed after measurement.
 
 ## Regression checks
 
@@ -27,7 +27,7 @@ docker exec -i supabase_db_captuto psql -v ON_ERROR_STOP=1 -U postgres -d postgr
 
 This checks sort-before-page, non-overlapping pages, search beyond the first page, literal wildcard handling, exclusive counters and cross-account isolation. All fixtures roll back.
 
-Use `agent-browser` for localhost interaction checks: next page, title search, no results and reset, filters, share dialog, error/retry and 390px mobile layout. An injected fetch failure must show an error and retry action, then recover when fetch is restored. Never interpret a database error as an empty library.
+Use `agent-browser` for localhost interaction checks: next page, title search, no results and reset, filters, share dialog, error/retry and 320px and 390px mobile layouts. An injected fetch failure must show an error and retry action, then recover when fetch is restored. Never interpret a database error as an empty library.
 
 ## Remaining measurement scope
 

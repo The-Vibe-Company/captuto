@@ -10,7 +10,7 @@ CREATE OR REPLACE FUNCTION public.get_dashboard_page(
 LANGUAGE sql STABLE SECURITY INVOKER SET search_path = public
 AS $$
   WITH matching AS MATERIALIZED (
-    SELECT t.*,
+    SELECT t.id, t.title, t.slug, t.status, t.visibility, t.created_at,
       CASE WHEN t.visibility IN ('link_only', 'public') THEN 'shared'
            WHEN t.status = 'processing' THEN 'processing' ELSE 'draft' END AS bucket
     FROM tutorials t

@@ -34,7 +34,7 @@ export function DashboardTopBar({ userEmail }: { userEmail: string }) {
         <Link href="/dashboard" className="text-2xl font-bold tracking-tight text-stone-900">captuto<span className="text-[#bd402d]">.</span></Link>
         <div className="flex items-center gap-2 sm:gap-4">
           <Button asChild variant="outline" className="h-11 border-stone-300 bg-transparent text-stone-700">
-            <a href={DESKTOP_DOWNLOAD_URL} target="_blank" rel="noopener noreferrer"><Download className="mr-2 h-4 w-4"/><span>Download for Mac</span><span className="sr-only"> (opens a new tab)</span></a>
+            <a aria-label="Download Captuto for Mac (opens a new tab)" href={DESKTOP_DOWNLOAD_URL} target="_blank" rel="noopener noreferrer"><Download className="mr-2 h-4 w-4"/><span className="sm:hidden">Mac app</span><span className="hidden sm:inline">Download for Mac</span><span className="sr-only"> (opens a new tab)</span></a>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild><Button variant="ghost" className="h-11 w-11 rounded-full p-0" aria-label="Account menu"><Avatar className="h-9 w-9"><AvatarFallback className="bg-stone-200 text-xs font-semibold text-stone-800">{initials}</AvatarFallback></Avatar></Button></DropdownMenuTrigger>
