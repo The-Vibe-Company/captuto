@@ -1,0 +1,28 @@
+supabase/migrations/20260908233000_dashboard_pages.sql
+  s_1930cc3a6b228d::t_0a134e943d5bdb 13
+apps/web/components/dashboard/DashboardTopBar.tsx
+  s_1930cc3a6b228d::t_0a134e943d5bdb 37
+docs/captuto/dashboard-performance.md
+  s_1930cc3a6b228d::t_4f8891cde4d76d 17,30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "2a90fb9e4ecb547ac2d43311a25d69fb1de3cc3e",
+  "prompts": {},
+  "humans": {
+    "h_42fad98ca714c8": {
+      "author": "StanGirard"
+    }
+  },
+  "sessions": {
+    "s_1930cc3a6b228d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08264-1a3c-7973-8ac1-d1503c6b7118",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "StanGirard <stan@quivr.app>"
+    }
+  }
+}
