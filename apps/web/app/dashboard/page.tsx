@@ -1,302 +1,82 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, RefreshCw, ListOrdered, Plus } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { TutorialTableRow } from '@/components/dashboard/TutorialTableRow';
-import { TutorialCardProps } from '@/components/dashboard/TutorialCard';
-import { KpiStrip } from '@/components/dashboard/KpiStrip';
-import { Card, CardContent } from '@/components/ui/card';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, FileText, Loader2, MoreHorizontal, Pencil, RefreshCw, Search, Share2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import type { DashboardGuide, DashboardPage as GuidePage, DashboardSort, DashboardTab } from '@/lib/dashboard/query';
 
-type Tutorial = Omit<TutorialCardProps, 'onEdit' | 'onDelete' | 'onShare'>;
+const ShareDialog = dynamic(() => import('@/components/dashboard/ShareDialog').then(m => m.ShareDialog));
+const tabs: { key: DashboardTab; label: string }[] = [{ key: 'all', label: 'All guides' }, { key: 'shared', label: 'Shared' }, { key: 'draft', label: 'Drafts' }, { key: 'processing', label: 'Processing' }];
 
-type TabKey = 'all' | 'published' | 'draft' | 'processing';
-type SortKey = 'recent' | 'oldest' | 'title';
-
-const sortLabels: Record<SortKey, string> = {
-  recent: 'Recent',
-  oldest: 'Oldest',
-  title: 'Title',
-};
-
-async function fetchTutorials(): Promise<Tutorial[]> {
-  const response = await fetch('/api/tutorials');
-  if (!response.ok) {
-    if (response.status === 401) throw new Error('UNAUTHORIZED');
-    throw new Error('Failed to fetch tutorials');
-  }
-  const data = await response.json();
-  return data.tutorials;
+async function fetchPage(query: string, signal: AbortSignal): Promise<GuidePage> {
+  const response = await fetch(`/api/dashboard?${query}`, { signal });
+  if (response.status === 401) throw new Error('UNAUTHORIZED');
+  if (!response.ok) throw new Error('Could not load your guides. Try again.');
+  return response.json();
 }
 
 export default function DashboardPage() {
   const router = useRouter();
-  const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<TabKey>('all');
-  const [sortOrder, setSortOrder] = useState<SortKey>('recent');
-
-  const {
-    data: tutorials = [],
-    isLoading: loading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: ['tutorials'],
-    queryFn: fetchTutorials,
+  const cache = useQueryClient();
+  const [search, setSearch] = useState('');
+  const [query, setQuery] = useState('');
+  const [tab, setTab] = useState<DashboardTab>('all');
+  const [sort, setSort] = useState<DashboardSort>('recent');
+  const [page, setPage] = useState(1);
+  const [share, setShare] = useState<DashboardGuide | null>(null);
+  const [deleting, setDeleting] = useState<DashboardGuide | null>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+  useEffect(() => { const timer = setTimeout(() => { setQuery(search.trim()); setPage(1); }, 250); return () => clearTimeout(timer); }, [search]);
+  const params = new URLSearchParams({ page: String(page), search: query, tab, sort });
+  const { data, error, isLoading, isFetching, refetch } = useQuery({
+    queryKey: ['dashboard', query, tab, sort, page],
+    queryFn: ({ signal }) => fetchPage(params.toString(), signal),
   });
-
-  const deleteMutation = useMutation({
-    mutationFn: async (tutorialId: string) => {
-      const response = await fetch(`/api/tutorials/${tutorialId}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) throw new Error('Failed to delete tutorial');
-      return tutorialId;
-    },
-    onSuccess: (deletedId) => {
-      queryClient.setQueryData<Tutorial[]>(['tutorials'], (old) =>
-        old?.filter((t) => t.id !== deletedId) ?? [],
-      );
-    },
-  });
-
-  const handleEdit = (tutorialId: string) => router.push(`/editor/${tutorialId}`);
-  const handleDelete = (tutorialId: string) => deleteMutation.mutate(tutorialId);
-
-  useEffect(() => {
-    if (error?.message === 'UNAUTHORIZED') router.push('/login');
-  }, [error, router]);
-
-  const counts = useMemo(() => {
-    const total = tutorials.length;
-    const published = tutorials.filter(
-      (t) => t.visibility === 'link_only' || t.visibility === 'public',
-    ).length;
-    const processing = tutorials.filter((t) => t.status === 'processing').length;
-    const draft = total - published - processing;
-    return { all: total, published, draft, processing };
-  }, [tutorials]);
-
-  const filtered = useMemo(() => {
-    let list: Tutorial[];
-    if (activeTab === 'all') {
-      list = tutorials;
-    } else if (activeTab === 'published') {
-      list = tutorials.filter(
-        (t) => t.visibility === 'link_only' || t.visibility === 'public',
-      );
-    } else if (activeTab === 'processing') {
-      list = tutorials.filter((t) => t.status === 'processing');
-    } else {
-      list = tutorials.filter(
-        (t) =>
-          t.status !== 'processing' &&
-          t.visibility !== 'link_only' &&
-          t.visibility !== 'public',
-      );
-    }
-    const sorted = [...list];
-    if (sortOrder === 'recent') {
-      sorted.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
-    } else if (sortOrder === 'oldest') {
-      sorted.sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
-    } else {
-      sorted.sort((a, b) =>
-        a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }),
-      );
-    }
-    return sorted;
-  }, [activeTab, tutorials, sortOrder]);
-
-  if (error?.message === 'UNAUTHORIZED') return null;
-
-  if (error) {
-    return (
-      <div className="mx-auto max-w-3xl px-6 py-12">
-        <Card className="border-red-100">
-          <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-              <AlertCircle className="h-6 w-6 text-red-600" />
-            </div>
-            <p className="mb-4 text-red-600">{error.message}</p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => refetch()}
-              className="gap-2"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Retry
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
+  useEffect(() => { if (error?.message === 'UNAUTHORIZED') router.replace('/login'); }, [error, router]);
+  useEffect(() => { if (data && page > 1 && data.tutorials.length === 0) setPage(Math.max(1, Math.ceil(data.total / data.pageSize))); }, [data, page]);
+  async function removeGuide() {
+    if (!deleting) return;
+    setDeleteBusy(true); setDeleteError('');
+    try {
+      const response = await fetch(`/api/tutorials/${deleting.id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Could not delete this guide. It is still available; try again.');
+      setDeleting(null);
+      await cache.invalidateQueries({ queryKey: ['dashboard'] });
+      await cache.invalidateQueries({ queryKey: ['tutorials'] });
+    } catch (e) { setDeleteError(e instanceof Error ? e.message : 'Could not delete this guide.'); }
+    finally { setDeleteBusy(false); }
   }
-
-  return (
-    <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
-      {/* Greeting */}
-      <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="font-heading text-[28px] font-semibold leading-tight tracking-tight text-stone-900">
-            Your tutorials,{' '}
-            <span
-              className="font-serif italic font-normal bg-clip-text text-transparent"
-              style={{ backgroundImage: 'var(--brand-gradient)' }}
-            >
-              ready to share.
-            </span>
-          </h1>
-          <p className="mt-1.5 text-sm text-stone-500">
-            {loading
-              ? 'Loading…'
-              : `${counts.all} ${counts.all === 1 ? 'tutorial' : 'tutorials'} · ${counts.published} published`}
-          </p>
-        </div>
-      </div>
-
-      {/* KPI strip */}
-      <div className="mb-8">
-        <KpiStrip tutorialsCount={counts.all} />
-      </div>
-
-      {/* Tab bar */}
-      <div className="mb-3.5 flex flex-wrap items-center gap-1.5">
-        {[
-          { key: 'all' as const, label: 'All', count: counts.all },
-          { key: 'published' as const, label: 'Published', count: counts.published },
-          { key: 'draft' as const, label: 'Drafts', count: counts.draft },
-          { key: 'processing' as const, label: 'Processing', count: counts.processing },
-        ].map((tab) => {
-          const isActive = activeTab === tab.key;
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${
-                isActive
-                  ? 'bg-stone-900 text-white'
-                  : 'text-stone-500 hover:bg-stone-100 hover:text-stone-900'
-              }`}
-            >
-              {tab.label}
-              <span
-                className={`font-mono text-[11px] ${
-                  isActive ? 'text-white/65' : 'text-stone-400'
-                }`}
-              >
-                {tab.count}
-              </span>
-            </button>
-          );
-        })}
-        <div className="ml-auto flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className="inline-flex items-center gap-1.5 rounded-md border border-stone-200 bg-white px-3 py-1.5 text-[13px] font-medium text-stone-600 transition-colors hover:border-stone-300 hover:text-stone-900"
-              >
-                <ListOrdered className="h-3.5 w-3.5" />
-                Sort: {sortLabels[sortOrder]}
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => setSortOrder('recent')}>
-                Most recent
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setSortOrder('oldest')}>
-                Oldest
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setSortOrder('title')}>
-                Title (A–Z)
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
-      {/* Table or empty state */}
-      {loading ? (
-        <div className="overflow-hidden rounded-2xl border border-stone-200/60 bg-white">
-          <div className="grid grid-cols-[42px_minmax(0,1.6fr)_120px_minmax(0,0.8fr)_minmax(0,0.6fr)_32px] gap-4 border-b border-stone-200/60 bg-stone-50 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.06em] text-stone-500">
-            <span />
-            <span>Tutorial</span>
-            <span>Status</span>
-            <span>Updated</span>
-            <span>Views</span>
-            <span />
-          </div>
-          {[...Array(4)].map((_, i) => (
-            <div
-              key={i}
-              className="grid grid-cols-[42px_minmax(0,1.6fr)_120px_minmax(0,0.8fr)_minmax(0,0.6fr)_32px] items-center gap-4 border-b border-stone-200/60 px-5 py-3 last:border-b-0"
-            >
-              <div className="h-10 w-10 animate-pulse rounded-md bg-stone-100" />
-              <div className="space-y-1.5">
-                <div className="h-3 w-2/3 animate-pulse rounded bg-stone-100" />
-                <div className="h-2 w-1/3 animate-pulse rounded bg-stone-100" />
-              </div>
-              <div className="h-5 w-20 animate-pulse rounded-full bg-stone-100" />
-              <div className="h-3 w-16 animate-pulse rounded bg-stone-100" />
-              <div className="h-3 w-12 animate-pulse rounded bg-stone-100" />
-              <div />
-            </div>
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <Card className="border-stone-200/60">
-          <CardContent className="flex flex-col items-center justify-center p-12 text-center">
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-brand-100 bg-brand-50">
-              <Plus className="h-6 w-6 text-brand-600" />
-            </div>
-            <h2 className="font-heading text-xl font-semibold text-stone-900">
-              {activeTab === 'all' ? 'No tutorials yet' : 'Nothing here'}
-            </h2>
-            <p className="mt-2 max-w-sm text-stone-500">
-              {activeTab === 'all'
-                ? 'Use the Chrome extension to create your first tutorial.'
-                : 'No tutorials match this filter. Try another tab.'}
-            </p>
-            {activeTab === 'all' && (
-              <p className="mt-4 text-sm text-stone-400">
-                Click on the CapTuto icon in Chrome to start recording.
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="overflow-hidden rounded-2xl border border-stone-200/60 bg-white">
-          <div className="grid grid-cols-[42px_minmax(0,1.6fr)_120px_minmax(0,0.8fr)_minmax(0,0.6fr)_32px] gap-4 border-b border-stone-200/60 bg-stone-50 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.06em] text-stone-500">
-            <span />
-            <span>Tutorial</span>
-            <span>Status</span>
-            <span>Updated</span>
-            <span>Views</span>
-            <span />
-          </div>
-          <div className="divide-y divide-stone-200/60">
-            {filtered.map((tutorial) => (
-              <TutorialTableRow
-                key={tutorial.id}
-                {...tutorial}
-                onEdit={() => handleEdit(tutorial.id)}
-                onDelete={() => handleDelete(tutorial.id)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+  const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
+  return <div className="mx-auto max-w-6xl px-5 pb-16 pt-12 sm:px-8 sm:pt-16">
+    <div className="mb-10 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+      <div><p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#ad3d2b]">Your workspace</p><h1 className="text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">A little clarity, saved.</h1><p className="mt-4 max-w-lg text-sm leading-6 text-stone-600">Record in Captuto for Mac. Turn your captures into a guide here, or shape them with your agent.</p></div>
+      <Link href="/settings" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-stone-700 underline-offset-4 hover:underline">Connect your agent<ArrowRight className="h-4 w-4"/></Link>
     </div>
-  );
+    <div className="mb-6 flex flex-col gap-3 sm:flex-row">
+      <div className="relative flex-1"><Search className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-stone-500"/><Input aria-label="Search guide titles" type="search" maxLength={200} placeholder="Find a guide by title…" value={search} onChange={e => setSearch(e.target.value)} className="h-11 border-stone-300 bg-white pl-10"/></div>
+      <div className="flex gap-2"><DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="h-11 flex-1 justify-between gap-3 border-stone-300 bg-white sm:flex-none" aria-label="Sort guides">{sort === 'recent' ? 'Newest first' : sort === 'oldest' ? 'Oldest first' : 'Title A–Z'}<ChevronDown className="h-4 w-4"/></Button></DropdownMenuTrigger><DropdownMenuContent align="end">{([{ key: 'recent', label: 'Newest first' }, { key: 'oldest', label: 'Oldest first' }, { key: 'title', label: 'Title A–Z' }] as const).map(option => <DropdownMenuItem key={option.key} onSelect={() => { setSort(option.key); setPage(1); }}>{option.label}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu><Button variant="outline" className="h-11 w-11 bg-white p-0" onClick={() => refetch()} disabled={isFetching} aria-label="Refresh guides"><RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`}/></Button></div>
+    </div>
+    <div role="group" aria-label="Filter guides" className="mb-3 flex flex-wrap gap-1 border-b border-stone-200 pb-3">{tabs.map(item => <Button key={item.key} variant="ghost" aria-pressed={tab === item.key} onClick={() => { setTab(item.key); setPage(1); }} className={`h-11 gap-2 px-3 ${tab === item.key ? 'bg-stone-900 text-white hover:bg-stone-800 hover:text-white' : 'text-stone-600'}`}>{item.label}<span className="text-xs tabular-nums opacity-70">{data?.counts[item.key] ?? '—'}</span></Button>)}</div>
+    {error && error.message !== 'UNAUTHORIZED' ? <div role="alert" className="py-12 text-center"><p className="text-red-700">{error.message}</p><Button variant="outline" className="mt-4" onClick={() => refetch()}>Try again</Button></div> : isLoading ? <div role="status" aria-label="Loading guides" className="space-y-3 py-4">{[0,1,2,3].map(i => <div key={i} className="h-24 animate-pulse rounded-lg bg-stone-200/60"/>)}</div> : data?.tutorials.length ? <>
+      <ul aria-label="Guides" className="divide-y divide-stone-200">{data.tutorials.map(guide => <li key={guide.id} className="group flex items-center gap-3 py-5 sm:gap-5">
+        <Link href={`/editor/${guide.id}`} prefetch={false} className="flex min-w-0 flex-1 items-center gap-3 rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 sm:gap-5">
+          <span className="flex h-12 w-10 shrink-0 items-center justify-center rounded-md border border-stone-200 bg-white text-stone-500"><FileText className="h-5 w-5"/></span>
+          <span className="min-w-0"><span className="block break-words text-base font-medium leading-6 text-stone-900 group-hover:underline">{guide.title || 'Untitled guide'}</span><span className="mt-1 block text-xs leading-5 text-stone-500">{guide.stepsCount} {guide.stepsCount === 1 ? 'step' : 'steps'}<span className="mx-2">·</span>Created {new Date(guide.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span></span>
+        </Link>
+        <span className="hidden shrink-0 text-xs text-stone-600 sm:block">{guide.visibility === 'public' || guide.visibility === 'link_only' ? 'Shared' : guide.status === 'processing' ? 'Processing' : guide.status === 'error' ? 'Needs attention' : 'Draft'}</span>
+        <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-11 w-11 shrink-0" aria-label={`Actions for ${guide.title || 'Untitled guide'}`}><MoreHorizontal className="h-5 w-5"/></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem asChild><Link href={`/editor/${guide.id}`} prefetch={false}><Pencil className="mr-2 h-4 w-4"/>Edit guide</Link></DropdownMenuItem><DropdownMenuItem onSelect={() => setShare(guide)}><Share2 className="mr-2 h-4 w-4"/>Share or export PDF</DropdownMenuItem><DropdownMenuItem onSelect={() => { setDeleteError(''); setDeleting(guide); }} className="text-red-700"><Trash2 className="mr-2 h-4 w-4"/>Delete guide</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
+      </li>)}</ul>
+      <nav aria-label="Guide pages" className="mt-6 flex items-center justify-between border-t border-stone-200 pt-5"><p className="text-sm text-stone-600">Page {page} of {totalPages}<span className="hidden sm:inline"> · {data.total} {data.total === 1 ? 'guide' : 'guides'}</span></p><div className="flex gap-2"><Button variant="outline" className="h-11 bg-transparent" disabled={page <= 1 || isFetching} onClick={() => setPage(p => p-1)}><ChevronLeft className="mr-1 h-4 w-4"/>Previous</Button><Button variant="outline" className="h-11 bg-transparent" disabled={page >= totalPages || isFetching} onClick={() => setPage(p => p+1)}>Next<ChevronRight className="ml-1 h-4 w-4"/></Button></div></nav>
+    </> : <div className="py-16 text-center"><h2 className="text-xl font-medium">{query ? 'No matching guides' : tab !== 'all' ? 'No guides in this view' : 'Your first guide starts with a recording.'}</h2><p className="mx-auto mt-3 max-w-md text-sm leading-6 text-stone-600">{query ? 'Try another title or clear the search.' : tab !== 'all' ? 'Choose All guides to return to your library.' : 'Download Captuto for Mac, connect your account and record your workflow. Your captures will appear here.'}</p>{(query || tab !== 'all') && <Button variant="outline" className="mt-5" onClick={() => { setSearch(''); setQuery(''); setTab('all'); setPage(1); }}>Show all guides</Button>}</div>}
+    {share && <ShareDialog open onOpenChange={open => { if (!open) { setShare(null); cache.invalidateQueries({ queryKey: ['dashboard'] }); } }} tutorialId={share.id} tutorialTitle={share.title} tutorialSlug={share.slug}/>}
+    <Dialog open={Boolean(deleting)} onOpenChange={open => { if (!open && !deleteBusy) setDeleting(null); }}><DialogContent><DialogHeader><DialogTitle>Delete this guide?</DialogTitle><DialogDescription>“{deleting?.title}” and its steps will be deleted. This cannot be undone.</DialogDescription></DialogHeader>{deleteError && <p role="alert" className="text-sm text-red-700">{deleteError}</p>}<DialogFooter><Button variant="outline" disabled={deleteBusy} onClick={() => setDeleting(null)}>Keep guide</Button><Button variant="destructive" disabled={deleteBusy} onClick={removeGuide}>{deleteBusy && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}Delete guide</Button></DialogFooter></DialogContent></Dialog>
+  </div>;
 }

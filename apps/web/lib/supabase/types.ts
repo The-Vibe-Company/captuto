@@ -237,6 +237,10 @@ export type Database = {
       begin_desktop_connection: { Args: { code_challenge: string; requester: string }; Returns: Json };
       approve_desktop_connection: { Args: { connection_id: string; approving_user_id: string }; Returns: string };
       exchange_desktop_connection: { Args: { connection_id: string; verifier: string }; Returns: Json };
+      get_dashboard_page: {
+        Args: { p_limit?: number; p_offset?: number; p_search?: string; p_sort?: string; p_tab?: string };
+        Returns: Json;
+      };
       get_user_dashboard_tutorials: {
         Args: {
           p_limit?: number;
