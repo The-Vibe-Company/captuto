@@ -1,0 +1,142 @@
+apps/web/app/auth/callback/route.ts
+  s_b25909d4887c23::t_492db62068fadc 20
+apps/web/lib/supabase/middleware.ts
+  s_b25909d4887c23::t_5e9b63af19d311 59
+  s_b25909d4887c23::t_5094c6baee1d49 42-50
+apps/web/lib/supabase/middleware.test.ts
+  s_b25909d4887c23::t_8ed7add3ca5d0e 16-28
+  s_b25909d4887c23::t_46ba206acbf1aa 1-15
+apps/web/app/forgot-password/page.tsx
+  s_b25909d4887c23::t_492db62068fadc 1-47
+apps/web/components/editor/studio/StudioTopBar.tsx
+  s_b25909d4887c23::t_eaa70c28ca086f 4,44-49,52-59,61,94,106
+docs/account-lifecycle.md
+  s_b25909d4887c23::t_ed049f27bb7412 1-28,30-41,45-70
+  s_b25909d4887c23::t_70b6eced46fa15 29
+  s_b25909d4887c23::t_09d681d3be21bf 42-44,71-74
+apps/web/components/landing/Footer.tsx
+  s_b25909d4887c23::t_5e9b63af19d311 9-10
+  s_b25909d4887c23::t_5b48fdda548a85 59
+apps/web/app/api/account/route.ts
+  s_b25909d4887c23::t_a3aae9ebc80eb7 36-37
+  s_b25909d4887c23::t_387d6512c91ea0 1-35,38-39
+apps/web/components/editor/GenerateDialog.tsx
+  s_b25909d4887c23::t_6c6f4f87ab26ba 53-55,75,103,118,123,189,204,268-269,274-275,279,460,474
+  s_b25909d4887c23::t_b525572a184f52 270-273
+apps/web/components/editor/studio/Timeline.tsx
+  s_b25909d4887c23::t_5e9b63af19d311 96,139,207
+apps/web/app/dashboard/page.tsx
+  s_b25909d4887c23::t_5e9b63af19d311 15,19,76,83,94,102,132
+apps/web/components/editor/EditorClient.tsx
+  s_b25909d4887c23::t_e76baf97ee2dcf 391-394,398-399,401-413,700
+  s_b25909d4887c23::t_6c6f4f87ab26ba 519-525,563,595
+  s_b25909d4887c23::t_e7d1607d13e5da 580
+  s_b25909d4887c23::t_70b6eced46fa15 75,630
+  s_b25909d4887c23::t_0e4dd79ba14435 636
+apps/web/app/api/account/route.test.ts
+  s_b25909d4887c23::t_7225b8c2823d7b 1-46
+apps/web/components/editor/studio/Inspector.tsx
+  s_b25909d4887c23::t_5e9b63af19d311 8,22,93
+apps/web/app/settings/page.tsx
+  s_b25909d4887c23::t_b231c77885bbfb 386,392
+  s_b25909d4887c23::t_d07a97f092004b 129,132,135,181,200-201,205,207,213,225,230,232,239,246-247,250,255-256,259,261,277,283,291,297,309,345-346,357
+  s_b25909d4887c23::t_4d3c9ffc02e3d1 2-3,377-382,402-403,408-409
+apps/web/components/editor/studio/RecordedScreens.tsx
+  s_b25909d4887c23::t_c952e6d20cf5b5 1-135
+apps/web/components/landing/HowItWorks.tsx
+  s_b25909d4887c23::t_5e9b63af19d311 11-12,24,34,36
+apps/web/app/login/page.tsx
+  s_b25909d4887c23::t_492db62068fadc 200
+  s_b25909d4887c23::t_eaa70c28ca086f 23,165
+apps/web/components/dashboard/DashboardSidebar.tsx
+  s_b25909d4887c23::t_89c170fcf22711 35
+  s_b25909d4887c23::t_5e9b63af19d311 18
+  s_b25909d4887c23::t_fbd3a21fbfe5db 21,153
+apps/web/app/api/generate-tutorial/route.ts
+  s_b25909d4887c23::t_6c6f4f87ab26ba 18,98-101,146,156-162
+  s_b25909d4887c23::t_e7d1607d13e5da 389-390
+  s_b25909d4887c23::t_70b6eced46fa15 154-155,199,201
+apps/web/components/editor/studio/StudioEditor.tsx
+  s_b25909d4887c23::t_eaa70c28ca086f 74,86,124-126,129,138-139,155-156,168
+  s_b25909d4887c23::t_e76baf97ee2dcf 16,40,63,117-119
+apps/web/app/reset-password/page.tsx
+  s_b25909d4887c23::t_492db62068fadc 1-38,40-62
+  s_b25909d4887c23::t_5333e6cfbfb366 39
+apps/web/components/landing/FAQAccordion.tsx
+  s_b25909d4887c23::t_5e9b63af19d311 11,16,21,26
+apps/web/app/support/page.tsx
+  s_b25909d4887c23::t_5e9b63af19d311 32
+  s_b25909d4887c23::t_5b48fdda548a85 20,22,54,56,62,72,74
+  s_b25909d4887c23::t_b30f4d3e94d673 27,42
+apps/web/app/signup/page.tsx
+  s_b25909d4887c23::t_eaa70c28ca086f 3,9,38,55
+docs/ux-audit-2026-09-09.md
+  s_b25909d4887c23::t_ea4ed5d5e71966 1-84
+  s_b25909d4887c23::t_ed049f27bb7412 85-101
+  s_b25909d4887c23::t_09d681d3be21bf 102-112
+apps/web/lib/account/delete-account.test.ts
+  s_b25909d4887c23::t_7225b8c2823d7b 1-71
+apps/web/app/api/generate-tutorial/route.test.ts
+  s_b25909d4887c23::t_e7d1607d13e5da 152,159,184,189,191,193-200,311,332,386
+  s_b25909d4887c23::t_70b6eced46fa15 151,153,155-156,161-178
+  s_b25909d4887c23::t_6f89c19b155f13 149-150,154,157-158,160,179-183,185-188,190,192
+supabase/config.toml
+  s_b25909d4887c23::t_492db62068fadc 114
+apps/web/app/api/billing/webhook/route.test.ts
+  s_b25909d4887c23::t_8f423e8eadc059 1-34
+apps/web/components/settings-account.tsx
+  s_b25909d4887c23::t_b231c77885bbfb 53
+  s_b25909d4887c23::t_3d23e880562ccc 5-16,58-67
+  s_b25909d4887c23::t_5333e6cfbfb366 41
+  s_b25909d4887c23::t_861ec412327daf 1-4,17-40,42-52,54-57,68-72
+apps/web/lib/account/delete-account.ts
+  s_b25909d4887c23::t_387d6512c91ea0 1-41,44-45,48-67
+  s_b25909d4887c23::t_a3aae9ebc80eb7 42-43
+  s_b25909d4887c23::t_bd273693b377e0 46-47
+apps/web/components/dashboard/ShareDialog.tsx
+  s_b25909d4887c23::t_eaa70c28ca086f 110,112,126
+apps/web/components/settings-agent.tsx
+  s_b25909d4887c23::t_d07a97f092004b 3-4,14-16,18,21-23,28-29
+.github/workflows/ci.yml
+  s_b25909d4887c23::t_63f4d40d8826a8 28-30
+README.md
+  s_b25909d4887c23::t_933da3d8600a82 69,80
+apps/desktop/VibeTuto/Sources/VibeTuto/App/SessionManager.swift
+  s_b25909d4887c23::t_336fc2b18ffa11 25,505-506
+apps/desktop/VibeTuto/Sources/VibeTuto/UI/UploadPanel.swift
+  s_b25909d4887c23::t_4993bd33da481b 21,25-27,53-56,88,95-101,104,108,110
+apps/extension/src/popup/popup.html
+  s_b25909d4887c23::t_264b3ef6cc7a58 71-72,110
+apps/web/app/api/billing/checkout/route.ts
+  s_b25909d4887c23::t_589931fa85d388 20-21
+apps/web/app/api/billing/webhook/route.ts
+  s_b25909d4887c23::t_e79ae0607d15c7 32-39
+apps/web/app/auth/callback/route.test.ts
+  s_b25909d4887c23::t_f27fb3d68af287 1-23
+apps/web/components/editor/studio/Artboard.tsx
+  s_b25909d4887c23::t_20d4ea4a3ddbd8 96,142,145,155
+apps/web/components/editor/studio/Canvas.tsx
+  s_b25909d4887c23::t_f7ffb9327c2db4 157,163-165,204-205,289,314,326-327,331,464
+apps/web/components/landing/HeroSection.tsx
+  s_b25909d4887c23::t_0dfe65cb47750a 123
+supabase/migrations/20260909130000_account_deletion_guards.sql
+  s_b25909d4887c23::t_4e034b8b516eee 1-82
+supabase/tests/account_deletion_guards.test.sql
+  s_b25909d4887c23::t_744f2f5ddf5ab0 1-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "89968c7a180a79353ec6d71968922b1b5ff4caf8",
+  "prompts": {},
+  "sessions": {
+    "s_b25909d4887c23": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08517-d22b-7442-aaff-1a7949da81e3",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "StanGirard <stan@quivr.app>"
+    }
+  }
+}
