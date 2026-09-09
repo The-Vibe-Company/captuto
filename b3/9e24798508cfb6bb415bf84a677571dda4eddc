@@ -1,0 +1,35 @@
+apps/web/components/editor/studio/StudioTopBar.tsx
+  s_3f311bb92b95a7::t_bd63951368a3dd 260-263
+  s_3f311bb92b95a7::t_69f875f4eb5902 3,25,52-55,60,63-64,67,69-84,93,95-101,103-127,134-136,147-148,150-152,154-157,169,175-195,201,208-228,230,245,247,250,254,257-259,265-270,272-274,277-282,284-294
+apps/web/components/dashboard/DashboardSidebar.tsx
+  s_3f311bb92b95a7::t_70e89e93873e86 3,5-10,12-16,19,21,23-63,66-67,69-70,74-85,87-103,105-109,111-112,115,117,120,122-123,127,129-130,132-139
+  s_3f311bb92b95a7::t_b69233f5ba223b 71
+apps/web/lib/dashboard/query.ts
+  s_3f311bb92b95a7::t_7a92e64689607a 28-34
+apps/web/app/dashboard/layout.tsx
+  s_3f311bb92b95a7::t_3b5233d85aee64 2,8,10-11
+apps/web/app/dashboard/page.tsx
+  s_3f311bb92b95a7::t_ee8bf0a0469d48 55-58
+  s_3f311bb92b95a7::t_b42ea89aa923e3 6,8,12,16,26-27,29,34-49,51-52,59,71,73-109,119-121,123-125,127-132
+  s_3f311bb92b95a7::t_a930a8e7bb74c1 17-21
+  s_3f311bb92b95a7::t_883d8975094c19 110,114
+  s_3f311bb92b95a7::t_72c7c34f667884 111-113,115-118
+  s_3f311bb92b95a7::t_f829e13fc2bcfe 122,126
+  s_3f311bb92b95a7::t_ed044c65c4dd9a 135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "b39e24798508cfb6bb415bf84a677571dda4eddc",
+  "prompts": {},
+  "sessions": {
+    "s_3f311bb92b95a7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c004bbca-0863-483f-84d7-4bd4d86672df",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "StanGirard <stan@quivr.app>"
+    }
+  }
+}
