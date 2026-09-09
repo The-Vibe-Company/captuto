@@ -1,0 +1,26 @@
+{
+  "skill_name": "captuto",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a Captuto tutorial for inviting a colleague on https://workspace.example. Discover the steps yourself and prepare the completed guide.",
+      "expected_output": "Private native tutorial with actual browser captures, instructions and visually checked editable annotations.",
+      "files": [],
+      "expectations": ["Creates a stable capture directory and tutorial ID", "Captures viewports before meaningful actions and verifies their results", "Inspects every authored image preview", "Returns the editor link without publishing"]
+    },
+    {
+      "id": 2,
+      "prompt": "Continue this published Captuto tutorial across our workspace and billing website. The last upload response was lost. After reviewing your completed changes, I will give the go to publish.",
+      "expected_output": "Resumed private revision, no duplicate captures, corrected guide and approved publication retaining the original link.",
+      "files": [],
+      "expectations": ["Uses a private revision and its returned ID", "Retains one capture directory across websites", "Retries identical source IDs after a lost response", "Checks annotation previews", "Uses publish_revision only after the user's go"]
+    },
+    {
+      "id": 3,
+      "prompt": "Continue my existing Captuto guide. After the web setup, it needs a step inside a native Mac application, but I have not recorded that step yet.",
+      "expected_output": "Completed available web work, saved partial guide and clear native-control boundary.",
+      "files": [],
+      "expectations": ["Reads existing sources before editing", "Saves partial progress", "Explains that new native capture needs the later integration", "Does not claim the native step was recorded"]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "name": "captuto",
-  "version": "0.1.19",
+  "version": "0.1.20",
   "private": true,
   "scripts": {
     "commit": "cz",
@@ -9,7 +9,7 @@
     "lint": "turbo lint",
     "type-check": "turbo type-check",
     "test": "turbo test",
-    "test:run": "turbo test:run",
+    "test:run": "turbo test:run && node --test skills/captuto/scripts/capture.test.mjs",
     "prepare": "husky"
   },
   "config": {
