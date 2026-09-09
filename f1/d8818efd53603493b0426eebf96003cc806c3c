@@ -1,0 +1,65 @@
+skills/captuto/scripts/capture.test.mjs
+  s_619f4c10bb3a89::t_7510914041ca5c 1-113
+scripts/test-autonomous-capture.mjs
+  s_619f4c10bb3a89::t_7510914041ca5c 1-129
+skills/captuto/scripts/capture.mjs
+  s_619f4c10bb3a89::t_7510914041ca5c 1-170
+apps/web/app/api/tutorials/[id]/share/route.ts
+  s_619f4c10bb3a89::t_7510914041ca5c 44,112,126-131
+apps/web/app/api/tutorials/[id]/share/route.test.ts
+  s_619f4c10bb3a89::t_f3da1682c258e8 216-223
+supabase/migrations/20260909120000_agent_revisions.sql
+  s_619f4c10bb3a89::t_7510914041ca5c 1-102
+docs/captuto/spec.md
+  s_619f4c10bb3a89::t_d350a165fd1493 1,4-12,24-27,49-51,54,56-64
+package.json
+  s_619f4c10bb3a89::t_7510914041ca5c 12
+apps/web/app/api/mcp/route.test.ts
+  s_619f4c10bb3a89::t_695af2a2ad1e04 15
+apps/web/lib/agent/capture.test.ts
+  s_619f4c10bb3a89::t_6b934ca78798d8 1-58
+apps/web/lib/agent/service.test.ts
+  s_619f4c10bb3a89::t_bfbb6abe113777 22-32
+apps/web/lib/agent/transcription.ts
+  s_619f4c10bb3a89::t_48b246070028f3 6-7
+apps/web/lib/supabase/types.ts
+  s_619f4c10bb3a89::t_26a0e482072472 106-108,123-125,140-142,246-248
+skills/captuto/references/setup.md
+  s_b25909d4887c23::t_a06872c7595231 1-30
+README.md
+  s_619f4c10bb3a89::t_e060dcdf9ce832 5-21,86,97
+apps/web/lib/agent/capture.ts
+  s_619f4c10bb3a89::t_4b6f3dd6c39a27 1-69
+apps/web/lib/agent/mcp.ts
+  s_619f4c10bb3a89::t_f03d39708f4fea 6,13,16-21
+apps/web/lib/agent/service.ts
+  s_619f4c10bb3a89::t_cafeb2797d60e0 28,34-95,109-112,114,139,148,168,176
+skills/captuto/SKILL.md
+  s_619f4c10bb3a89::t_7dd4ccb8772a3d 1-38
+skills/captuto/evals/evals.json
+  s_619f4c10bb3a89::t_dec0e1f599eca2 1-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "f1d8818efd53603493b0426eebf96003cc806c3c",
+  "prompts": {},
+  "sessions": {
+    "s_619f4c10bb3a89": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08509-309b-7710-83c4-139436a904a8",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "StanGirard <stan@quivr.app>"
+    },
+    "s_b25909d4887c23": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08517-d22b-7442-aaff-1a7949da81e3",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "StanGirard <stan@quivr.app>"
+    }
+  }
+}
