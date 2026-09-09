@@ -12,11 +12,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { fetchDashboardPage, type DashboardGuide, type DashboardSort, type DashboardTab } from '@/lib/dashboard/query';
 
 const ShareDialog = dynamic(() => import('@/components/dashboard/ShareDialog').then(m => m.ShareDialog));
-const tabs: { key: DashboardTab; label: string }[] = [{ key: 'all', label: 'All guides' }, { key: 'shared', label: 'Shared' }, { key: 'draft', label: 'Drafts' }, { key: 'processing', label: 'Processing' }];
+const tabs: { key: DashboardTab; label: string }[] = [{ key: 'all', label: 'All guides' }, { key: 'shared', label: 'Shared' }, { key: 'draft', label: 'Drafts' }, { key: 'processing', label: 'To review' }];
 const sortOptions: { key: DashboardSort; label: string }[] = [{ key: 'recent', label: 'Newest first' }, { key: 'oldest', label: 'Oldest first' }, { key: 'title', label: 'Title A–Z' }];
 function guideStatus(guide: DashboardGuide): { label: string; dot: string } {
   if (guide.visibility === 'public' || guide.visibility === 'link_only') return { label: 'Shared', dot: 'bg-emerald-500' };
-  if (guide.status === 'processing') return { label: 'Processing', dot: 'bg-amber-500' };
+  if (guide.status === 'processing') return { label: 'To review', dot: 'bg-amber-500' };
   if (guide.status === 'error') return { label: 'Needs attention', dot: 'bg-red-500' };
   return { label: 'Draft', dot: 'bg-stone-300' };
 }
@@ -73,14 +73,14 @@ export default function DashboardPage() {
   const activeLabel = tabs.find(t => t.key === tab)?.label ?? 'All guides';
 
   return <div className="flex min-w-0 flex-1 flex-col">
-    <header className="sticky top-0 z-10 flex h-11 flex-none items-center justify-between border-b border-stone-200 bg-[#fafaf9] px-5">
+    <header className="sticky top-0 z-10 flex min-h-11 flex-none flex-wrap items-center justify-between gap-2 py-2 border-b border-stone-200 bg-[#fafaf9] px-5">
       <div className="flex items-center gap-2 text-[12.5px] text-stone-500">
         <span className="font-medium text-stone-900">{activeLabel}</span>
         <span>·</span>
         <span>{data ? `${data.total} ${data.total === 1 ? 'guide' : 'guides'}` : '—'}</span>
       </div>
       <div className="flex items-center gap-1.5">
-        <div className="flex gap-0.5 rounded-md bg-stone-100 p-0.5">
+        <div className="flex flex-wrap gap-0.5 rounded-md bg-stone-100 p-0.5">
           <button type="button" aria-label="List view" aria-pressed={view === 'list'} onClick={() => setView('list')} className={`flex h-6 w-7 items-center justify-center rounded ${view === 'list' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500'}`}><List className="h-3.5 w-3.5" /></button>
           <button type="button" aria-label="Grid view" aria-pressed={view === 'grid'} onClick={() => setView('grid')} className={`flex h-6 w-7 items-center justify-center rounded ${view === 'grid' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500'}`}><LayoutGrid className="h-3.5 w-3.5" /></button>
         </div>
@@ -91,7 +91,7 @@ export default function DashboardPage() {
           <DropdownMenuContent align="end">{sortOptions.map(option => <DropdownMenuItem key={option.key} onSelect={() => updateParams({ sort: option.key })}>{option.label}</DropdownMenuItem>)}</DropdownMenuContent>
         </DropdownMenu>
         <Button asChild className="h-7 gap-1.5 bg-brand-600 px-2.5 text-xs font-medium text-white hover:bg-brand-700">
-          <Link href="/settings"><Plus className="h-3 w-3" />Connect your agent</Link>
+          <Link href="/settings#recording"><Plus className="h-3 w-3" />Recording setup</Link>
         </Button>
       </div>
     </header>
@@ -99,7 +99,7 @@ export default function DashboardPage() {
     <div className="mx-auto w-full max-w-5xl flex-1 px-5 pb-16 pt-7">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-semibold tracking-tight text-stone-900">Guides</h1>
-        <div role="group" aria-label="Filter guides" className="flex gap-0.5 rounded-md bg-stone-100 p-0.5">
+        <div role="group" aria-label="Filter guides" className="flex flex-wrap gap-0.5 rounded-md bg-stone-100 p-0.5">
           {tabs.map(item => <button key={item.key} type="button" aria-pressed={tab === item.key} onClick={() => updateParams({ tab: item.key })} className={`flex h-6 items-center gap-1.5 whitespace-nowrap rounded px-2.5 text-xs font-medium ${tab === item.key ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-900'}`}>{item.label}<span className="text-[11px] font-normal opacity-55">{data?.counts[item.key] ?? 0}</span></button>)}
         </div>
       </div>
@@ -129,7 +129,7 @@ export default function DashboardPage() {
           </div>
         )}
         <nav aria-label="Guide pages" className="mt-6 flex items-center justify-between border-t border-stone-200 pt-5"><p className="text-sm text-stone-600">Page {page} of {totalPages}<span className="hidden sm:inline"> · {data.total} {data.total === 1 ? 'guide' : 'guides'}</span></p><div className="flex gap-2"><Button variant="outline" className="h-9 bg-transparent" disabled={page <= 1 || isFetching} onClick={() => updateParams({ page: page - 1 })}><ChevronLeft className="mr-1 h-4 w-4"/>Previous</Button><Button variant="outline" className="h-9 bg-transparent" disabled={page >= totalPages || isFetching} onClick={() => updateParams({ page: page + 1 })}>Next<ChevronRight className="ml-1 h-4 w-4"/></Button></div></nav>
-      </> : <div className="py-16 text-center"><h2 className="text-xl font-medium">{search ? 'No matching guides' : tab !== 'all' ? 'No guides in this view' : 'Your first guide starts with a recording.'}</h2><p className="mx-auto mt-3 max-w-md text-sm leading-6 text-stone-600">{search ? 'Try another title or clear the search.' : tab !== 'all' ? 'Choose All guides to return to your library.' : 'Download Captuto for Mac, connect your account and record your workflow. Your captures will appear here.'}</p>{(search || tab !== 'all') && <Button variant="outline" className="mt-5" onClick={() => router.replace(pathname)}>Show all guides</Button>}</div>}
+      </> : <div className="py-16 text-center"><h2 className="text-xl font-medium">{search ? 'No matching guides' : tab !== 'all' ? 'No guides in this view' : 'Your first guide starts with a recording.'}</h2><p className="mx-auto mt-3 max-w-md text-sm leading-6 text-stone-600">{search ? 'Try another title or clear the search.' : tab !== 'all' ? 'Choose All guides to return to your library.' : 'Download Captuto for Mac, connect your account and record your workflow. Your captures will appear here.'}</p>{!search && tab === 'all' && <Button asChild className="mt-5"><Link href="/settings#recording">Set up recording</Link></Button>}{(search || tab !== 'all') && <Button variant="outline" className="mt-5" onClick={() => router.replace(pathname)}>Show all guides</Button>}</div>}
     </div>
     {share && <ShareDialog open onOpenChange={open => { if (!open) { setShare(null); cache.invalidateQueries({ queryKey: ['dashboard'] }); } }} tutorialId={share.id} tutorialTitle={share.title} tutorialSlug={share.slug}/>}
     <Dialog open={Boolean(deleting)} onOpenChange={open => { if (!open && !deleteBusy) setDeleting(null); }}><DialogContent><DialogHeader><DialogTitle>Delete this guide?</DialogTitle><DialogDescription>&ldquo;{deleting?.title}&rdquo; and its steps will be deleted. This cannot be undone.</DialogDescription></DialogHeader>{deleteError && <p role="alert" className="text-sm text-red-700">{deleteError}</p>}<DialogFooter><Button variant="outline" disabled={deleteBusy} onClick={() => setDeleting(null)}>Keep guide</Button><Button variant="destructive" disabled={deleteBusy} onClick={removeGuide}>{deleteBusy && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}Delete guide</Button></DialogFooter></DialogContent></Dialog>

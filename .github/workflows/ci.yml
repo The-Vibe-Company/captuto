@@ -25,6 +25,9 @@ jobs:
       - name: Verify migrations applied
         run: supabase migration list --local
 
+      - name: Test database guards
+        run: supabase test db
+
       - name: Stop Supabase
         if: always()
         run: supabase stop

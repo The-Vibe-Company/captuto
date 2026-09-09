@@ -93,6 +93,7 @@ export function Artboard({
 }: ArtboardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const [naturalSize, setNaturalSize] = useState<{ src: string; width: number; height: number } | null>(null);
   const [naturalWidth, setNaturalWidth] = useState<number | null>(null);
   const [renderedHeight, setRenderedHeight] = useState<number | null>(null);
 
@@ -138,13 +139,10 @@ export function Artboard({
             ref={containerRef}
             className="relative"
             style={{
-              transform: `scale(${zoom})`,
-              transformOrigin: 'top left',
-              width: zoom > 1 ? `${100 / zoom}%` : '100%',
-              transition: 'transform .2s ease',
+              width: `${zoom * 100}%`,
             }}
           >
-            <div className="relative aspect-video w-full">
+            <div className="relative w-full" style={{ aspectRatio: naturalSize?.src === src ? `${naturalSize.width} / ${naturalSize.height}` : `${step.source?.viewport_width || step.viewport_width || 16} / ${step.source?.viewport_height || step.viewport_height || 9}` }}>
               {src ? (
                 <Image
                   src={src}
@@ -154,7 +152,7 @@ export function Artboard({
                   sizes="(max-width: 768px) 100vw, 800px"
                   loading="lazy"
                   decoding="async"
-                  onLoadingComplete={(img) => setNaturalWidth(img.naturalWidth)}
+                  onLoadingComplete={(img) => { setNaturalWidth(img.naturalWidth); setNaturalSize({ src, width: img.naturalWidth, height: img.naturalHeight }); }}
                 />
               ) : (
                 <PlaceholderShot

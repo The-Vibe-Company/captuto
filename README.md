@@ -66,7 +66,7 @@ cp apps/web/.env.example apps/web/.env.local
 ### 3. Run the development server
 
 ```bash
-pnpm dev
+./scripts/dev-start.sh
 ```
 
 Open [http://localhost:3678](http://localhost:3678) in your browser.
@@ -77,7 +77,7 @@ Open [http://localhost:3678](http://localhost:3678) in your browser.
 
 ```bash
 # Start development server
-pnpm dev
+./scripts/dev-start.sh
 
 # Build for production
 pnpm build

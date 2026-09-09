@@ -6,8 +6,8 @@ const productLinks = [
 ];
 
 const legalLinks = [
-  { label: "Privacy Policy", href: "/privacy" },
-  { label: "Terms of Service", href: "/terms" },
+  { label: "Help & support", href: "/support" },
+  { label: "Privacy questions", href: "mailto:support@thevibecompany.co" },
 ];
 
 export function Footer() {
@@ -56,7 +56,7 @@ export function Footer() {
           {/* Legal */}
           <div>
             <h4 className="mb-4 text-xs font-medium uppercase tracking-widest text-stone-400">
-              Legal
+              Help & privacy
             </h4>
             <ul className="space-y-3">
               {legalLinks.map((link) => (

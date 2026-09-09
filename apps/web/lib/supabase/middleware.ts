@@ -39,6 +39,15 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
 
+  if (user?.app_metadata?.account_deletion_pending === true) {
+    if (pathname.startsWith('/api/') && pathname !== '/api/account') {
+      return NextResponse.json({ error: 'Account deletion is in progress. Finish it in Settings.' }, { status: 403 });
+    }
+    if (pathname.startsWith('/dashboard') || pathname.startsWith('/editor')) {
+      return NextResponse.redirect(new URL('/settings#account', request.url));
+    }
+  }
+
   // API routes with Bearer token handle their own auth - don't redirect
   const hasBearerToken = request.headers.get('Authorization')?.startsWith('Bearer ');
   const isApiRoute = pathname.startsWith('/api/');
@@ -47,6 +56,7 @@ export async function updateSession(request: NextRequest) {
   // But skip redirect for API routes with Bearer tokens (desktop app uses API tokens)
   if (isProtectedRoute && !user && !(isApiRoute && hasBearerToken)) {
     const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('next', pathname + request.nextUrl.search);
     return NextResponse.redirect(loginUrl);
   }
 

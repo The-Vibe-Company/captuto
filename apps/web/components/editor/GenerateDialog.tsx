@@ -50,6 +50,9 @@ export function GenerateDialog({
 }: GenerateDialogProps) {
   const [status, setStatus] = useState<GenerateStatus>('idle');
   const [error, setError] = useState<string | null>(null);
+  const [useAllScreens, setUseAllScreens] = useState(false);
+  const timelineSourceIds = [...new Set(steps.flatMap(step => step.source_id ? [step.source_id] : []))];
+  const generationSourceIds = useAllScreens || !timelineSourceIds.length ? sources.map(source => source.id) : timelineSourceIds;
   const [generated, setGenerated] = useState<GeneratedTutorialContent | null>(null);
   const [editedContent, setEditedContent] = useState<GeneratedTutorialContent | null>(null);
   const [metadata, setMetadata] = useState<GenerateTutorialResponse['metadata'] | null>(null);
@@ -69,6 +72,7 @@ export function GenerateDialog({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tutorialId,
+          sourceIds: generationSourceIds,
           options: {
             userGoal: userGoal.trim() || undefined,
             style,
@@ -96,6 +100,7 @@ export function GenerateDialog({
   const handleApply = async () => {
     if (!editedContent) return;
 
+    setError(null);
     setStatus('applying');
     try {
       await onApply(editedContent);
@@ -110,11 +115,12 @@ export function GenerateDialog({
     } catch (err) {
       console.error('Apply error:', err);
       setError(err instanceof Error ? err.message : 'Failed to apply changes');
-      setStatus('error');
+      setStatus('preview');
     }
   };
 
   const handleClose = () => {
+    if (status === 'applying' || status === 'generating') return;
     onOpenChange(false);
     // Reset state after a delay to prevent flash
     setTimeout(() => {
@@ -180,7 +186,7 @@ export function GenerateDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-2xl max-h-[90dvh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-brand-500" />
@@ -195,7 +201,7 @@ export function GenerateDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden">
+        <div className="min-h-0 flex-1 overflow-y-auto">
           {/* Idle State - Show options and generate button */}
           {status === 'idle' && (
             <div className="space-y-6 py-4">
@@ -259,10 +265,18 @@ export function GenerateDialog({
                 </RadioGroup>
               </div>
 
+              {timelineSourceIds.length > 0 && <div className="space-y-2">
+                <Label htmlFor="generation-scope">Screens to use</Label>
+                <RadioGroup id="generation-scope" aria-label="Screens to use" value={useAllScreens ? 'all' : 'timeline'} onValueChange={value => setUseAllScreens(value === 'all')}>
+                  <div className="flex items-center gap-2"><RadioGroupItem id="scope-timeline" value="timeline"/><Label htmlFor="scope-timeline">Timeline screens ({timelineSourceIds.length})</Label></div>
+                  <div className="flex items-center gap-2"><RadioGroupItem id="scope-all" value="all"/><Label htmlFor="scope-all">All recorded screens ({sources.length})</Label></div>
+                </RadioGroup>
+                <p className="text-xs text-muted-foreground">Review the result before applying. Existing instructions for these screens will be updated.</p>
+              </div>}
               {/* Generate Button */}
               <div className="flex flex-col items-center pt-4">
                 <p className="text-sm text-stone-500 mb-4">
-                  AI will analyze {sources.length} screenshot{sources.length !== 1 ? 's' : ''} and any audio transcription.
+                  AI will analyze {generationSourceIds.length} screenshot{generationSourceIds.length !== 1 ? 's' : ''} and any audio transcription.
                 </p>
                 <Button onClick={handleGenerate} size="lg" className="gap-2">
                   <Sparkles className="h-4 w-4" />
@@ -443,16 +457,7 @@ export function GenerateDialog({
                   </div>
                 </div>
 
-                {/* Metadata */}
-                {metadata && (
-                  <div className="rounded-lg bg-stone-50 p-3 text-xs text-stone-500">
-                    <div className="flex items-center gap-4">
-                      <span>Model: {metadata.modelUsed}</span>
-                      <span>Tokens: {metadata.inputTokens + metadata.outputTokens}</span>
-                      <span>Time: {(metadata.processingTimeMs / 1000).toFixed(1)}s</span>
-                    </div>
-                  </div>
-                )}
+
               </div>
             </ScrollArea>
           )}
@@ -466,6 +471,7 @@ export function GenerateDialog({
           )}
         </div>
 
+        {error && status === 'preview' && <p role="alert" className="text-sm text-destructive">{error}</p>}
         {/* Footer with actions */}
         {status === 'preview' && (
           <DialogFooter className="gap-2 sm:gap-0">

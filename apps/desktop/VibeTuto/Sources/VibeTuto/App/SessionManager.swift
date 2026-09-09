@@ -22,6 +22,7 @@ final class SessionManager: ObservableObject {
 
     private var recordingStartTime: Date?
     private var timeline: RecordingTimeline?
+    var hasSavedRecording: Bool { persistedDirectory != nil }
     var canRetryUpload: Bool { !detectedSteps.isEmpty }
     private var timer: Timer?
     private var detectedSteps: [DetectedStep] = []
@@ -501,6 +502,8 @@ final class SessionManager: ObservableObject {
 
     /// Reset session state back to idle.
     func reset() {
+        // Upload owns this session until completion; resetting is not cancellation.
+        if case .uploading = state { return }
         state = .idle
         elapsedTime = 0
         timeline = nil

@@ -32,7 +32,6 @@ interface ToolDef {
 
 const TOOLS: ToolDef[] = [
   { d: ICON.cursor, k: 'V', tool: 'select' },
-  { d: ICON.hand, k: 'H', tool: 'hand' },
   { divider: true },
   { d: ICON.rect, k: 'R', tool: 'rectangle' },
   { d: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18', k: 'C', tool: 'circle' },
@@ -41,7 +40,6 @@ const TOOLS: ToolDef[] = [
   { d: ICON.hl, k: 'L', tool: 'highlight' },
   { d: ICON.blur, k: 'B', tool: 'blur' },
   { d: ICON.number, k: 'N', tool: 'numbered-callout' },
-  { d: ICON.pen, k: 'P', tool: 'pen' },
 ];
 
 const ANNOTATION_TOOLS: AnnotationType[] = [
@@ -156,16 +154,15 @@ export function Canvas({
 
   return (
     <main
-      className="studio-canvas-bg"
+      className="studio-canvas-bg flex flex-col"
       style={{ flex: 1, minWidth: 0, position: 'relative', overflow: 'hidden' }}
     >
       {/* Top floating bar: tools + zoom + step counter + Focus */}
       <div
         style={{
-          position: 'absolute',
-          top: 14,
-          left: 14,
-          right: 14,
+          position: 'relative',
+          flexShrink: 0,
+          margin: 14,
           zIndex: 5,
           display: 'flex',
           alignItems: 'center',
@@ -204,6 +201,8 @@ export function Canvas({
                 key={`t-${i}`}
                 className="ed-btn-icon ed-btn-sm"
                 title={`${t.tool} · ${t.k}`}
+                aria-label={`${t.tool} tool`}
+                aria-pressed={active}
                 onClick={() => {
                   if (isAnnoTool) {
                     onToolChange(
@@ -287,6 +286,7 @@ export function Canvas({
               className="ed-btn-icon ed-btn-sm"
               style={{ border: 0 }}
               onClick={() => setZoomIdx((i) => Math.max(0, i - 1))}
+              aria-label="Zoom out"
               disabled={zoomIdx === 0}
             >
               <Icon d={ICON.zoomOut} size={13} />
@@ -311,6 +311,7 @@ export function Canvas({
               onClick={() =>
                 setZoomIdx((i) => Math.min(ZOOM_LEVELS.length - 1, i + 1))
               }
+              aria-label="Zoom in"
               disabled={zoomIdx === ZOOM_LEVELS.length - 1}
             >
               <Icon d={ICON.zoomIn} size={13} />
@@ -322,12 +323,12 @@ export function Canvas({
       {/* artboard area */}
       <div
         style={{
-          position: 'absolute',
-          inset: 0,
+          flex: 1,
+          minHeight: 0,
           display: 'flex',
           alignItems: 'flex-start',
           justifyContent: 'center',
-          padding: '78px 28px 110px',
+          padding: '16px 28px 110px',
           overflow: 'auto',
         }}
       >
@@ -460,7 +461,7 @@ export function Canvas({
             onSelectionChange={onSelectAnnotation}
             activeTool={activeTool}
             zoom={ZOOM_LEVELS[zoomIdx]}
-            showFrame
+            showFrame={false}
           />
 
           {/* Caption */}

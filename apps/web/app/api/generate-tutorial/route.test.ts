@@ -146,6 +146,58 @@ describe('POST /api/generate-tutorial', () => {
     global.fetch = originalFetch;
   });
 
+  it('only analyzes selected sources in the requested timeline order', async () => {
+    const sources = ['src-1', 'src-2', 'src-3'].map((id, index) => ({ ...mockSource, id, screenshot_url: `screenshots/${id}.png`, order_index: index }));
+    mockCreateClient.mockResolvedValue(createMockSupabase({ sources }));
+    const create = vi.fn().mockResolvedValue(createMockAnthropicResponse(createMockGeneratedContent({ steps: [{ sourceId: 'src-1', textContent: 'Open the dashboard' }] })));
+    mockGetAnthropicClient.mockReturnValue({ messages: { create } });
+    const response = await POST(createJsonRequest('http://localhost/api/generate-tutorial', 'POST', { tutorialId: 'tut-1', sourceIds: ['src-3', 'src-1'] }));
+    expect(response.status).toBe(200);
+    const prompt = JSON.stringify(create.mock.calls[0][0].messages);
+    expect(prompt).not.toContain('src-2');
+    expect(prompt.indexOf('src-3')).toBeLessThan(prompt.indexOf('src-1'));
+  });
+
+  it.each([['src-1', 'src-3'], ['src-3', 'src-1']])('keeps narration aligned when selecting %s then %s', async (first, second) => {
+    const sources = ['src-1', 'src-2', 'src-3'].map((id, index) => ({ ...mockSource, id, timestamp_start: index * 10000 }));
+    mockCreateClient.mockResolvedValue(createMockSupabase({ sources }));
+    vi.mocked(global.fetch).mockImplementation(async () => ({ ok: true, json: async () => ({ segments: [
+      { start: 1, end: 2, transcript: 'First-screen narration' },
+      { start: 11, end: 12, transcript: 'Excluded-screen narration' },
+      { start: 21, end: 22, transcript: 'Third-screen narration' },
+    ] }), arrayBuffer: async () => new ArrayBuffer(8) }) as Response);
+    const create = vi.fn().mockResolvedValue(createMockAnthropicResponse(createMockGeneratedContent({ steps: [{ sourceId: first, textContent: 'Selected screen' }] })));
+    mockGetAnthropicClient.mockReturnValue({ messages: { create } });
+    const response = await POST(createJsonRequest('http://localhost/api/generate-tutorial', 'POST', { tutorialId: 'tut-1', sourceIds: [first, second] }));
+    expect(response.status).toBe(200);
+    const prompt = JSON.stringify(create.mock.calls[0][0].messages);
+    expect(prompt).toContain('First-screen narration');
+    expect(prompt).toContain('Third-screen narration');
+    expect(prompt).not.toContain('Excluded-screen narration');
+  });
+
+  it.each([{ sourceIds: [] }, { sourceIds: ['not-in-this-guide'] }])('rejects unavailable or empty source selection $sourceIds', async ({ sourceIds }) => {
+    mockCreateClient.mockResolvedValue(createMockSupabase());
+    const response = await POST(createJsonRequest('http://localhost/api/generate-tutorial', 'POST', { tutorialId: 'tut-1', sourceIds }));
+    expect(response.status).toBe(400);
+    expect(mockGetAnthropicClient).not.toHaveBeenCalled();
+  });
+
+  it('does not generate when existing steps cannot be loaded', async () => {
+    mockCreateClient.mockResolvedValue(createMockSupabase({ stepsError: { message: 'database unavailable' } }));
+    const response = await POST(createJsonRequest('http://localhost/api/generate-tutorial', 'POST', { tutorialId: 'tut-1' }));
+    expect(response.status).toBe(500);
+    expect(mockGetAnthropicClient).not.toHaveBeenCalled();
+  });
+
+  it('rejects AI output that reintroduces an excluded screen', async () => {
+    mockCreateClient.mockResolvedValue(createMockSupabase({ sources: [mockSource, { ...mockSource, id: 'src-2' }] }));
+    mockGetAnthropicClient.mockReturnValue({ messages: { create: vi.fn().mockResolvedValue(createMockAnthropicResponse(createMockGeneratedContent({ steps: [{ sourceId: 'src-2', textContent: 'Excluded capture' }] }))) } });
+    const response = await POST(createJsonRequest('http://localhost/api/generate-tutorial', 'POST', { tutorialId: 'tut-1', sourceIds: ['src-1'] }));
+    expect(response.status).toBe(500);
+    expect((await response.json()).code).toBe('GENERATION_FAILED');
+  });
+
   it('returns 401 when user is not authenticated', async () => {
     mockCreateClient.mockResolvedValue(
       createMockSupabase({ user: null, authError: { message: 'Not authenticated' } })
@@ -256,7 +308,7 @@ describe('POST /api/generate-tutorial', () => {
   });
 
   it('calls Claude API and returns generated content', async () => {
-    const generatedContent = createMockGeneratedContent();
+    const generatedContent = createMockGeneratedContent({ steps: [{ sourceId: 'src-1', textContent: 'Open the dashboard' }] });
     const mockAnthropicResponse = createMockAnthropicResponse(generatedContent);
 
     mockCreateClient.mockResolvedValue(createMockSupabase());
@@ -277,7 +329,7 @@ describe('POST /api/generate-tutorial', () => {
     expect(response.status).toBe(200);
     expect(data.success).toBe(true);
     expect(data.generated.title).toBe('How to Create a New Project');
-    expect(data.generated.steps).toHaveLength(2);
+    expect(data.generated.steps).toHaveLength(1);
     expect(data.metadata).toBeDefined();
     expect(data.metadata.modelUsed).toBe('claude-test-model');
     expect(data.metadata.inputTokens).toBe(1500);
@@ -331,7 +383,7 @@ describe('POST /api/generate-tutorial', () => {
   });
 
   it('returns metadata with processing time', async () => {
-    const generatedContent = createMockGeneratedContent();
+    const generatedContent = createMockGeneratedContent({ steps: [{ sourceId: 'src-1', textContent: 'Open the dashboard' }] });
     const mockAnthropicResponse = createMockAnthropicResponse(generatedContent);
 
     mockCreateClient.mockResolvedValue(createMockSupabase());

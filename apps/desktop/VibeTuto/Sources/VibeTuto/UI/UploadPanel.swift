@@ -18,14 +18,13 @@ struct UploadPanelView: View {
             ProgressView(value: progress)
 
             HStack {
-                Text("\(formattedDuration) · \(session.stepCount) steps")
+                Text("\(formattedDuration) · \(session.stepCount) screens")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
-                Button("Cancel") {
-                    session.reset()
-                }
-                .controlSize(.small)
+                Text("Keep CapTuto open")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
         .padding(16)
@@ -50,6 +49,10 @@ struct CompletionPanelView: View {
             Label("Upload complete", systemImage: "checkmark.circle.fill")
                 .font(.headline)
                 .foregroundStyle(.green)
+
+            Text("Choose your recorded screens in the editor, then edit or generate your guide.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
 
             HStack {
                 Button("Open in Editor", action: openInEditor)
@@ -82,22 +85,29 @@ struct ErrorPanelView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label("Upload failed", systemImage: "exclamationmark.triangle.fill")
+            Label("Recording needs attention", systemImage: "exclamationmark.triangle.fill")
                 .font(.headline)
                 .foregroundStyle(.orange)
 
             Text(message)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if session.hasSavedRecording {
+                Text("Your recording is saved on this Mac. You can retry the upload later.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
 
             HStack {
-                Button("Retry") {
+                Button("Retry upload") {
                     session.retryUpload()
                 }
                 .buttonStyle(.borderedProminent)
+                .disabled(!session.canRetryUpload)
 
-                Button("Save Locally") {
+                Button("Dismiss") {
                     session.reset()
                 }
             }

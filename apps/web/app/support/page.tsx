@@ -17,19 +17,19 @@ import {
 
 const faqs = [
   {
-    question: "The extension won't install, what should I do?",
+    question: "How do I install the recorder?",
     answer:
-      "Make sure you are using Google Chrome (version 100+). The extension is not compatible with other browsers at the moment. If the problem persists, try temporarily disabling your other extensions.",
+      "Open Settings and choose Download for Mac. Install CapTuto, connect your account through the browser and grant the permissions requested by the recorder.",
   },
   {
     question: "I can't log in to my account",
     answer:
-      "Make sure you are using the same credentials as on the website. If you forgot your password, use the 'Forgot password' feature on the login page. Also check that cookies are enabled in Chrome.",
+      "Use Forgot password on the sign-in page to receive a reset link by email. Open the link in the same browser, choose a new password, then sign in again. If you still cannot recover access, contact support below.",
   },
   {
     question: "Recording doesn't start",
     answer:
-      "The extension needs permission to access your microphone. Click on the lock icon in the address bar and allow microphone access. If the problem persists, reload the page and try again.",
+      "For the Mac recorder, check Screen Recording and Accessibility permissions in System Settings → Privacy & Security. Microphone permission is needed only for narration. Restart the recorder after changing permissions.",
   },
   {
     question: "My screenshots are black or empty",
@@ -39,7 +39,7 @@ const faqs = [
   {
     question: "How do I delete my account and data?",
     answer:
-      "Log in to your dashboard, go to Settings, then click 'Delete my account'. All your data will be permanently deleted within 24 hours.",
+      "Open Settings → Account → Delete account. Confirm your current password and type DELETE. This permanently removes your guides and recordings, disables shared links and cancels subscriptions immediately. Export anything you want to keep first.",
   },
   {
     question: "The AI generates incorrect text",
@@ -51,15 +51,15 @@ const faqs = [
 const troubleshooting = [
   {
     icon: Chrome,
-    title: "Reinstall the extension",
+    title: "Install the Mac recorder",
     description:
-      "Remove the extension from chrome://extensions, then reinstall it from the Chrome Web Store.",
+      "Use Download for Mac in Settings, then connect the recorder to your account.",
   },
   {
     icon: Mic,
     title: "Microphone issues",
     description:
-      "Check permissions in Chrome Settings > Privacy > Site Settings > Microphone.",
+      "For Mac narration, check System Settings → Privacy & Security → Microphone. For the browser extension, check Chrome microphone permissions.",
   },
   {
     icon: Upload,
@@ -69,9 +69,9 @@ const troubleshooting = [
   },
   {
     icon: RefreshCw,
-    title: "Update the extension",
+    title: "Update the recorder",
     description:
-      "Go to chrome://extensions, enable developer mode, then click 'Update'.",
+      "Use Download for Mac to find the latest release. Finish uploading pending recordings before replacing the app.",
   },
 ];
 

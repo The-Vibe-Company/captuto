@@ -107,8 +107,9 @@ export function ShareDialog({
       input.value = text;
       document.body.appendChild(input);
       input.select();
-      document.execCommand('copy');
+      const copied = document.execCommand('copy');
       document.body.removeChild(input);
+      if (!copied) { setError('Could not copy. Select the link and copy it manually.'); return; }
       setCopiedField(field);
       setTimeout(() => setCopiedField(null), 2000);
     }
@@ -122,7 +123,7 @@ export function ShareDialog({
   height="600"
   frameborder="0"
   allow="fullscreen"
-  title="${tutorialTitle}"
+  title="${tutorialTitle.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}"
 ></iframe>`;
   };
 
