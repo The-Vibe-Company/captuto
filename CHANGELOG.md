@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.21](https://github.com/The-Vibe-Company/captuto/compare/v0.1.20...v0.1.21) (2026-09-09)
+
+
+### Features
+
+* **editor:** review recordings before AI generation and add account controls ([#113](https://github.com/The-Vibe-Company/captuto/issues/113)) ([b6a9a3f](https://github.com/The-Vibe-Company/captuto/commit/b6a9a3f36d3e4f6f33a10b3a1f6077054edeb5d3))
+* **web:** capture and revise tutorials autonomously ([#111](https://github.com/The-Vibe-Company/captuto/issues/111)) ([cd755a5](https://github.com/The-Vibe-Company/captuto/commit/cd755a5ad8f9d5b6f7d2e1aad07faa57b90dfdfe))
+
 ## [0.1.20](https://github.com/The-Vibe-Company/captuto/compare/v0.1.19...v0.1.20) (2026-09-09)
 
 
