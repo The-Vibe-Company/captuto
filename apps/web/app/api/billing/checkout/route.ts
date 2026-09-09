@@ -17,6 +17,8 @@ export async function POST() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  if (user.app_metadata?.account_deletion_pending === true) return NextResponse.json({ error: 'Account deletion is in progress.' }, { status: 403 });
+
   if (!isStripeConfigured()) {
     return NextResponse.json(
       { error: 'Stripe is not configured' },

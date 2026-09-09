@@ -120,54 +120,7 @@ export function HeroSection() {
             </a>
           </motion.div>
 
-          {/* Social proof strip with avatars */}
-          <motion.div
-            variants={fadeUp}
-            className="mt-12 flex flex-col items-center gap-4"
-          >
-            {/* Avatar stack */}
-            <div className="flex items-center">
-              <div className="flex -space-x-2">
-                {[
-                  "bg-gradient-to-br from-brand-400 to-brand-600",
-                  "bg-gradient-to-br from-teal-400 to-teal-600",
-                  "bg-gradient-to-br from-cyan-400 to-cyan-600",
-                  "bg-gradient-to-br from-brand-300 to-brand-500",
-                  "bg-gradient-to-br from-teal-300 to-teal-500",
-                ].map((gradient, i) => (
-                  <div
-                    key={i}
-                    className={`h-8 w-8 rounded-full ${gradient} border-2 border-white flex items-center justify-center text-[10px] font-bold text-white`}
-                  >
-                    {["M", "S", "A", "J", "L"][i]}
-                  </div>
-                ))}
-              </div>
-              <span className="ml-3 text-sm font-medium text-stone-600">
-                Loved by 500+ teams
-              </span>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm text-stone-400">
-              <div className="flex items-center gap-1">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-3.5 w-3.5 fill-amber-400 text-amber-400"
-                    />
-                  ))}
-                </div>
-                <span className="ml-1 font-semibold text-stone-600">
-                  4.9/5
-                </span>
-              </div>
-              <div className="hidden sm:block h-4 w-px bg-stone-200" />
-              <span className="text-stone-500">
-                Trusted by product & support teams
-              </span>
-            </div>
-          </motion.div>
+          <p className="mt-8 text-sm text-stone-600">Record on Mac. Choose your screens. Share a guide.</p>
         </motion.div>
 
         {/* Browser mockup */}

@@ -1,4 +1,6 @@
 'use client';
+import { createClient } from '@/lib/supabase/client';
+import { AccountSettings } from '@/components/settings-account';
 import { AgentConnection } from '@/components/settings-agent';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -124,14 +126,13 @@ function BillingSection() {
         ) : status?.configured === false ? (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm font-medium text-amber-900">
-              Stripe is not configured yet.
+              Subscriptions are currently unavailable.
             </p>
             <p className="mt-1 text-sm text-amber-700">
-              Add STRIPE_SECRET_KEY, STRIPE_PRICE_ID, and STRIPE_WEBHOOK_SECRET
-              to enable paid subscriptions.
+              Please try again later or contact support if you need help with billing.
             </p>
           </div>
-        ) : (
+        ) : status ? (
           <>
             <div className="rounded-lg border bg-stone-50 p-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -177,7 +178,7 @@ function BillingSection() {
               {status?.isActive ? 'Manage billing' : 'Start subscription'}
             </Button>
           </>
-        )}
+        ) : <Button variant="outline" onClick={fetchStatus}>Retry billing status</Button>}
       </CardContent>
     </Card>
   );
@@ -196,16 +197,20 @@ function ApiTokensSection() {
   const [newToken, setNewToken] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [tokenError, setTokenError] = useState('');
+  const [revoking, setRevoking] = useState<string | null>(null);
 
   const fetchTokens = useCallback(async () => {
     try {
+      setTokenError('');
       const res = await fetch('/api/tokens');
+      if (!res.ok) throw new Error('Could not load connections. Please try again.');
       if (res.ok) {
         const data = await res.json();
         setTokens(data.tokens || []);
       }
     } catch {
-      // ignore
+      setTokenError('Could not load connections. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -217,38 +222,43 @@ function ApiTokensSection() {
 
   const generateToken = async () => {
     setGenerating(true);
+    setTokenError('');
     try {
       const res = await fetch('/api/tokens', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'Desktop App' }),
+        body: JSON.stringify({ name: 'Agent connection' }),
       });
+      if (!res.ok) throw new Error('Could not create a token. Please try again.');
       if (res.ok) {
         const data = await res.json();
         setNewToken(data.token);
         fetchTokens();
       }
     } catch {
-      // ignore
+      setTokenError('Could not create a token. Please try again.');
     } finally {
       setGenerating(false);
     }
   };
 
   const revokeToken = async (id: string) => {
+    setRevoking(id);
+    setTokenError('');
     try {
       const res = await fetch(`/api/tokens?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Could not revoke this connection.');
       if (res.ok) {
         setTokens(tokens.filter((t) => t.id !== id));
       }
     } catch {
-      // ignore
-    }
+      setTokenError('Could not revoke this connection. It is still active.');
+    } finally { setRevoking(null); }
   };
 
-  const copyToken = () => {
+  const copyToken = async () => {
     if (newToken) {
-      navigator.clipboard.writeText(newToken);
+      try { await navigator.clipboard.writeText(newToken); } catch { setTokenError('Could not copy. Select the token and copy it manually.'); return; }
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -264,12 +274,13 @@ function ApiTokensSection() {
           <div>
             <CardTitle className="text-base">API Tokens</CardTitle>
             <CardDescription>
-              Authenticate the desktop recorder app
+              Manage recorder and optional AI-agent connections
             </CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {tokenError && <p role="alert" className="text-sm text-destructive">{tokenError} <Button variant="link" onClick={fetchTokens}>Reload connections</Button></p>}
         {/* New token display */}
         {newToken && (
           <div className="rounded-lg border border-green-200 bg-green-50 p-4">
@@ -277,12 +288,13 @@ function ApiTokensSection() {
               Token created! Copy it now — you won&apos;t see it again.
             </p>
             <div className="flex items-center gap-2">
-              <code className="flex-1 rounded bg-white px-3 py-2 font-mono text-xs text-green-900 border">
+              <code className="min-w-0 flex-1 break-all rounded bg-white px-3 py-2 font-mono text-xs text-green-900 border">
                 {newToken}
               </code>
               <Button
                 variant="outline"
                 size="sm"
+                aria-label="Copy API token"
                 onClick={copyToken}
                 className="shrink-0"
               >
@@ -294,7 +306,7 @@ function ApiTokensSection() {
               </Button>
             </div>
             <p className="mt-2 text-xs text-green-600">
-              Paste this token in the desktop app: Preferences → Account → API Token
+              For an AI agent, set this token as CAPTUTO_API_TOKEN in its environment. Keep it private.
             </p>
           </div>
         )}
@@ -330,6 +342,8 @@ function ApiTokensSection() {
                 <Button
                   variant="ghost"
                   size="sm"
+                  aria-label={`Revoke ${token.name}`}
+                  disabled={revoking !== null}
                   onClick={() => revokeToken(token.id)}
                   className="text-red-500 hover:bg-red-50 hover:text-red-600"
                 >
@@ -340,7 +354,7 @@ function ApiTokensSection() {
           </div>
         ) : (
           <p className="text-sm text-stone-400">
-            No tokens yet. Generate one to connect the desktop app.
+            No connections yet. The Mac app connects through your browser; create a token only if you want to connect an AI agent.
           </p>
         )}
 
@@ -360,16 +374,22 @@ function ApiTokensSection() {
 }
 
 export default function SettingsPage() {
+  const [deletionPending, setDeletionPending] = useState<boolean | null>(null);
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data }) => {
+      setDeletionPending(data.user?.app_metadata.account_deletion_pending === true);
+    }).catch(() => setDeletionPending(false));
+  }, []);
   return (
     <div>
       {/* Back link */}
-      <Link
+      {deletionPending === false && <Link
         href="/dashboard"
         className="mb-6 inline-flex items-center text-sm text-stone-500 hover:text-stone-900"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to dashboard
-      </Link>
+      </Link>}
 
       {/* Page Header */}
       <div className="mb-8">
@@ -379,11 +399,14 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <AgentConnection />
+      {deletionPending === null && <p role="status">Loading account settings…</p>}
+      {deletionPending === false && <><AgentConnection />
       <div className="mb-8 grid gap-6 lg:grid-cols-2">
         <BillingSection />
         <ApiTokensSection />
       </div>
+      </>}
+      <AccountSettings pending={deletionPending === true} onPendingChange={setDeletionPending} />
     </div>
   );
 }

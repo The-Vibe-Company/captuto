@@ -15,6 +15,7 @@ import { alignStepsWithTranscription, type TranscriptionSegment } from '@/lib/al
 interface GenerateRequest {
   tutorialId: string;
   options?: GenerationOptions;
+  sourceIds?: string[];
 }
 
 interface SourceData {
@@ -94,6 +95,10 @@ export async function POST(request: Request) {
       );
     }
 
+    if (body.sourceIds !== undefined && (!Array.isArray(body.sourceIds) || !body.sourceIds.length || body.sourceIds.length > 500 || body.sourceIds.some(id => typeof id !== 'string'))) {
+      return NextResponse.json({ success: false, error: 'Choose at least one recorded screen.', code: 'NO_SOURCES' }, { status: 400 });
+    }
+
     // Extract generation options with defaults
     const options: GenerationOptions = {
       style: body.options?.style || 'normal',
@@ -138,7 +143,7 @@ export async function POST(request: Request) {
         .order('order_index', { ascending: true }),
     ]);
 
-    if (sourcesResult.error) {
+    if (sourcesResult.error || stepsResult.error) {
       console.error('Failed to fetch sources:', sourcesResult.error);
       return NextResponse.json(
         { success: false, error: 'Failed to fetch sources', code: 'INTERNAL_ERROR' } as GenerateTutorialErrorResponse,
@@ -146,7 +151,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const sources: SourceData[] = sourcesResult.data || [];
+    const allSources: SourceData[] = sourcesResult.data || [];
+    let sources = allSources;
+    if (body.sourceIds) {
+      const byId = new Map(sources.map(source => [source.id, source]));
+      if (body.sourceIds.some(id => !byId.has(id))) {
+        return NextResponse.json({ success: false, error: 'A selected screen is no longer available in this guide.', code: 'NO_SOURCES' }, { status: 400 });
+      }
+      sources = [...new Set(body.sourceIds)].map(id => byId.get(id)!);
+    }
     const steps: StepData[] = stepsResult.data || [];
 
     // 5. Check if there are sources to generate from
@@ -183,9 +196,9 @@ export async function POST(request: Request) {
         const segments: TranscriptionSegment[] = transcribeData.segments || [];
 
         // Align transcription with sources based on timestamps
-        const sourcesWithTimestamp = sources.filter(
+        const sourcesWithTimestamp = allSources.filter(
           (s): s is SourceData & { timestamp_start: number } => s.timestamp_start !== null
-        );
+        ).sort((a, b) => a.timestamp_start - b.timestamp_start);
 
         if (sourcesWithTimestamp.length > 0 && segments.length > 0) {
           const aligned = alignStepsWithTranscription(
@@ -373,7 +386,8 @@ Here are the steps in order:`,
     const generated = toolUseBlock.input as GeneratedTutorialContent;
 
     // Validate the generated content
-    if (!generated.title || !generated.description || !Array.isArray(generated.steps)) {
+    const validSourceIds = new Set(validSources.map(source => source.id));
+    if (!generated || typeof generated.title !== 'string' || !generated.title || typeof generated.description !== 'string' || !Array.isArray(generated.steps) || !generated.steps.length || generated.steps.some(step => !step || !validSourceIds.has(step.sourceId) || typeof step.textContent !== 'string' || !step.textContent.trim()) || new Set(generated.steps.map(step => step.sourceId)).size !== generated.steps.length) {
       console.error('Invalid generated content:', generated);
       return NextResponse.json(
         { success: false, error: 'Generation failed - invalid content structure', code: 'GENERATION_FAILED' } as GenerateTutorialErrorResponse,

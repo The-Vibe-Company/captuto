@@ -8,22 +8,22 @@ const faqs = [
   {
     question: "How is billing handled?",
     answer:
-      "Paid plans are handled through Stripe Checkout and the Stripe customer portal. The active price is configured in Stripe, not hard-coded in the app.",
+      "Open Settings → Billing to see subscription options and manage your subscription. You can review the price before confirming payment.",
   },
   {
     question: "Do I need to install anything?",
     answer:
-      "Just a lightweight Chrome extension (less than 2 MB). No software to download, everything happens in your browser. Installation takes 30 seconds.",
+      "Download CapTuto for Mac and connect your account. Record your workflow in the desktop app, then choose your screens and edit your guide in the browser.",
   },
   {
     question: "Is my data secure?",
     answer:
-      "Absolutely. Your captures are end-to-end encrypted and stored on servers in Europe (France). You can delete your data at any time.",
+      "Guides are private by default. You decide whether to share a link or make a guide public. AI generation analyzes the captures you choose; review screens for sensitive information before generating or sharing.",
   },
   {
     question: "What tools does it work with?",
     answer:
-      "All of them! If it displays in Chrome, we can capture it. Notion, Figma, your CRM, your ERP, any web application. No integration to configure.",
+      "The Mac recorder captures workflows in desktop apps and browsers. Some protected content and system windows may not allow capture.",
   },
   {
     question: "Can I cancel at any time?",

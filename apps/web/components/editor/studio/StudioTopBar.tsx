@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { Icon, ICON } from './icons';
 import { ShareDialog } from '@/components/dashboard/ShareDialog';
@@ -20,12 +21,6 @@ interface StudioTopBarProps {
   hasSourcesForGeneration?: boolean;
 }
 
-const SAVE_DOT_COLOR: Record<SaveStatus, string> = {
-  saved: '#10b981',
-  saving: 'var(--stone-400)',
-  unsaved: '#f59e0b',
-  error: '#ef4444',
-};
 const SAVE_LABEL: Record<SaveStatus, string> = {
   saved: 'Auto-saved',
   saving: 'Saving…',
@@ -46,198 +41,24 @@ export function StudioTopBar({
   const [shareOpen, setShareOpen] = useState(false);
 
   return (
-    <header
-      style={{
-        flex: 'none',
-        height: 44,
-        padding: '0 12px 0 10px',
-        background: 'var(--studio-bg)',
-        color: 'var(--studio-ink)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 12,
-        borderBottom: '1px solid #ebe9e6',
-      }}
-    >
-      {/* Left cluster: back + logo + breadcrumb + title */}
-      <div className="flex items-center" style={{ gap: 6, minWidth: 0 }}>
-        <a
-          href="/dashboard"
-          aria-label="Back to dashboard"
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: 6,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--studio-muted)',
-            flex: 'none',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'var(--studio-surface-2)';
-            e.currentTarget.style.color = 'var(--studio-ink)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = 'var(--studio-muted)';
-          }}
-        >
-          <Icon d={ICON.back} size={14} />
-        </a>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/brand/captuto-mark.svg"
-          alt=""
-          style={{ width: 20, height: 20, borderRadius: 5, flex: 'none' }}
-        />
-        <span style={{ color: 'var(--stone-300)', padding: '0 4px' }}>/</span>
-        <span
-          style={{
-            fontSize: 12.5,
-            color: 'var(--studio-muted)',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          Guides
-        </span>
-        <span style={{ color: 'var(--stone-300)', padding: '0 4px' }}>/</span>
-        <TitleField
-          value={tutorial.title || ''}
-          onCommit={(v) => v && v !== tutorial.title && onTitleChange(v)}
-        />
-        <span
-          className="inline-flex items-center"
-          style={{ gap: 5, fontSize: 11.5, color: 'var(--stone-400)', whiteSpace: 'nowrap' }}
-        >
-          {saveStatus === 'saving' ? (
-            <Loader2 className="h-2.5 w-2.5 animate-spin" />
-          ) : (
-            <span
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: 999,
-                background: SAVE_DOT_COLOR[saveStatus],
-              }}
-            />
-          )}
-          {SAVE_LABEL[saveStatus]}
+    <header className="flex flex-none flex-wrap items-center justify-between gap-2 border-b bg-background px-3 py-2 text-foreground">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <Button asChild variant="ghost" size="icon" className="shrink-0"><a href="/dashboard" aria-label="Back to dashboard"><Icon d={ICON.back} size={16} /></a></Button>
+        <TitleField value={tutorial.title || ''} onCommit={value => { if (value && value !== tutorial.title) onTitleChange(value); }} />
+        <span role="status" className="hidden shrink-0 items-center gap-1 text-xs text-muted-foreground sm:inline-flex">
+          {saveStatus === 'saving' && <Loader2 className="h-3 w-3 animate-spin" />}{SAVE_LABEL[saveStatus]}
         </span>
       </div>
-
-      {/* Center: mode segmented */}
-      <div
-        style={{
-          display: 'flex',
-          background: 'var(--studio-surface-2)',
-          borderRadius: 6,
-          padding: 2,
-          flex: 'none',
-        }}
-      >
-        {(['edit', 'preview', 'reader'] as const).map((k) => {
-          const on = mode === k;
-          return (
-            <button
-              key={k}
-              onClick={() => onModeChange(k)}
-              style={{
-                height: 24,
-                padding: '0 12px',
-                border: 0,
-                borderRadius: 4,
-                fontSize: 12,
-                fontWeight: 500,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                background: on ? 'var(--studio-surface)' : 'transparent',
-                color: on ? 'var(--studio-ink)' : 'var(--studio-muted)',
-                boxShadow: on ? 'var(--studio-shadow-1)' : 'none',
-                fontFamily: 'inherit',
-                textTransform: 'capitalize',
-              }}
-            >
-              {k}
-            </button>
-          );
-        })}
+      <div className="flex flex-wrap items-center gap-2">
+        <div role="group" aria-label="Editor view" className="flex rounded-md bg-muted p-1">
+          {(['edit', 'preview', 'reader'] as const).map(value => <Button key={value} variant={mode === value ? 'secondary' : 'ghost'} size="sm" aria-pressed={mode === value} onClick={() => onModeChange(value)} className="capitalize">{value}</Button>)}
+        </div>
+        {hasSourcesForGeneration && onGenerateClick && <Button variant="outline" size="sm" onClick={onGenerateClick} disabled={isGenerating || saveStatus !== 'saved'} title={saveStatus !== 'saved' ? 'Save your changes before generating' : undefined}>
+          {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Icon d={ICON.sparkle} size={14} />}<span className="ml-1">AI generation</span>
+        </Button>}
+        <Button size="sm" onClick={() => setShareOpen(true)} disabled={saveStatus !== 'saved'}>Share / Export</Button>
       </div>
-
-      {/* Right cluster: AI clean-up + Publish */}
-      <div className="flex items-center" style={{ gap: 6, flex: 'none' }}>
-        {hasSourcesForGeneration && onGenerateClick && (
-          <button
-            onClick={onGenerateClick}
-            disabled={isGenerating}
-            style={{
-              height: 28,
-              padding: '0 10px',
-              borderRadius: 6,
-              border: '1px solid var(--studio-line-strong)',
-              background: 'var(--studio-surface)',
-              fontSize: 12,
-              fontWeight: 500,
-              color: 'var(--studio-ink-2)',
-              cursor: isGenerating ? 'not-allowed' : 'pointer',
-              opacity: isGenerating ? 0.6 : 1,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              whiteSpace: 'nowrap',
-              fontFamily: 'inherit',
-            }}
-            onMouseEnter={(e) => {
-              if (!isGenerating) e.currentTarget.style.background = 'var(--studio-surface-2)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'var(--studio-surface)';
-            }}
-          >
-            {isGenerating ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : (
-              <Icon d={ICON.sparkle} size={12} />
-            )}
-            <span>AI clean-up</span>
-          </button>
-        )}
-        <button
-          onClick={() => setShareOpen(true)}
-          style={{
-            height: 28,
-            padding: '0 10px',
-            borderRadius: 6,
-            border: '1px solid var(--studio-accent)',
-            background: 'var(--studio-accent)',
-            fontSize: 12,
-            fontWeight: 500,
-            color: '#fff',
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-            fontFamily: 'inherit',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'var(--brand-700)';
-            e.currentTarget.style.borderColor = 'var(--brand-700)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'var(--studio-accent)';
-            e.currentTarget.style.borderColor = 'var(--studio-accent)';
-          }}
-        >
-          Publish
-        </button>
-      </div>
-
-      <ShareDialog
-        open={shareOpen}
-        onOpenChange={setShareOpen}
-        tutorialId={tutorial.id}
-        tutorialTitle={tutorial.title || 'Untitled'}
-        tutorialSlug={tutorial.slug || null}
-      />
+      <ShareDialog open={shareOpen} onOpenChange={setShareOpen} tutorialId={tutorial.id} tutorialTitle={tutorial.title || 'Untitled'} tutorialSlug={tutorial.slug || null} />
     </header>
   );
 }
@@ -270,6 +91,7 @@ function TitleField({
         if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
         else if (e.key === 'Escape') setDraft(value);
       }}
+      className="w-full min-w-0 max-w-sm"
       aria-label="Guide title"
       placeholder="Untitled guide"
       style={{
@@ -281,8 +103,7 @@ function TitleField({
         outline: 'none',
         padding: '4px 6px',
         borderRadius: 4,
-        minWidth: 120,
-        width: 260,
+        minWidth: 0,
         fontFamily: 'inherit',
       }}
       onFocus={(e) => {

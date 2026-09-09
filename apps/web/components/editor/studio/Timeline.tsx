@@ -93,9 +93,7 @@ export function Timeline({
             Timeline
           </span>
           <div className="flex" style={{ gap: 4 }}>
-            <button className="ed-btn-icon ed-btn-sm ed-btn-ghost" title="Sort">
-              <Icon d={ICON.list} size={12} />
-            </button>
+
             <button
               className="ed-btn-icon ed-btn-sm ed-btn-ghost"
               title="Add step"
@@ -138,7 +136,7 @@ export function Timeline({
                 borderRadius: 4,
               }}
             >
-              ⌘K
+              Filter
             </span>
           </div>
         </div>
@@ -206,7 +204,7 @@ export function Timeline({
                   margin: '8px',
                 }}
               >
-                No steps yet.
+                Add recorded screens to build your guide, or add a text step.
               </div>
             )}
             {chapters.map((ch) => {

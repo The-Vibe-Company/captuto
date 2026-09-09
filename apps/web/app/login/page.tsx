@@ -20,6 +20,7 @@ export default function LoginPage() {
   // Check if user is already logged in
   useEffect(() => {
     let isMounted = true;
+    if (new URLSearchParams(window.location.search).get('error') === 'auth_callback_error') setError('This sign-in link has expired or is invalid. Try signing in again, or contact support.');
 
     const checkAuth = async () => {
       try {
@@ -161,6 +162,7 @@ export default function LoginPage() {
                 />
                 <button
                   type="button"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600"
                 >
@@ -195,6 +197,7 @@ export default function LoginPage() {
           </button>
         </form>
 
+        <Link href="/forgot-password" className="block text-center text-sm text-brand-600 hover:underline">Forgot password?</Link>
         <div className="text-center text-sm">
           <span className="text-gray-600">Don&apos;t have an account?</span>{' '}
           <Link href="/signup" className="font-medium text-brand-600 hover:text-brand-500">

@@ -29,6 +29,14 @@ async function upsertSubscription(subscription: Stripe.Subscription) {
   };
 
   if (userId) {
+    const { data, error: userError } = await admin.auth.admin.getUserById(userId);
+    if (userError && userError.status !== 404 && userError.code !== 'user_not_found') throw userError;
+    if (!data.user || data.user.app_metadata.account_deletion_pending === true) {
+      if (!['canceled', 'incomplete_expired'].includes(subscription.status)) {
+        await getStripe().subscriptions.cancel(subscription.id, { invoice_now: false, prorate: false });
+      }
+      return;
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (admin as any)
       .from('billing_customers')

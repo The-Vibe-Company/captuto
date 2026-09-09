@@ -5,7 +5,7 @@ import type { Annotation, StepWithSignedUrl } from '@/lib/types/editor';
 import { Icon, ICON } from './icons';
 import { stepAction } from './helpers';
 
-type InspectorTab = 'selection' | 'step' | 'history';
+type InspectorTab = 'selection' | 'step';
 
 interface InspectorProps {
   step: StepWithSignedUrl | null;
@@ -19,7 +19,7 @@ interface InspectorProps {
 }
 
 export function Inspector(props: InspectorProps) {
-  const [tab, setTab] = useState<InspectorTab>('selection');
+  const [tab, setTab] = useState<InspectorTab>('step');
 
   // When the user picks an annotation, jump to the Selection tab.
   useEffect(() => {
@@ -47,7 +47,6 @@ export function Inspector(props: InspectorProps) {
           [
             ['selection', 'Selection', ICON.cursor],
             ['step', 'Step', ICON.image],
-            ['history', 'History', ICON.history],
           ] as const
         ).map(([k, l, ic]) => {
           const active = tab === k;
@@ -90,10 +89,8 @@ export function Inspector(props: InspectorProps) {
           <EmptyHint>Select a step from the timeline.</EmptyHint>
         ) : tab === 'selection' ? (
           <InspectorSelection {...props} step={props.step} />
-        ) : tab === 'step' ? (
-          <InspectorStep {...props} step={props.step} />
         ) : (
-          <InspectorHistory />
+          <InspectorStep {...props} step={props.step} />
         )}
       </div>
     </aside>
@@ -569,103 +566,6 @@ function InspectorStep({
 }
 
 /* ---------- History tab (visual placeholder) ---------- */
-
-function InspectorHistory() {
-  const accent = 'var(--studio-accent)';
-  const events: Array<{
-    who: string;
-    what: string;
-    when: string;
-    current?: boolean;
-    kind: 'edit' | 'add' | 'move' | 'ai' | 'capture';
-  }> = [
-    { who: 'You', what: 'Editing this step', when: 'now', current: true, kind: 'edit' },
-    {
-      who: 'Captuto AI',
-      what: 'Suggested action labels',
-      when: 'earlier today',
-      kind: 'ai',
-    },
-    { who: 'You', what: 'Created tutorial', when: 'a while ago', kind: 'capture' },
-  ];
-  const iconForKind: Record<typeof events[number]['kind'], string> = {
-    edit: ICON.pen,
-    add: ICON.plus,
-    move: ICON.cursor,
-    ai: ICON.sparkle,
-    capture: ICON.image,
-  };
-
-  return (
-    <div className="flex flex-col" style={{ gap: 14 }}>
-      <Section title="Activity">
-        <div style={{ position: 'relative', paddingLeft: 18 }}>
-          <span
-            style={{
-              position: 'absolute',
-              left: 7,
-              top: 8,
-              bottom: 8,
-              width: 1,
-              background: 'var(--studio-line)',
-            }}
-          />
-          {events.map((e, i) => (
-            <div key={i} style={{ position: 'relative', paddingBottom: 14 }}>
-              <span
-                style={{
-                  position: 'absolute',
-                  left: -14,
-                  top: 2,
-                  width: 16,
-                  height: 16,
-                  borderRadius: 999,
-                  background: e.current ? accent : 'var(--studio-surface)',
-                  border: e.current
-                    ? `2px solid ${accent}`
-                    : '1.5px solid var(--studio-line-strong)',
-                  color: e.current ? '#fff' : 'var(--studio-muted)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: e.current
-                    ? `0 0 0 3px color-mix(in oklab, ${accent} 18%, transparent)`
-                    : 'none',
-                }}
-              >
-                <Icon
-                  d={iconForKind[e.kind]}
-                  size={9}
-                  stroke={e.current ? '#fff' : 'var(--studio-muted)'}
-                />
-              </span>
-              <div
-                style={{ fontSize: 12, color: 'var(--studio-ink)', lineHeight: 1.4 }}
-              >
-                {e.what}
-              </div>
-              <div
-                className="flex items-center"
-                style={{
-                  fontSize: 10.5,
-                  color: 'var(--studio-muted)',
-                  marginTop: 2,
-                  gap: 6,
-                }}
-              >
-                <span>{e.who}</span>
-                <span style={{ opacity: 0.5 }}>·</span>
-                <span>{e.when}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Section>
-    </div>
-  );
-}
-
-/* ---------- Inspector primitives ---------- */
 
 function Section({
   title,

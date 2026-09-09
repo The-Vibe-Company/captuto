@@ -15,10 +15,10 @@ const tabs: { key: DashboardTab; label: string }[] = [
   { key: 'all', label: 'All guides' },
   { key: 'shared', label: 'Shared' },
   { key: 'draft', label: 'Drafts' },
-  { key: 'processing', label: 'Processing' },
+  { key: 'processing', label: 'To review' },
 ];
 
-const libraryNav = ['Onboarding', 'Support', 'Internal SOPs'];
+
 
 function SearchBox({ value, onChange, className }: { value: string; onChange: (v: string) => void; className?: string }) {
   return (
@@ -32,7 +32,7 @@ function SearchBox({ value, onChange, className }: { value: string; onChange: (v
         onChange={(e) => onChange(e.target.value)}
         className="w-full min-w-0 border-0 bg-transparent p-0 text-[12.5px] text-stone-900 outline-none placeholder:text-stone-500"
       />
-      <span className="hidden shrink-0 text-[10.5px] text-stone-400 sm:inline">⌘K</span>
+
     </label>
   );
 }
@@ -150,15 +150,7 @@ export function DashboardSidebar({ userEmail }: { userEmail: string }) {
           })}
         </nav>
 
-        <div className="px-2 pb-1 pt-3.5 text-[11px] font-medium text-stone-400">Folders</div>
-        {libraryNav.map((label) => (
-          <span
-            key={label}
-            className="flex h-[30px] cursor-default items-center gap-2 rounded-md px-2 text-[12.5px] text-stone-500"
-          >
-            {label}
-          </span>
-        ))}
+
 
         <div className="mt-auto flex flex-col gap-0.5 border-t border-stone-200/70 pt-2">
           <a

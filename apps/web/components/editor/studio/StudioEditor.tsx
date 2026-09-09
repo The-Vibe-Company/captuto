@@ -13,6 +13,7 @@ import type { NewStepType } from '../DocEditor';
 import './studio.css';
 import { Button } from '@/components/ui/button';
 import { StudioTopBar, type StudioMode } from './StudioTopBar';
+import { RecordedScreens } from './RecordedScreens';
 import { Timeline } from './Timeline';
 import { Canvas } from './Canvas';
 import { Inspector } from './Inspector';
@@ -36,6 +37,7 @@ interface StudioEditorProps {
   onDeleteStep: (stepId: string) => void;
   onReorderSteps: (next: StepWithSignedUrl[]) => void;
   onAddStep: (type: NewStepType, afterStepId?: string | null) => void;
+  onCreateStepFromSource: (source: SourceWithSignedUrl) => Promise<void>;
   onGenerateClick?: () => void;
   isGenerating?: boolean;
   errorMessage?: string | null;
@@ -58,6 +60,7 @@ export function StudioEditor({
   onDeleteStep,
   onReorderSteps,
   onAddStep,
+  onCreateStepFromSource,
   onGenerateClick,
   isGenerating,
   errorMessage,
@@ -68,6 +71,7 @@ export function StudioEditor({
     null
   );
   const [focusOpen, setFocusOpen] = useState(false);
+  const [mobilePanel, setMobilePanel] = useState<'timeline' | 'canvas' | 'inspector'>('canvas');
   const [mode, setMode] = useState<StudioMode>('edit');
 
   const screenshots = useMemo(() => playheadSteps(steps), [steps]);
@@ -79,6 +83,7 @@ export function StudioEditor({
 
   const handleSelectStep = (id: string) => {
     onSelectStep(id);
+    setMobilePanel('canvas');
     setSelectedAnnotationId(null);
   };
 
@@ -109,12 +114,19 @@ export function StudioEditor({
         hasSourcesForGeneration={sources.length > 0}
       />
 
+      {mode === 'edit' && (
+        <RecordedScreens sources={sources} steps={steps} onAdd={onCreateStepFromSource} />
+      )}
       {errorMessage && <div role="alert" className="flex items-center justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
         <span>{errorMessage}</span>
         {onRetrySave && <Button size="sm" variant="outline" onClick={onRetrySave}>Retry save</Button>}
       </div>}
+      {mode === 'edit' && <div role="group" aria-label="Editor panels" className="flex flex-none gap-2 border-b bg-background px-3 py-2 lg:hidden">
+        {(['timeline', 'canvas', 'inspector'] as const).map(panel => <Button key={panel} size="sm" variant={mobilePanel === panel ? 'secondary' : 'ghost'} aria-pressed={mobilePanel === panel} onClick={() => setMobilePanel(panel)} className="capitalize">{panel === 'inspector' ? 'Step settings' : panel}</Button>)}
+      </div>}
       {mode === 'edit' ? (
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
+          <div className={`${mobilePanel === 'timeline' ? 'flex' : 'hidden'} min-h-0 w-full lg:flex lg:w-auto [&>aside]:!w-full lg:[&>aside]:!w-[296px]`}>
           <Timeline
             steps={steps}
             selectedStepId={selectedStepId}
@@ -123,6 +135,8 @@ export function StudioEditor({
             onAddStepAfter={(id) => onAddStep('text', id)}
           />
 
+          </div>
+          <div className={`${mobilePanel === 'canvas' ? 'flex' : 'hidden'} min-h-0 min-w-0 flex-1 lg:flex`}>
           <Canvas
             step={step}
             screenshots={screenshots}
@@ -138,6 +152,8 @@ export function StudioEditor({
             onOpenFocus={() => step && setFocusOpen(true)}
           />
 
+          </div>
+          <div className={`${mobilePanel === 'inspector' ? 'flex' : 'hidden'} min-h-0 w-full lg:flex lg:w-auto [&>aside]:!w-full lg:[&>aside]:!w-[296px]`}>
           <Inspector
             step={step}
             stepIdx={stepIdx}
@@ -149,6 +165,7 @@ export function StudioEditor({
             onDeleteStep={onDeleteStep}
           />
 
+          </div>
           {focusOpen && step && (
             <FocusMode
               step={step}
