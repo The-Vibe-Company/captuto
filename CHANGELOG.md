@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.19](https://github.com/The-Vibe-Company/captuto/compare/v0.1.18...v0.1.19) (2026-09-09)
+
+
+### Features
+
+* add agent-authored guides and simplify the dashboard ([#107](https://github.com/The-Vibe-Company/captuto/issues/107)) ([12f0343](https://github.com/The-Vibe-Company/captuto/commit/12f034305577dc9a171b9392e6742ddc984405d4))
+* **web:** retire team UI surfaces, fix dashboard sort ([#106](https://github.com/The-Vibe-Company/captuto/issues/106)) ([a1f0662](https://github.com/The-Vibe-Company/captuto/commit/a1f0662eb50d0a1b3ded2ebfcd4dfdc0d8c928ad))
+
+
+### Performance Improvements
+
+* **web:** speed up dashboard tutorials list ([#104](https://github.com/The-Vibe-Company/captuto/issues/104)) ([2a8d92b](https://github.com/The-Vibe-Company/captuto/commit/2a8d92b5ff31f6805043f70b9f04c7f1620d69d6))
+
 ## [0.1.18](https://github.com/The-Vibe-Company/captuto/compare/v0.1.17...v0.1.18) (2026-05-04)
 
 
