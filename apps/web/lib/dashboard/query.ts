@@ -25,3 +25,10 @@ export interface DashboardPage {
   page: number;
   pageSize: number;
 }
+
+export async function fetchDashboardPage(query: string, signal?: AbortSignal): Promise<DashboardPage> {
+  const response = await fetch(`/api/dashboard?${query}`, { signal });
+  if (response.status === 401) throw new Error('UNAUTHORIZED');
+  if (!response.ok) throw new Error('Could not load your guides. Try again.');
+  return response.json();
+}
