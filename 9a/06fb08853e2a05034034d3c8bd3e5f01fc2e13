@@ -1,0 +1,27 @@
+apps/extension/manifest.json
+  s_3f311bb92b95a7::t_28e8e4ba133b18 4
+.release-please-manifest.json
+  s_3f311bb92b95a7::t_28e8e4ba133b18 2
+CHANGELOG.md
+  s_3f311bb92b95a7::t_28e8e4ba133b18 3-15
+package.json
+  s_3f311bb92b95a7::t_28e8e4ba133b18 3
+apps/extension/package.json
+  s_3f311bb92b95a7::t_28e8e4ba133b18 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "9a06fb08853e2a05034034d3c8bd3e5f01fc2e13",
+  "prompts": {},
+  "sessions": {
+    "s_3f311bb92b95a7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c004bbca-0863-483f-84d7-4bd4d86672df",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "StanGirard <stan@quivr.app>"
+    }
+  }
+}
