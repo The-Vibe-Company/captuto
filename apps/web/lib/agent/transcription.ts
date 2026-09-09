@@ -3,8 +3,8 @@ import { getDeepgramClient, TRANSCRIPTION_OPTIONS } from '@/lib/deepgram';
 import { AgentError, TutorialService } from './service';
 
 export async function transcribeTutorial(auth: RequestUser, tutorialId: string) {
-  await new TutorialService(auth).owned(tutorialId);
-  const path = `${auth.userId}/${tutorialId}`;
+  const tutorial = await new TutorialService(auth).owned(tutorialId);
+  const path = `${auth.userId}/${tutorial.revision_of || tutorialId}`;
   const { data: cached } = await auth.supabase.storage.from('recordings').download(`${path}.transcript.json`);
   if (cached) { try { return JSON.parse(await cached.text()); } catch { /* Regenerate corrupt cache. */ } }
   let {data:audio} = await auth.supabase.storage.from('recordings').download(`${path}.webm`);

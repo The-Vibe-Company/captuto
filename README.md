@@ -2,6 +2,23 @@
 
 Create professional tutorials in seconds. Record your screen while talking, and CapTuto automatically generates a step-by-step guide with screenshots and text.
 
+## Autonomous web tutorials
+
+The portable [Captuto skill](skills/captuto/SKILL.md) lets Codex or Claude Code perform a web workflow with agent-browser, upload native Captuto captures, write the steps and inspect editable annotations. It can continue existing tutorials across multiple websites. Published tutorials get a private revision; publishing it keeps the original public link.
+
+Copy `skills/captuto` to your agent's skills directory and follow [connection setup](skills/captuto/references/setup.md). The helper requires Node.js 20+, agent-browser, `CAPTUTO_URL` and `CAPTUTO_API_TOKEN`. Ask the agent, for example: “Use Captuto to make a tutorial for inviting a teammate on this website.”
+
+Capture files and upload progress remain in the chosen local directory for resuming interruptions. Publication requires the user's go. This first version controls web applications; it can edit existing Mac captures, with native application control planned separately.
+
+Apply the repository migrations before using the new MCP tools. Validation:
+
+```sh
+node --test skills/captuto/scripts/capture.test.mjs
+pnpm --filter @captuto/web test:run
+# After signing in to localhost with agent-browser session captuto-autonomous:
+node scripts/test-autonomous-capture.mjs
+```
+
 ## Tech Stack
 
 - **Frontend**: Next.js 14 (App Router) + React
@@ -66,7 +83,7 @@ cp apps/web/.env.example apps/web/.env.local
 ### 3. Run the development server
 
 ```bash
-pnpm dev
+./scripts/dev-start.sh
 ```
 
 Open [http://localhost:3678](http://localhost:3678) in your browser.
@@ -77,7 +94,7 @@ Open [http://localhost:3678](http://localhost:3678) in your browser.
 
 ```bash
 # Start development server
-pnpm dev
+./scripts/dev-start.sh
 
 # Build for production
 pnpm build

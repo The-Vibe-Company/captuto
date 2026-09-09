@@ -103,6 +103,9 @@ export type Database = {
         Row: {
           id: string;
           user_id: string | null;
+          revision_of?: string | null;
+          revision_base?: string | null;
+          revision_published_at?: string | null;
           title: string;
           description: string | null;
           slug: string | null;
@@ -117,6 +120,9 @@ export type Database = {
         Insert: {
           id?: string;
           user_id?: string | null;
+          revision_of?: string | null;
+          revision_base?: string | null;
+          revision_published_at?: string | null;
           title: string;
           description?: string | null;
           slug?: string | null;
@@ -131,6 +137,9 @@ export type Database = {
         Update: {
           id?: string;
           user_id?: string | null;
+          revision_of?: string | null;
+          revision_base?: string | null;
+          revision_published_at?: string | null;
           title?: string;
           description?: string | null;
           slug?: string | null;
@@ -234,6 +243,9 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      tutorial_content_hash: { Args: { p_id: string }; Returns: string };
+      begin_tutorial_revision: { Args: { p_owner: string; p_original: string; p_revision: string; p_base: string }; Returns: string };
+      publish_tutorial_revision: { Args: { p_owner: string; p_revision: string; p_content: string }; Returns: string };
       begin_desktop_connection: { Args: { code_challenge: string; requester: string }; Returns: Json };
       approve_desktop_connection: { Args: { connection_id: string; approving_user_id: string }; Returns: string };
       exchange_desktop_connection: { Args: { connection_id: string; verifier: string }; Returns: Json };
