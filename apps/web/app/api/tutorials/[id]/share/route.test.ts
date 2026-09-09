@@ -213,6 +213,14 @@ describe('GET /api/tutorials/[id]/share', () => {
 });
 
 describe('POST /api/tutorials/[id]/share', () => {
+  it('keeps revisions private when the editor tries to create another public link', async () => {
+    const db = createMockSupabase({ user: { id: 'owner' }, tutorial: { id: 'revision', user_id: 'owner', revision_of: 'original', visibility: 'private' } });
+    mockCreateClient.mockResolvedValue(db as any);
+    const response = await POST(createJsonRequest(`${BASE_URL}/api/tutorials/revision/share`, { visibility: 'link_only' }) as any, wrapParams({ id: 'revision' }));
+    expect(response.status).toBe(409);
+    expect((await response.json()).error).toContain('original guide');
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.NEXT_PUBLIC_APP_URL = BASE_URL;

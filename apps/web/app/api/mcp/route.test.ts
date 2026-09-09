@@ -12,6 +12,7 @@ describe('MCP HTTP protocol',()=>{
  it('lists tools on a subsequent stateless request',async()=>{
   const r=await POST(request('tools/list'));const names=(await r.json()).result.tools.map((t:{name:string})=>t.name);
   expect(names).toContain('preview_step');expect(names).toContain('save_steps');expect(names).toContain('export_pdf');
+  for (const name of ['create_capture','append_capture','begin_revision','publish_revision']) expect(names).toContain(name);
  });
  it('rejects cross-origin browser invocations before authentication',async()=>{
   expect((await POST(request('tools/list',{}, {Origin:'https://attacker.invalid'}))).status).toBe(403);

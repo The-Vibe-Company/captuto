@@ -19,6 +19,17 @@ function database(results:Record<string,unknown>[]) {
   return {auth:{userId:'owner',supabase:{from}} as unknown as RequestUser,writes,filters};
 }
 describe('agent ownership and atomic editing boundary',()=>{
+  it('requires a revision before changing publicly visible content',async()=>{
+    for (const visibility of ['link_only','public']) {
+      const db=database([{data:{id:tutorialId,user_id:'owner',visibility}}]);
+      await expect(new TutorialService(db.auth).upsertSteps(tutorialId,[step])).rejects.toThrow('begin_revision');
+      expect(db.writes).not.toHaveBeenCalled();
+    }
+  });
+  it('does not allow edits to an already published revision',async()=>{
+    const db=database([{data:{id:tutorialId,user_id:'owner',visibility:'private',revision_published_at:'2026-09-09'}}]);
+    await expect(new TutorialService(db.auth).update(tutorialId,'Changed')).rejects.toThrow('new revision');
+  });
   it('scopes tutorial reads to the authenticated user before returning sources',async()=>{
     const db=database([{data:null,error:{message:'not found'}}]);
     await expect(new TutorialService(db.auth).read(tutorialId)).rejects.toThrow('Tutorial not found');

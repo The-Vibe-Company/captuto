@@ -41,7 +41,7 @@ export async function GET(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: tutorial, error: tutorialError } = await (supabase as any)
     .from('tutorials')
-    .select('id, user_id, slug, visibility, public_token, published_at')
+    .select('id, user_id, slug, visibility, public_token, published_at, revision_of')
     .eq('id', tutorialId)
     .single();
 
@@ -109,7 +109,7 @@ export async function POST(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: tutorial, error: tutorialError } = await (supabase as any)
     .from('tutorials')
-    .select('id, user_id, slug, visibility, public_token, published_at')
+    .select('id, user_id, slug, visibility, public_token, published_at, revision_of')
     .eq('id', tutorialId)
     .single();
 
@@ -123,6 +123,12 @@ export async function POST(
   }
 
   // A readable URL is generated automatically when publishing.
+  if (tutorial.revision_of && visibility !== 'private') {
+    return NextResponse.json(
+      { error: 'Ask your agent to publish this revision to update the original guide and keep its link.' },
+      { status: 409 }
+    );
+  }
   const slug = tutorial.slug || `guide-${nanoid(12)}`;
 
   // Prepare update data
