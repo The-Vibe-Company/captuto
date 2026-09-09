@@ -1,0 +1,27 @@
+apps/web/components/dashboard/DashboardSidebar.tsx
+  s_3f311bb92b95a7::t_2b5e137f1c0db1 6-7,11-12,23-39,43,80,87-130,132-190
+apps/web/components/editor/studio/StudioTopBar.tsx
+  s_3f311bb92b95a7::t_85ddfbf0e80494 253,255-257,261
+  s_3f311bb92b95a7::t_27aeda71b3b139 3
+apps/web/app/dashboard/layout.tsx
+  s_3f311bb92b95a7::t_fac3e1c89ec234 8
+apps/web/app/dashboard/page.tsx
+  s_3f311bb92b95a7::t_c1a7410e583f5c 102-103
+  s_3f311bb92b95a7::t_cf63f71216f0f8 94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "bd5d7297f19fe47ca6f08da0c14eaf64b605262a",
+  "prompts": {},
+  "sessions": {
+    "s_3f311bb92b95a7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c004bbca-0863-483f-84d7-4bd4d86672df",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "StanGirard <stan@quivr.app>"
+    }
+  }
+}
