@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Icon, ICON } from './icons';
 import { ShareDialog } from '@/components/dashboard/ShareDialog';
@@ -250,11 +250,15 @@ function TitleField({
   onCommit: (next: string) => void;
 }) {
   const [draft, setDraft] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => setDraft(value), [value]);
+  useEffect(() => {
+    if (document.activeElement !== inputRef.current) setDraft(value);
+  }, [value]);
 
   return (
     <input
+      ref={inputRef}
       value={draft}
       onChange={(e) => setDraft(e.target.value)}
       onBlur={(e) => {

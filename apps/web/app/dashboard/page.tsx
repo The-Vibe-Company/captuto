@@ -91,7 +91,7 @@ export default function DashboardPage() {
           <DropdownMenuContent align="end">{sortOptions.map(option => <DropdownMenuItem key={option.key} onSelect={() => updateParams({ sort: option.key })}>{option.label}</DropdownMenuItem>)}</DropdownMenuContent>
         </DropdownMenu>
         <Button asChild className="h-7 gap-1.5 bg-brand-600 px-2.5 text-xs font-medium text-white hover:bg-brand-700">
-          <Link href="/settings"><Plus className="h-3 w-3" />New guide</Link>
+          <Link href="/settings"><Plus className="h-3 w-3" />Connect your agent</Link>
         </Button>
       </div>
     </header>
@@ -99,8 +99,8 @@ export default function DashboardPage() {
     <div className="mx-auto w-full max-w-5xl flex-1 px-5 pb-16 pt-7">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-semibold tracking-tight text-stone-900">Guides</h1>
-        <div className="flex gap-0.5 rounded-md bg-stone-100 p-0.5">
-          {tabs.map(item => <button key={item.key} type="button" onClick={() => updateParams({ tab: item.key })} className={`flex h-6 items-center gap-1.5 whitespace-nowrap rounded px-2.5 text-xs font-medium ${tab === item.key ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-900'}`}>{item.label}<span className="text-[11px] font-normal opacity-55">{data?.counts[item.key] ?? 0}</span></button>)}
+        <div role="group" aria-label="Filter guides" className="flex gap-0.5 rounded-md bg-stone-100 p-0.5">
+          {tabs.map(item => <button key={item.key} type="button" aria-pressed={tab === item.key} onClick={() => updateParams({ tab: item.key })} className={`flex h-6 items-center gap-1.5 whitespace-nowrap rounded px-2.5 text-xs font-medium ${tab === item.key ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-900'}`}>{item.label}<span className="text-[11px] font-normal opacity-55">{data?.counts[item.key] ?? 0}</span></button>)}
         </div>
       </div>
 
