@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.20](https://github.com/The-Vibe-Company/captuto/compare/v0.1.19...v0.1.20) (2026-09-09)
+
+
+### Features
+
+* add agent authoring, desktop pairing, and captuto v2 redesign ([#109](https://github.com/The-Vibe-Company/captuto/issues/109)) ([627caed](https://github.com/The-Vibe-Company/captuto/commit/627caed8759b6e020677e71185f69b0e0209a398))
+
 ## [0.1.19](https://github.com/The-Vibe-Company/captuto/compare/v0.1.18...v0.1.19) (2026-09-09)
 
 
