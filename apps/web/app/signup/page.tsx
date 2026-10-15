@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
+import { captureSignedUp } from '@/lib/analytics/posthog';
 import { createClient } from '@/lib/supabase/client';
 
 export default function SignupPage() {
@@ -52,6 +53,7 @@ export default function SignupPage() {
         return;
       }
 
+      if (data.user) captureSignedUp(data.user);
       if (data.session) { router.push('/dashboard'); return; }
       setSuccess(true);
     } catch (err) {

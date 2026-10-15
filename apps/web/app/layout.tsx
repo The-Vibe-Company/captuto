@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Sora, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { PostHogAnalytics } from "@/components/providers/PostHogAnalytics";
 
 import "./globals.css";
 
@@ -45,6 +46,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${sora.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} font-sans`}>
+        <PostHogAnalytics />
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
