@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.22](https://github.com/The-Vibe-Company/captuto/compare/v0.1.21...v0.1.22) (2026-10-15)
+
+
+### Features
+
+* **web:** add PostHog analytics ([#114](https://github.com/The-Vibe-Company/captuto/issues/114)) ([35e1b23](https://github.com/The-Vibe-Company/captuto/commit/35e1b2318ca6bab25ce51c889ab593dec9859e3f))
+
 ## [0.1.21](https://github.com/The-Vibe-Company/captuto/compare/v0.1.20...v0.1.21) (2026-09-09)
 
 
