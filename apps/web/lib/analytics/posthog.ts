@@ -43,9 +43,21 @@ export function resetUser() {
   if (initialized) posthog.reset();
 }
 
-/** Supabase returns a user with no identities when the email is already registered. */
-export function captureSignedUp(user: Pick<User, 'id' | 'email' | 'user_metadata' | 'identities'>) {
-  if (!initialized || !user.identities?.length) return;
+type SignUpUser = Pick<User, 'id' | 'email' | 'user_metadata' | 'identities' | 'created_at' | 'confirmation_sent_at'>;
+
+/**
+ * signUp also "succeeds" for existing emails: confirmed ones come back with no
+ * identities, unconfirmed ones get a fresh confirmation email (rate-limited to
+ * one per minute) long after the account was created.
+ */
+export function isNewSignUp(user: SignUpUser): boolean {
+  if (!user.identities?.length) return false;
+  if (!user.confirmation_sent_at) return true;
+  return Date.parse(user.confirmation_sent_at) - Date.parse(user.created_at) < 60_000;
+}
+
+export function captureSignedUp(user: SignUpUser) {
+  if (!initialized || !isNewSignUp(user)) return;
   identifyUser(user);
   posthog.capture('signed_up');
 }

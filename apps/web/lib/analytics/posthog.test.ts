@@ -11,7 +11,10 @@ async function load() {
   return { posthog, ...analytics };
 }
 
-const user = { id: 'user-1', email: 'a@b.co', user_metadata: {}, identities: [{ id: 'identity-1' }] } as never;
+const user = {
+  id: 'user-1', email: 'a@b.co', user_metadata: {}, identities: [{ id: 'identity-1' }],
+  created_at: '2026-10-15T10:00:00.000Z', confirmation_sent_at: '2026-10-15T10:00:00.400Z',
+} as never;
 
 describe('posthog analytics', () => {
   beforeEach(() => {
@@ -66,10 +69,19 @@ describe('posthog analytics', () => {
     expect(posthog.reset).toHaveBeenCalledTimes(1);
 
     captureSignedUp({ ...(user as object), identities: [] } as never);
+    captureSignedUp({ ...(user as object), confirmation_sent_at: '2026-10-16T09:00:00.000Z' } as never);
     expect(posthog.capture).not.toHaveBeenCalled();
 
     captureSignedUp(user);
     expect(posthog.identify).toHaveBeenLastCalledWith('user-1', { email: 'a@b.co' });
     expect(posthog.capture).toHaveBeenCalledWith('signed_up');
+  });
+
+  it('treats auto-confirmed and freshly created accounts as new sign-ups only', async () => {
+    const { isNewSignUp } = await load();
+    expect(isNewSignUp(user)).toBe(true);
+    expect(isNewSignUp({ ...(user as object), confirmation_sent_at: undefined } as never)).toBe(true);
+    expect(isNewSignUp({ ...(user as object), identities: [] } as never)).toBe(false);
+    expect(isNewSignUp({ ...(user as object), confirmation_sent_at: '2026-10-15T10:05:00.000Z' } as never)).toBe(false);
   });
 });
