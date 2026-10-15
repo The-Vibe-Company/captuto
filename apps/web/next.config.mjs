@@ -36,6 +36,15 @@ const nextConfig = {
   },
   // Compress output for better performance
   compress: true,
+  // PostHog reverse proxy: its API paths rely on trailing slashes.
+  skipTrailingSlashRedirect: true,
+  async rewrites() {
+    return [
+      { source: '/ingest/static/:path*', destination: 'https://us-assets.i.posthog.com/static/:path*' },
+      { source: '/ingest/array/:path*', destination: 'https://us-assets.i.posthog.com/array/:path*' },
+      { source: '/ingest/:path*', destination: 'https://us.i.posthog.com/:path*' },
+    ];
+  },
   // Add headers for caching
   async headers() {
     return [
