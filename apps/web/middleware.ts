@@ -2,6 +2,9 @@ import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
+  // Stats uses its own server-only bearer token, independent of browser sessions.
+  if (request.nextUrl.pathname === '/api/stats') return NextResponse.next();
+
   const response = await updateSession(request);
 
   // Allow embedding for /t/[token]/embed routes

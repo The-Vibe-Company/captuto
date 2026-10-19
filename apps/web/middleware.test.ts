@@ -15,6 +15,20 @@ describe('middleware', () => {
     vi.clearAllMocks();
   });
 
+  it('lets stats enforce bearer auth without session middleware interception', async () => {
+    mockUpdateSession.mockResolvedValue(NextResponse.json({ error: 'Account deletion is in progress' }, { status: 403 }));
+    const response = await middleware(new NextRequest('http://localhost/api/stats'));
+    expect(response.headers.get('x-middleware-next')).toBe('1');
+    expect(mockUpdateSession).not.toHaveBeenCalled();
+  });
+
+  it('still runs session middleware for other API routes', async () => {
+    mockUpdateSession.mockResolvedValue(NextResponse.next());
+    const request = new NextRequest('http://localhost/api/account');
+    await middleware(request);
+    expect(mockUpdateSession).toHaveBeenCalledWith(request);
+  });
+
   it('calls updateSession with the request', async () => {
     const mockResponse = NextResponse.next();
     mockUpdateSession.mockResolvedValue(mockResponse);
