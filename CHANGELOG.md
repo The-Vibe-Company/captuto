@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.23](https://github.com/The-Vibe-Company/captuto/compare/v0.1.22...v0.1.23) (2026-10-19)
+
+
+### Features
+
+* add bearer-protected /api/stats endpoint ([#116](https://github.com/The-Vibe-Company/captuto/issues/116)) ([1241606](https://github.com/The-Vibe-Company/captuto/commit/1241606222e323af14472359f62f4ee850a119f0))
+
 ## [0.1.22](https://github.com/The-Vibe-Company/captuto/compare/v0.1.21...v0.1.22) (2026-10-15)
 
 
